@@ -1,3 +1,4 @@
+#include "framework.h"
 #include "vk_pointLightSystem.h"
 
 // libs
@@ -64,8 +65,8 @@ namespace vkc {
         pipelineConfig.pipelineLayout = pipelineLayout;
 
         // Construct paths using PROJECT_ROOT_DIR
-        std::string vertShaderPath = std::string(PROJECT_ROOT_DIR) + "/res/Shaders/SpirV/point_light.vert.spv";
-        std::string fragShaderPath = std::string(PROJECT_ROOT_DIR) + "/res/Shaders/SpirV/point_light.frag.spv";
+        std::string vertShaderPath = "matter://Shaders/SpirV/point_light.vert.spv";
+        std::string fragShaderPath = "matter://Shaders/SpirV/point_light.frag.spv";
 
         vkcPipeline = std::make_unique<VkcPipeline>(
             vkcDevice,

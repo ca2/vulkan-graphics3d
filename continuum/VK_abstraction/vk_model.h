@@ -41,7 +41,7 @@ namespace vkc {
         static std::unique_ptr<VkcModel> createModelFromFile(VkcDevice& device, const std::string& filepath);
 
 
-        VkcModel::VkcModel(VkcDevice& device, const VkcModel::Builder& builder);
+        VkcModel(VkcDevice& device, const VkcModel::Builder& builder);
         ~VkcModel();
 
         VkcModel(const VkcModel&) = delete;

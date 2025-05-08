@@ -1,3 +1,4 @@
+#include "framework.h"
 /*
  * Encapsulates a vulkan buffer
  *

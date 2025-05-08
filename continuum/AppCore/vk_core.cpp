@@ -26,7 +26,7 @@
 
 // Project source specific includes
 #include "vk_core.h"
-#include "VkBootstrap.h"
+#include "vkbootstrap/VkBootstrap.h"
 #include "Renderer/vk_buffer.h"
 #include "VK_abstraction/vk_camera.h"
 #include "VK_abstraction/vk_input.h"
@@ -145,7 +145,7 @@ namespace vkc {
     {
 
        {
-        std::shared_ptr<VkcModel> vkcModel = VkcModel::createModelFromFile(_device, PROJECT_ROOT_DIR "/res/models/flat_vase.obj");
+        std::shared_ptr<VkcModel> vkcModel = VkcModel::createModelFromFile(_device, "matter://models/flat_vase.obj");
         auto flatVase = VkcGameObject::createGameObject();
 
         flatVase.model = vkcModel;
@@ -155,7 +155,7 @@ namespace vkc {
         }
 
        {
-          std::shared_ptr<VkcModel> vkcModel = VkcModel::createModelFromFile(_device, PROJECT_ROOT_DIR "/res/models/quad.obj");
+          std::shared_ptr<VkcModel> vkcModel = VkcModel::createModelFromFile(_device, "matter://res/models/quad.obj");
           auto floor = VkcGameObject::createGameObject();
           floor.model = vkcModel;
           assert(vkcModel);
@@ -165,7 +165,7 @@ namespace vkc {
        }
 
        {
-          std::shared_ptr<VkcModel> vkcModel = VkcModel::createModelFromFile(_device, PROJECT_ROOT_DIR "/res/models/smooth_vase.obj");
+          std::shared_ptr<VkcModel> vkcModel = VkcModel::createModelFromFile(_device, "matter://models/smooth_vase.obj");
           auto smoothVase = VkcGameObject::createGameObject();
           smoothVase.model = vkcModel;
           smoothVase.transform.translation = { .5f, .5f, 0.f };

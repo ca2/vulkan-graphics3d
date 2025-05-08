@@ -1,3 +1,4 @@
+#include "framework.h"
 #include "vk_gameObject.h"
 
 namespace vkc {

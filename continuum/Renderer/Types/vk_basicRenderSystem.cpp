@@ -1,3 +1,4 @@
+#include "framework.h"
 #include "vk_basicRenderSystem.h"
 // libs
 #define GLM_FORCE_RADIANS	
@@ -63,8 +64,8 @@ namespace vkc {
 		pipelineConfig.pipelineLayout = pipelineLayout;
 
 		// Construct paths using PROJECT_ROOT_DIR
-		std::string vertShaderPath = std::string(PROJECT_ROOT_DIR) + "/res/Shaders/SpirV/vert.vert.spv";
-		std::string fragShaderPath = std::string(PROJECT_ROOT_DIR) + "/res/Shaders/SpirV/frag.frag.spv";
+		std::string vertShaderPath = "matter://Shaders/SpirV/vert.vert.spv";
+		std::string fragShaderPath = "matter://Shaders/SpirV/frag.frag.spv";
 
 		vkcPipeline = std::make_unique<VkcPipeline>(
 			vkcDevice,

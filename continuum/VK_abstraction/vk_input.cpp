@@ -1,3 +1,4 @@
+#include "framework.h"
 #include "vk_input.h"
 #include "vk_gameObject.h"
 #include <limits>
