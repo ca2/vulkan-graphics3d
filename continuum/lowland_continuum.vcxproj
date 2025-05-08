@@ -794,17 +794,47 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='StaticRelease|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="impact.cpp" />
-    <ClCompile Include="main_frame.cpp" />
+    <ClCompile Include="src\AppCore\vk_core.cpp" />
+    <ClCompile Include="src\AppCore\vk_window.cpp" />
+    <ClCompile Include="src\Renderer\Types\vk_basicRenderSystem.cpp" />
+    <ClCompile Include="src\Renderer\Types\vk_pointLightSystem.cpp" />
+    <ClCompile Include="src\Renderer\vk_buffer.cpp" />
+    <ClCompile Include="src\Renderer\vk_renderer.cpp" />
+    <ClCompile Include="src\VK_abstraction\vk_camera.cpp" />
+    <ClCompile Include="src\VK_abstraction\vk_descriptors.cpp" />
+    <ClCompile Include="src\VK_abstraction\vk_device.cpp" />
+    <ClCompile Include="src\VK_abstraction\vk_gameObject.cpp" />
+    <ClCompile Include="src\VK_abstraction\vk_initializers.cpp" />
+    <ClCompile Include="src\VK_abstraction\vk_input.cpp" />
+    <ClCompile Include="src\VK_abstraction\vk_model.cpp" />
+    <ClCompile Include="src\VK_abstraction\vk_pipeline.cpp" />
+    <ClCompile Include="src\VK_abstraction\vk_swapchain.cpp" />
     <ClCompile Include="_.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
     <ClInclude Include="document.h" />
+    <ClInclude Include="src\AppCore\vk_core.h" />
+    <ClInclude Include="src\AppCore\vk_window.h" />
+    <ClInclude Include="src\IMCommon\vkc_types.h" />
+    <ClInclude Include="src\IMCommon\vk_types.h" />
+    <ClInclude Include="src\Renderer\Types\vk_basicRenderSystem.h" />
+    <ClInclude Include="src\Renderer\Types\vk_pointLightSystem.h" />
+    <ClInclude Include="src\Renderer\vk_buffer.h" />
+    <ClInclude Include="src\Renderer\vk_renderer.h" />
+    <ClInclude Include="src\Utils\vkc_utils.h" />
+    <ClInclude Include="src\VK_abstraction\vk_camera.h" />
+    <ClInclude Include="src\VK_abstraction\vk_descriptors.h" />
+    <ClInclude Include="src\VK_abstraction\vk_device.h" />
+    <ClInclude Include="src\VK_abstraction\vk_frameInfo.h" />
+    <ClInclude Include="src\VK_abstraction\vk_gameObject.h" />
+    <ClInclude Include="src\VK_abstraction\vk_initializers.h" />
+    <ClInclude Include="src\VK_abstraction\vk_input.h" />
+    <ClInclude Include="src\VK_abstraction\vk_model.h" />
+    <ClInclude Include="src\VK_abstraction\vk_pipeline.h" />
+    <ClInclude Include="src\VK_abstraction\vk_swapchain.h" />
     <ClInclude Include="_.h" />
-    <ClInclude Include="main_frame.h" />
     <ClInclude Include="framework.h" />
-    <ClInclude Include="impact.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="deployment.rc" />
@@ -828,9 +858,6 @@
     <ProjectReference Include="..\..\app\axis\axis.vcxproj">
       <Project>{a2cbd4ed-ed0f-482b-9b16-f48f21c32835}</Project>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="matter.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
