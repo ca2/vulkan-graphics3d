@@ -1,3 +1,4 @@
+#include "framework.h"
 // vk_core.cpp
 
 // std
@@ -16,7 +17,7 @@
 
 // Third party
 #define VMA_IMPLEMENTATION
-#include "vk_mem_alloc.h"
+#include "vma/vk_mem_alloc.h"
 
 #define GLM_FORCE_RADIANS	
 #define GLM_ENABLE_EXPERIMENTAL
