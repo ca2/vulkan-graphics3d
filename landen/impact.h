@@ -146,6 +146,9 @@
 #include "vulkan/shared.h"
 #include "vulkan/application.h"
 #include "vulkan/vk_container.h"
+#include "apex/platform/app_consumer.h"
+#include "lowland/landen/vulkan/vk_container.h"
+
 
 
 namespace lowland_landen
@@ -153,8 +156,7 @@ namespace lowland_landen
 
 
    class CLASS_DECL_LOWLAND_LANDEN impact :
-      virtual public ::user::impact,
-      virtual public ::vkc::VkContainer
+      virtual public ::app_consumer < application, ::user::impact, ::vkc::VkContainer>
    {
    public:
 
@@ -162,12 +164,10 @@ namespace lowland_landen
       //int m_i;
 
       mouseState m_mousestate;
-
       ::image::image_pointer m_pimage;
 
       ::particle_pointer         m_pparticleImageSynchronization;
 
-      ::pointer < ::vulkan::application > m_pvulkanapplication;
 
 
       impact();
@@ -208,9 +208,11 @@ namespace lowland_landen
       DECLARE_MESSAGE_HANDLER(on_message_mouse_move);
       DECLARE_MESSAGE_HANDLER(on_message_left_button_down);
       DECLARE_MESSAGE_HANDLER(on_message_left_button_up);
+      DECLARE_MESSAGE_HANDLER(on_message_mouse_leave);
+
       void on_timer(timer * ptimer) override;
 
-
+      void reset_mouse_last_position();
 
 
       long long increment_reference_count() override

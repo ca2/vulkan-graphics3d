@@ -27,12 +27,12 @@ namespace vkc {
 
         //void moveInPlaneXZ(vkc::VkContainer * pcontainer, float dt, VkcGameObject& gameObject);
 
-        void updateMovement(vkc::VkContainer* pcontainer, float dt, VkcGameObject& gameObject);
-        void updateLook(float xOffset, float yOffset, VkcGameObject& gameObject);
+        void updateMovement(vkc::VkContainer* pvkcontainer, float dt, VkcGameObject& gameObject);
+        void updateLook(vkc::VkContainer* pvkcontainer, float xOffset, float yOffset, VkcGameObject& gameObject);
 
         void processMouseMovement(float xOffset, float yOffset);
-        void processKeyboardInput(vkc::VkContainer* pcontainer, float deltaTime);
-        void handleMouseInput(vkc::VkContainer* pcontainer);
+        void processKeyboardInput(vkc::VkContainer* pvkcontainer, float deltaTime);
+        void handleMouseInput(vkc::VkContainer* pvkcontainer);
 
         glm::vec3 getCameraDirection() const;
         glm::vec3 getCameraPosition() const;
@@ -40,7 +40,7 @@ namespace vkc {
         //KeyMappings keys{};
         float moveSpeed{ 3.f };
         float lookSpeed{ 1.5f };
-
+        bool   m_bMouseAbsolute;
 
     //public:
         //double lastX = 400.0;
@@ -51,13 +51,12 @@ namespace vkc {
         // Existing functions...
         //void handleMouseInput(GLFWwindow* window);
 
-        float getXOffset() const { return _xOffset; }
-        float getYOffset() const { return _yOffset; }
+        float getX() const { return _x; }
+        float getY() const { return _y; }
 
     private:
         double _lastX = 0.0, _lastY = 0.0;
-        bool _firstMouse = true;
-        float _xOffset = 0.f, _yOffset = 0.f;
+        double _x = 0.f, _y = 0.f;
 
 
 

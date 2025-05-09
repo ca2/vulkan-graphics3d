@@ -798,6 +798,7 @@
     </ClCompile>
     <ClCompile Include="impact.cpp" />
     <ClCompile Include="main_frame.cpp" />
+    <ClCompile Include="pane_impact.cpp" />
     <ClCompile Include="Renderer\Types\vk_basicRenderSystem.cpp" />
     <ClCompile Include="Renderer\Types\vk_pointLightSystem.cpp" />
     <ClCompile Include="Renderer\vk_buffer.cpp" />
@@ -824,6 +825,7 @@
     <ClInclude Include="IMCommon\vk_types.h" />
     <ClInclude Include="impact.h" />
     <ClInclude Include="main_frame.h" />
+    <ClInclude Include="pane_impact.h" />
     <ClInclude Include="Renderer\Types\vk_basicRenderSystem.h" />
     <ClInclude Include="Renderer\Types\vk_pointLightSystem.h" />
     <ClInclude Include="Renderer\vk_buffer.h" />

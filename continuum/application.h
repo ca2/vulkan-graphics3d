@@ -13,11 +13,12 @@ namespace lowland_continuum
    {
    public:
 
-
+      pane_impact* m_ppaneimpact;
       ::file::path                                    m_pathApplicationText;
       ::user::document *                              m_pdocMenu;
       //::pointer<::user::single_document_template>  m_ptemplateSimpleDrawingMain;
       //pane_impact *                                     m_ppaneimpact;
+      ::pointer < ::user::plain_edit >             m_peditYeeColor;
 
       application();
       ~application() override;
@@ -36,7 +37,7 @@ namespace lowland_continuum
       virtual long long increment_reference_count() override;
       virtual long long decrement_reference_count() override;
 #endif
-
+      void create_options_body(::user::interaction* pparent);
    };
 
 

@@ -12,6 +12,9 @@
 //#include "window.h"
 #include "acme/handler/request.h"
 #include "acme/platform/system.h"
+#include "aura/graphics/image/context.h"
+#include "aura/graphics/image/image.h"
+#include "aura/graphics/image/drawing.h"
 #include "base/user/user/single_document_template.h"
 
 
@@ -102,9 +105,111 @@ namespace lowland_landen
    }
 
 
-   void application::term_instance()
+   void application::update_3d_application(int cx, int cy)
    {
 
+      if (!m_pvulkanapplication)
+      {
+
+         if (!m_pimpact->m_callbackOffscreen)
+         {
+
+            m_pimpact->m_callbackOffscreen = [this](void* p, int w, int h, int stride)
+               {
+
+                  {
+
+                     _synchronous_lock synchronouslock(m_pimpact->m_pparticleImageSynchronization);
+
+                     m_pimpact->m_pimage->image32()->copy(m_pimpact->m_pimage->size().minimum(::int_size(w, h)), m_pimpact->m_pimage->m_iScan, (image32_t*)p, stride);
+
+                     for (int y = 0; y < h; y++)
+                     {
+
+                        auto p = (unsigned char*)(m_pimpact->m_pimage->image32() + (y * m_pimpact->m_pimage->m_iScan) / 4);
+
+                        for (int x = 0; x < w; x++)
+                        {
+
+                           //p[0] = p[0] * p[3] / 255;
+                           //p[1] = p[1] * p[3] / 255;
+                           //p[2] = p[2] * p[3] / 255;
+
+                           auto r = p[0];
+                           auto g = p[1];
+                           auto b = p[2];
+                           auto a = p[3];
+                           p[0] = b;
+                           p[2] = r;
+                           //p[3] = 255;
+
+                           /*         if (r > a)
+                                    {
+
+                                       information("What a red!!"_ansi);
+
+                                    }
+
+                                    if (g > a)
+                                    {
+
+                                       information("What a green!!"_ansi);
+
+                                    }
+
+                                    if (b > a)
+                                    {
+
+                                       information("What a blue!!"_ansi);
+
+                                    }*/
+
+                           p += 4;
+
+                        }
+
+                     }
+
+                  }
+
+
+                  m_pimpact->set_need_redraw();
+                  m_pimpact->post_redraw();
+               };
+
+         }
+
+         m_ptask3dApp = fork([this]()
+            {
+
+               //            run_vulkan_example();
+
+               m_pvulkanapplication = m_pimpact->start_vulkan_application();
+
+               m_pvulkanapplication->run_application();
+               m_ptask3dApp.release();
+
+            });
+
+
+
+
+      }
+      else
+      {
+
+         m_pvulkanapplication->resize(cx, cy);
+
+      }
+
+
+
+   }
+
+
+   void application::term_instance()
+   {
+      //m_ptask3dApp->set_finish();
       ::aura::application::term_instance();
    }
 

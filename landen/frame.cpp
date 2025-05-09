@@ -1,5 +1,6 @@
 #include "framework.h"
 #include "frame.h"
+#include "application.h"
 #include <math.h>
 
 
@@ -24,6 +25,16 @@ namespace lowland_landen
    }
 
 
+   void frame::install_message_routing(::channel* pchannel)
+   {
+
+      //      ::backimpact::user::impact::install_message_routing(pchannel);
+
+      ::simple_frame_window::install_message_routing(pchannel);
+
+      MESSAGE_LINK(e_message_close, pchannel, this, &frame::on_message_close);
+
+   }
    //void frame::assert_ok() const
    //{
 
@@ -38,6 +49,15 @@ namespace lowland_landen
    //   simple_frame_window::dump(dumpcontext);
 
    //}
+
+   void frame::on_message_close(::message::message* pmessage)
+   {
+
+      ::pointer <::lowland_landen::application> papp = m_papplication;
+
+      papp->m_ptask3dApp->set_finish();
+
+   }
 
 
    ::pointer < ::experience::frame > frame::frame_experience()

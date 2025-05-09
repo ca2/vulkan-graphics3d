@@ -1,6 +1,7 @@
 #include "framework.h"
 #include "document.h"
 #include "impact.h"
+#include "application.h"
 
 
 

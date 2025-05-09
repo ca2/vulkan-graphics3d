@@ -3,8 +3,13 @@
 #include "main_frame.h"
 #include "document.h"
 #include "impact.h"
+#include "pane_impact.h"
 #include "acme/filesystem/filesystem/file_system_options.h"
+#include "aura/graphics/write_text/font.h"
 #include "acme/handler/request.h"
+#include "aura/user/user/plain_edit.h"
+#include "aura/user/user/still.h"
+#include "apex/database/stream.h"
 #include "base/user/user/tab_impact.h"
 #include "base/platform/session.h"
 #include "base/user/user/document_manager.h"
@@ -22,7 +27,7 @@ namespace lowland_continuum
 
    application::application()
    {
-
+      m_ppaneimpact = nullptr;
       //m_bImaging = false;
 
       //m_bImaging = true; // for showing application icon
@@ -60,6 +65,7 @@ namespace lowland_continuum
       factory()->add_factory_item <::lowland_continuum::document >();
       factory()->add_factory_item <::lowland_continuum::main_frame >();
       factory()->add_factory_item <::lowland_continuum::impact >();
+      factory()->add_factory_item <::lowland_continuum::pane_impact >();
 
       ::lowland_landen::application::init_instance();
 
@@ -68,9 +74,15 @@ namespace lowland_continuum
          "main",
          ::type < document >(),
          ::type < main_frame >(),
-         ::type < impact >()));
+         ::type < pane_impact >()));
       
-      
+      add_impact_system(
+         "impact", __initialize_new::user::single_document_template(
+            "impact",
+            ::type < document >(),
+            ::type < main_frame >(),
+            ::type < impact >()));
+
 #if defined(APPLE_IOS)
 
       m_pathApplicationText = "icloud://iCloud.app-simple/Documents/application/application.txt";
@@ -157,6 +169,116 @@ namespace lowland_continuum
 
 
 #endif
+
+
+   void application::create_options_body(::user::interaction* pparent)
+   {
+
+      auto pstillTitle = create_label<::user::still>(pparent, "lowland continuum Options");
+
+      __defer_construct(pstillTitle->m_pfont);
+
+      pstillTitle->m_pfont->create_font(e_font_sans_ui, 24_pt);
+
+      auto playoutLine = create_line_layout(pparent, e_orientation_horizontal);
+
+      {
+
+         auto pcheckbox = create_check_box<::user::check_box>(playoutLine, "");
+
+         bool bCheck = false;
+
+         if (datastream()->get("Absolute Mouse Position", bCheck))
+         {
+
+            pcheckbox->set_check(bCheck, ::e_source_initialize);
+
+         }
+
+         pcheckbox->check_changed(this) += [this](auto& check)
+            {
+
+               bool bCheck = check.payload().as_bool();
+
+               datastream()->set("Absolute Mouse Position", bCheck);
+
+               //on_change_synchronize_with_weather();
+
+            };
+
+         create_label<::user::still>(playoutLine, "Absolute Mouse Position");
+
+      }
+
+      //{
+
+      //   auto pcomponent = system()->component("wallpaper_transform");
+
+      //   pcomponent->_001CreateForm(playoutLine);
+
+      //}
+
+      //m_pyeetask->m_pyee->create_yee_options_impact(pparent);
+
+      //create_label<::user::still>(pparent, "yee color");
+
+      //m_peditYeeColor = create_edit<::user::plain_edit>(pparent);
+
+      //m_peditYeeColor->set_size({ 300, 25 });
+
+      //m_peditYeeColor->add_handler(this);
+
+      //::string strYeeColor;
+
+      //datastream()->get("yee_color", strYeeColor);
+
+      //m_peditYeeColor->set_text(strYeeColor, ::e_source_initialize);
+
+      //auto pstill = __allocate ::user::still();
+
+      //__construct_new(m_pedit);
+
+      //__construct_new(m_pbuttonClear);
+
+      //__construct_new(m_pbuttonSend);
+
+      //__construct_new(m_pstillReceiver);
+
+      //m_pstill->create_control(this, "still");
+
+      //m_pedit->create_control(this, "edit");
+
+      //m_pedit->add_handler(this);
+
+      //m_pbuttonClear->create_control(this, "clear_button");
+
+      //m_pbuttonClear->add_handler(this);
+
+      //m_pbuttonSend->create_control(this, "send_button");
+
+      //m_pbuttonSend->add_handler(this);
+
+      //m_pstill->set_window_text("Enter ___new text:");
+
+      //m_pstillReceiver->create_control(this, "still");
+
+      //m_pstillReceiver->set_window_text("(Waiting to receive...)");
+
+      //m_pedit->m_strEmtpyText = "Enter New Text Here";
+
+      //string strInitialText;
+
+      //auto papp = get_app();
+
+      //papp->datastream()->get("last_text", strInitialText);
+
+      //m_pedit->set_text(strInitialText, ::e_source_initialize);
+
+      //m_pbuttonClear->set_window_text("Clear");
+
+      //m_pbuttonSend->set_window_text("Send");
+
+   }
 
 
 } // namespace lowland_continuum

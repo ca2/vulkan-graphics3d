@@ -29,8 +29,11 @@ namespace vkc
 
 		::function < void(void*, int, int, int)> m_callbackOffscreen;
 
-		int      m_iMouseLastX;
-		int      m_iMouseLastY;
+		double   m_dMouseLastX;
+		double   m_dMouseLastY;
+		bool		m_bFirstMouse;
+		bool		m_bLastMouse;
+
 
 		bool		m_bShouldClose;
 
@@ -40,6 +43,7 @@ namespace vkc
 
 		VkContainer(const VkContainer&) = delete;
 		VkContainer& operator=(const VkContainer&) = delete;
+		virtual bool is_absolute_mouse_position();
 
 		//bool shouldClose() { return glfwWindowShouldClose(window); }
 		bool shouldClose() { return false; }
@@ -57,8 +61,8 @@ namespace vkc
 		//static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
 		void initWindow();
 
-		int width;
-		int height;
+		int m_width;
+		int m_height;
 		bool framebufferResized = false;
 
 

@@ -1,6 +1,7 @@
 #include "framework.h"
 // vk_core.cpp
-
+#include "application.h"
+#include "apex/database/stream.h"
 // std
 #include <iostream>
 // std
@@ -80,6 +81,9 @@ namespace vkc {
    void Application::run_application()
    {
 
+      ::pointer < lowland_continuum::application> papp = m_papplication;
+
+
       __construct_new(m_pvkcdevice);
 
       m_pvkcdevice->initialize_device(m_pvkcontainer);
@@ -155,19 +159,25 @@ namespace vkc {
           globalSetLayout->getDescriptorSetLayout()
       };
 
+      //VkcCamera camera{ glm::vec3(0.0f, 2.0f, -15.0f), -90.0f, 0.0f };
       VkcCamera camera{ glm::vec3(0.0f, 2.0f, -15.0f), -90.0f, 0.0f };
-      //VkcCamera camera{ };
-
       auto viewerObject = VkcGameObject::createGameObject();
+      m_pvkcontainer->m_bLastMouse = true;
       viewerObject.transform.translation.z = -2.5f;
       MNKController cameraController{};
       /*    glfwSetInputMode(_window.getGLFWwindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
           glfwSetWindowUserPointer(_window.getGLFWwindow(), &cameraController);*/
+      cameraController.m_bMouseAbsolute;
+
+      papp->datastream()->get_block("camera", as_memory_block(camera));
+      papp->datastream()->get_block("transform", as_memory_block(viewerObject.transform));
+      papp->datastream()->get_block("camera_controller", as_memory_block(cameraController));
 
       auto currentTime = std::chrono::high_resolution_clock::now();
       //while (!_window.shouldClose())
-      while (!m_pvkcontainer->m_bShouldClose) 
+      while (!m_pvkcontainer->m_bShouldClose && task_get_run()) 
       {
+         task_iteration();
          //glfwPollEvents();
 
          auto newTime = std::chrono::high_resolution_clock::now();
@@ -178,7 +188,7 @@ namespace vkc {
 
          cameraController.handleMouseInput(m_pvkcontainer);
          
-         cameraController.updateLook(cameraController.getXOffset(), cameraController.getYOffset(), viewerObject);
+         cameraController.updateLook(m_pvkcontainer, cameraController.getX(), cameraController.getY(), viewerObject);
          
          cameraController.updateMovement(m_pvkcontainer, frameTime, viewerObject);
 
@@ -225,6 +235,10 @@ namespace vkc {
 
       }
 
+      papp->datastream()->set("camera_controller", as_memory_block(cameraController));
+      papp->datastream()->set("transform", as_memory_block(viewerObject.transform));
+      papp->datastream()->set("camera", as_memory_block(camera));
+
       if (m_pvkcdevice->device() != VK_NULL_HANDLE) 
       {
 
@@ -241,6 +255,9 @@ namespace vkc {
       m_prenderer->m_pvkcrenderpass->windowExtent.height = cy;
 
    }
+
+
+   
 
 
    void Application::loadGameObjects()
@@ -280,8 +297,8 @@ namespace vkc {
          ::pointer<VkcModel> vkcModel = VkcModel::createModelFromFile(m_pvkcdevice, "matter://models/StoneSphere.obj");
          auto stoneSphere = VkcGameObject::createGameObject();
          stoneSphere.model = vkcModel;
-         stoneSphere.transform.translation = { .0f, 1.f, -40.f };
-         stoneSphere.transform.scale = { 3.f, 1.5f, 3.f };
+         stoneSphere.transform.translation = { .0f, 0.f, 2.f };
+         stoneSphere.transform.scale = { .5f, .5f, .5f };
          m_gameObjects.emplace(stoneSphere.getId(), std::move(stoneSphere));
 
       }
@@ -291,8 +308,8 @@ namespace vkc {
          ::pointer<VkcModel> vkcModel = VkcModel::createModelFromFile(m_pvkcdevice, "matter://models/Barrel_OBJ.obj");
          auto woodBarrel = VkcGameObject::createGameObject();
          woodBarrel.model = vkcModel;
-         woodBarrel.transform.translation = { .0f, 1.f, -4.f };
-         woodBarrel.transform.scale = { 2.f, 1.5f, 2.f };
+         woodBarrel.transform.translation = {1.f, -.4f, -1.5f };
+         woodBarrel.transform.scale = { 1.f, 1.f, 1.f };
          m_gameObjects.emplace(woodBarrel.getId(), std::move(woodBarrel));
 
       }

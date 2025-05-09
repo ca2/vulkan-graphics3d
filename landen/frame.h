@@ -21,7 +21,7 @@ namespace lowland_landen
       frame();
       ~frame() override;
 
-
+      void install_message_routing(::channel* pchannel) override;
 	   // void assert_ok() const override;
 	   // void dump(dump_context & dumpcontext) const override;
 
@@ -37,7 +37,7 @@ namespace lowland_landen
       using simple_frame_window::frame_experience;
       ::pointer < ::experience::frame > frame_experience() override;
 
-
+      DECLARE_MESSAGE_HANDLER(on_message_close);
    };
 
 

@@ -70,6 +70,9 @@
     <ClCompile Include="VK_abstraction\vk_renderpass.cpp">
       <Filter>Source Files\VK_abstraction</Filter>
     </ClCompile>
+    <ClCompile Include="pane_impact.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h">
@@ -155,6 +158,9 @@
     </ClInclude>
     <ClInclude Include="VK_abstraction\vk_renderpass.h">
       <Filter>Header Files\VK_abstraction</Filter>
+    </ClInclude>
+    <ClInclude Include="pane_impact.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

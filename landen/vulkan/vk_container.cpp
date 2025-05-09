@@ -12,8 +12,10 @@ namespace vkc
 	VkContainer::VkContainer() 
 	{
 		m_bShouldClose = false;
-		m_iMouseLastX = 0;
-		m_iMouseLastY = 0;
+		m_dMouseLastX = 0.;
+		m_dMouseLastY = 0.;
+		m_bFirstMouse = true;
+		m_bLastMouse = false;
 		// initWindow();
 	}
 
@@ -36,6 +38,15 @@ namespace vkc
 	{
 
 		return ::user::e_key_state_none;
+
+	}
+
+
+	bool VkContainer::is_absolute_mouse_position()
+	{
+
+
+		return true;
 
 	}
 

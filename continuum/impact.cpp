@@ -9,6 +9,7 @@
 #include "acme/prototype/mathematics/mathematics.h"
 #include "aura/message/user.h"
 #include "aura/graphics/draw2d/draw2d.h"
+#include "apex/database/stream.h"
 
 
 CLASS_DECL_AURA ::color::color dk_red(); // <3 tbs
@@ -114,6 +115,8 @@ namespace lowland_continuum
    {
 
    }
+
+
 
 
    void impact::handle(::topic * ptopic, ::handler_context * phandlercontext)
@@ -368,6 +371,18 @@ namespace lowland_continuum
 
    }
 
+
+   bool impact::is_absolute_mouse_position()
+   {
+
+
+      bool bAbsoluteMousePosition = false;
+
+      get_app()->datastream()->get("Absolute Mouse Position", bAbsoluteMousePosition);
+
+      return bAbsoluteMousePosition;
+
+   }
 
 } // namespace lowland_continuum
 

@@ -1,6 +1,6 @@
 #pragma once
 
-
+#include "vulkan/application.h"
 #include "core/platform/application.h"
 
 
@@ -17,7 +17,9 @@ namespace lowland_landen
       ::user::document *                     m_pdocMenu;
       //::user::single_document_template *     m_ptemplateFuelMain;
       //::user::single_document_template *     m_ptemplateFuelImpact;
-
+      ::pointer<impact> m_pimpact;
+      ::task_pointer m_ptask3dApp;
+      ::pointer < ::vulkan::application > m_pvulkanapplication;
 
       application();
       ~application() override;
@@ -37,6 +39,9 @@ namespace lowland_landen
 
       
       string draw2d_get_default_implementation_name() override;
+
+      
+      virtual void update_3d_application(int cx, int cy);
 
 
    };

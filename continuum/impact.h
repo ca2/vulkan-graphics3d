@@ -2,8 +2,6 @@
 
 
 #include "lowland/landen/impact.h"
-#include "apex/platform/app_consumer.h"
-#include "lowland/landen/vulkan/vk_container.h"
 
 
 namespace lowland_continuum
@@ -53,6 +51,7 @@ namespace lowland_continuum
       
       bool on_click(::item * pitem, ::user::mouse * pmouse) override;
       
+      bool is_absolute_mouse_position() override;
 
    };
 

@@ -92,15 +92,25 @@ namespace vkc {
    //}
 
 
-   void MNKController::updateLook(float xOffset, float yOffset, VkcGameObject& gameObject) {
+   void MNKController::updateLook(vkc::VkContainer* pvkcontainer, float xOffset, float yOffset, VkcGameObject& gameObject) {
       xOffset *= _sensitivity;
       yOffset *= _sensitivity;
 
       // limit pitch values between about +/- 85ish degrees
       gameObject.transform.rotation.x = glm::clamp(gameObject.transform.rotation.x, -1.5f, 1.5f);
       gameObject.transform.rotation.y = glm::mod(gameObject.transform.rotation.y, glm::two_pi<float>());
-      _yaw += xOffset;
-      _pitch += yOffset;
+      if (pvkcontainer->is_absolute_mouse_position())
+      {
+         _yaw = xOffset;
+         _pitch = yOffset;
+      }
+      else
+      {
+
+         _yaw += xOffset;
+         _pitch += yOffset;
+
+      }
 
       // Clamp pitch to avoid flipping
       _pitch = glm::clamp(_pitch, -89.0f, 89.0f);
@@ -149,18 +159,66 @@ namespace vkc {
    void MNKController::handleMouseInput(vkc::VkContainer* pvkcontainer)
    {
       double xpos, ypos;
-      xpos = (double)pvkcontainer->m_iMouseLastX * 4.0;
-      ypos = (double)pvkcontainer->m_iMouseLastY * 4.0;
+      double newx, newy;
+      if (pvkcontainer->is_absolute_mouse_position())
+      {
+         newx = pvkcontainer->m_dMouseLastX * 1.25 * MATH_PI;
+         newy = pvkcontainer->m_dMouseLastY * 1.25 * MATH_PI/2.0;
+      }
+      else
+      {
+
+         newx = pvkcontainer->m_dMouseLastX;
+         newy = pvkcontainer->m_dMouseLastY;
+
+      }
       //glfwGetCursorPos(window, &xpos, &ypos);
 
-      if (_firstMouse) {
-         _lastX = xpos;
-         _lastY = ypos;
-         _firstMouse = false;
+      //if (pvkcontainer->m_bFirstMouse) {
+      //   _lastX = newx;
+      //   _lastY = newy;
+      //   pvkcontainer->m_bFirstMouse = false;
+      //   xpos = _lastX;
+      //   ypos = _lastY;
+      //}
+      //else
+      if (!pvkcontainer->is_absolute_mouse_position())
+      {
+
+         if (pvkcontainer->m_bFirstMouse)
+         {
+            _lastX = newx;
+            _lastY = newy;
+            pvkcontainer->m_bFirstMouse = false;
+
+         }
+
+      }
+      {
+
+
+
       }
 
-      _xOffset = static_cast<float>(xpos - _lastX) ;
-      _yOffset = static_cast<float>(_lastY - ypos);  // reversed Y
+      if (pvkcontainer->is_absolute_mouse_position())
+      {
+
+         xpos = _lastX + (newx - _lastX) * 0.05;
+         ypos = _lastY + (newy - _lastY) * 0.05;
+         _x = xpos;
+         _y = -ypos;  // reversed Y
+      }
+      else
+      {
+
+         xpos = newx;
+         ypos = newy;
+
+         _x = _x + static_cast<float>(xpos - _lastX - _x) * 0.05;
+         _y = _y + static_cast<float>(_lastY - ypos - _y) * 0.05;  // reversed Y
+
+
+      }
 
       _lastX = xpos;
       _lastY = ypos;

@@ -121,6 +121,7 @@ namespace lowland_landen
       MESSAGE_LINK(e_message_mouse_move, pchannel, this, &impact::on_message_mouse_move);
       MESSAGE_LINK(e_message_left_button_down, pchannel, this, &impact::on_message_left_button_down);
       MESSAGE_LINK(e_message_left_button_up, pchannel, this, &impact::on_message_left_button_up);
+      MESSAGE_LINK(e_message_mouse_leave, pchannel, this, &impact::on_message_mouse_leave);
 
    }
 
@@ -160,7 +161,7 @@ namespace lowland_landen
 
       pmessage->m_bRet = true;
 
-      if (m_pvulkanapplication)
+      if (get_app()->m_pvulkanapplication)
       {
 
          auto point = pmouse->m_pointHost;
@@ -172,13 +173,61 @@ namespace lowland_landen
          //m_mousestate.buttons.left = true;
          //         pmouse->m_p
 
-         m_iMouseLastX = point.x();
-         m_iMouseLastY = point.y();
+         double w = m_width;
+         double h = m_height;
+
+         if (m_bLastMouse)
+         {
+            m_bLastMouse = false;
+            m_bFirstMouse = true;
+
+         }
+
+         if (is_absolute_mouse_position())
+         {
+            m_dMouseLastX = ((point.x() - (w / 2.0)) * 2.0);
+            m_dMouseLastY = ((point.y() - (h / 2.0)) * 2.0);
+         }
+         else
+         {
+
+            m_dMouseLastX = point.x();
+            m_dMouseLastY = point.y();
+
+         }
+
+         track_mouse_leave();
 
 
-         m_pvulkanapplication->handleMouseMove(point.x(), point.y());
+         get_app()->m_pvulkanapplication->handleMouseMove(point.x(), point.y());
 
       }
+
+   }
+
+   void impact::on_message_mouse_leave(::message::message* pmessage)
+   {
+
+      //if (is_absolute_mouse_position())
+      {
+         reset_mouse_last_position();
+
+      }
+
+
+
+   }
+
+
+   void impact::reset_mouse_last_position()
+   {
+
+      if (is_absolute_mouse_position())
+      {
+         m_dMouseLastX = 0.;
+         m_dMouseLastY = 0.;
+      }
+      m_bLastMouse = true;
 
    }
 
@@ -249,6 +298,9 @@ namespace lowland_landen
 
       }
 
+
+      get_app()->m_pimpact = this;
+
       m_pparticleImageSynchronization = node()->create_mutex();
 
       m_pimage = image()->create_image(int_size{ 1920, 1080 });
@@ -273,7 +325,6 @@ namespace lowland_landen
 
    void impact::on_message_destroy(::message::message * pmessage)
    {
-
 
    }
 
@@ -416,95 +467,12 @@ namespace lowland_landen
       if (rectangleX.area() <= 0)
          return;
 
-      if (!m_pvulkanapplication)
-      {
+      m_width = rectangleX.width();
+      m_height = rectangleX.height();
 
-         if (!m_callbackOffscreen)
-         {
+      get_app()->update_3d_application(m_width, m_height);
 
-            m_callbackOffscreen = [this](void* p, int w, int h, int stride)
-               {
-
-                  {
-
-                     _synchronous_lock synchronouslock(m_pparticleImageSynchronization);
-
-                     m_pimage->image32()->copy(m_pimage->size().minimum(::int_size(w, h)), m_pimage->m_iScan, (image32_t*)p, stride);
-
-                     for (int y = 0; y < h; y++)
-                     {
-
-                        auto p = (unsigned char*)(m_pimage->image32() + (y * m_pimage->m_iScan) / 4);
-
-                        for (int x = 0; x < w; x++)
-                        {
-
-                           //p[0] = p[0] * p[3] / 255;
-                           //p[1] = p[1] * p[3] / 255;
-                           //p[2] = p[2] * p[3] / 255;
-
-                           auto r = p[0];
-                           auto g = p[1];
-                           auto b = p[2];
-                           auto a = p[3];
-                           p[0] = b;
-                           p[2] = r;
-                           //p[3] = 255;
-
-                           /*         if (r > a)
-                                    {
-
-                                       information("What a red!!"_ansi);
-
-                                    }
-
-                                    if (g > a)
-                                    {
-
-                                       information("What a green!!"_ansi);
-
-                                    }
-
-                                    if (b > a)
-                                    {
-
-                                       information("What a blue!!"_ansi);
-
-                                    }*/
-
-                           p += 4;
-
-                        }
-
-                     }
-
-                  }
-
-
-                  set_need_redraw();
-                  post_redraw();
-               };
-
-         }
-
-         application()->fork([this]()
-            {
-
-               //            run_vulkan_example();
-
-               m_pvulkanapplication = start_vulkan_application();
-
-               m_pvulkanapplication->run_application();
-
-            });
-
-      }
-      else
-      {
-
-         m_pvulkanapplication->resize(rectangleX.width(), rectangleX.height());
-
-      }
+      reset_mouse_last_position();
 
    }
 
