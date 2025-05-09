@@ -149,8 +149,8 @@ namespace vkc {
           globalSetLayout->getDescriptorSetLayout()
       };
 
-      //VkcCamera camera{ glm::vec3(0.0f, 2.0f, 5.0f), -90.0f, 0.0f };
-      VkcCamera camera{ };
+      VkcCamera camera{ glm::vec3(0.0f, 2.0f, -15.0f), -90.0f, 0.0f };
+      //VkcCamera camera{ };
 
       auto viewerObject = VkcGameObject::createGameObject();
       viewerObject.transform.translation.z = -2.5f;
