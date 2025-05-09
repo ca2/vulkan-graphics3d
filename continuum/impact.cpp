@@ -12,10 +12,15 @@
 
 
 CLASS_DECL_AURA ::color::color dk_red(); // <3 tbs
-
-
-namespace app_simple_application
+namespace vkc
 {
+   ::pointer<::vulkan::application > start_vulkan_application(::vkc::VkContainer* pvkcontainer, mouseState* pmousestate);
+} // namespace vkc
+
+namespace lowland_continuum
+{
+
+
 
 
    impact::impact()
@@ -64,12 +69,22 @@ namespace app_simple_application
    void impact::install_message_routing(::channel * psender)
    {
 
-      ::user::impact::install_message_routing(psender);
+      ::lowland_landen::impact::install_message_routing(psender);
 
       MESSAGE_LINK(e_message_create,psender,this,&impact::on_message_create);
       MESSAGE_LINK(e_message_destroy, psender, this, &impact::on_message_destroy);
 
    }
+
+
+
+   ::pointer < ::vulkan::application > impact::start_vulkan_application()
+   {
+
+      return ::vkc::start_vulkan_application(this, &m_mousestate);
+
+   }
+
 
 
    void impact::on_message_create(::message::message * pmessage)
@@ -285,7 +300,7 @@ namespace app_simple_application
       pgraphics->text_out(point.x(), point.y() + y + size.cy(), strText);
 
       pgraphics->set_smooth_mode(::draw2d::e_smooth_mode_none);
-
+      ::lowland_landen::impact::_001OnDraw(pgraphics);
    }
 
 
@@ -301,7 +316,7 @@ namespace app_simple_application
 
       }
 
-      ::user::impact::on_layout(pgraphics);
+      ::lowland_landen::impact::on_layout(pgraphics);
       
       setup_default_client_area_user_item();
 
@@ -354,7 +369,7 @@ namespace app_simple_application
    }
 
 
-} // namespace app_simple_application
+} // namespace lowland_continuum
 
 
 

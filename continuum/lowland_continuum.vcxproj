@@ -510,7 +510,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)../../..</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>windowscodecs.lib;gdiplus.lib;winmm.lib;version.lib;vfw32.lib;opengl32.lib;glu32.lib;Psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>vulkan/vulkan-1.lib;windowscodecs.lib;gdiplus.lib;winmm.lib;version.lib;vfw32.lib;opengl32.lib;glu32.lib;Psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>
       </IgnoreAllDefaultLibraries>
       <IgnoreSpecificDefaultLibraries>
@@ -527,6 +527,7 @@
       <LinkTimeCodeGeneration>
       </LinkTimeCodeGeneration>
       <FixedBaseAddress>false</FixedBaseAddress>
+      <AdditionalLibraryDirectories>$(RootParentDir)operating_system\storage-windows\$(PlatformName)\$(Configuration)\library\;$(RootParentDir)operating_system\storage-windows\$(PlatformName)\$(Configuration)\third\library\;$(USERPROFILE)\software\library\;$(OutDir)</AdditionalLibraryDirectories>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>
@@ -782,7 +783,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="AppCore\vk_core.cpp" />
+    <ClCompile Include="AppCore\vk_application.cpp" />
     <ClCompile Include="AppCore\vk_window.cpp" />
     <ClCompile Include="application.cpp" />
     <ClCompile Include="document.cpp" />
@@ -809,12 +810,14 @@
     <ClCompile Include="VK_abstraction\vk_initializers.cpp" />
     <ClCompile Include="VK_abstraction\vk_input.cpp" />
     <ClCompile Include="VK_abstraction\vk_model.cpp" />
+    <ClCompile Include="VK_abstraction\vk_offscreen.cpp" />
     <ClCompile Include="VK_abstraction\vk_pipeline.cpp" />
+    <ClCompile Include="VK_abstraction\vk_renderpass.cpp" />
     <ClCompile Include="VK_abstraction\vk_swapchain.cpp" />
     <ClCompile Include="_.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AppCore\vk_core.h" />
+    <ClInclude Include="AppCore\vk_application.h" />
     <ClInclude Include="AppCore\vk_window.h" />
     <ClInclude Include="application.h" />
     <ClInclude Include="document.h" />
@@ -836,7 +839,9 @@
     <ClInclude Include="VK_abstraction\vk_initializers.h" />
     <ClInclude Include="VK_abstraction\vk_input.h" />
     <ClInclude Include="VK_abstraction\vk_model.h" />
+    <ClInclude Include="VK_abstraction\vk_offscreen.h" />
     <ClInclude Include="VK_abstraction\vk_pipeline.h" />
+    <ClInclude Include="VK_abstraction\vk_renderpass.h" />
     <ClInclude Include="VK_abstraction\vk_swapchain.h" />
     <ClInclude Include="_.h" />
     <ClInclude Include="framework.h" />
@@ -859,6 +864,15 @@
     </ProjectReference>
     <ProjectReference Include="..\..\app\axis\axis.vcxproj">
       <Project>{a2cbd4ed-ed0f-482b-9b16-f48f21c32835}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\app\bred\bred.vcxproj">
+      <Project>{dfbf067f-aff9-4bd6-a5e1-72af984d1476}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\app\core\core.vcxproj">
+      <Project>{29c1eb5b-060e-4021-ae12-d1bcfb1b1359}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\landen\lowland_landen.vcxproj">
+      <Project>{5aafbd19-daed-40a5-bbd6-2fb07425c874}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

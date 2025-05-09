@@ -16,7 +16,7 @@
 namespace vkc {
 	class SimpleRenderSystem {
 	public:
-		SimpleRenderSystem(VkcDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
+		SimpleRenderSystem(VkcDevice *pvkcdevice, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
 		~SimpleRenderSystem();
 
 		SimpleRenderSystem(const SimpleRenderSystem&) = delete;
@@ -27,10 +27,10 @@ namespace vkc {
 		void createPipelineLayout(VkDescriptorSetLayout globalSetLayout);
 		void createPipeline(VkRenderPass renderPass);
 
-		VkcDevice& vkcDevice;
+		VkcDevice* m_pvkcdevice;
 
 
-		std::unique_ptr<VkcPipeline> vkcPipeline;
+		::pointer<VkcPipeline> vkcPipeline;
 		VkPipelineLayout pipelineLayout;
 	};
 }

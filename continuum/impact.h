@@ -1,16 +1,17 @@
 #pragma once
 
 
-#include "base/user/user/impact.h"
+#include "lowland/landen/impact.h"
 #include "apex/platform/app_consumer.h"
+#include "lowland/landen/vulkan/vk_container.h"
 
 
-namespace app_simple_application
+namespace lowland_continuum
 {
 
 
-   class CLASS_DECL_APP_SIMPLE_APPLICATION impact :
-      virtual public ::app_consumer < application, ::user::impact >
+   class CLASS_DECL_lowland_continuum impact :
+      virtual public ::app_consumer < application, ::lowland_landen::impact >
    {
    public:
 
@@ -30,6 +31,9 @@ namespace app_simple_application
       virtual long long increment_reference_count() override;
       virtual long long decrement_reference_count() override;
 #endif
+
+      ::pointer < ::vulkan::application > start_vulkan_application() override;
+
 
       virtual void install_message_routing(::channel * psender) override;
 
@@ -53,6 +57,6 @@ namespace app_simple_application
    };
 
 
-} // namespace app_simple_application
+} // namespace lowland_continuum
 
 

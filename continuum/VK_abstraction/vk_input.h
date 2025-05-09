@@ -2,6 +2,8 @@
 // MNK_Controller.h
 #include "VK_Abstraction/vk_gameObject.h"
 #include "AppCore/vk_window.h"
+#include "acme/constant/user_key.h"
+
 
 namespace vkc {
     class MNKController {
@@ -9,34 +11,34 @@ namespace vkc {
 
         MNKController(float sensitivity = 0.1f, float yaw = -90.0f, float pitch = 0.0f);
 
-        struct KeyMappings {
-            int moveLeft = GLFW_KEY_A;
-            int moveRight = GLFW_KEY_D;
-            int moveForward = GLFW_KEY_W;
-            int moveBackward = GLFW_KEY_S;
-            int moveUp = GLFW_KEY_E;
-            int moveDown = GLFW_KEY_Q;
-            int lookLeft = GLFW_KEY_LEFT;
-            int lookRight = GLFW_KEY_RIGHT;
-            int lookUp = GLFW_KEY_UP;
-            int lookDown = GLFW_KEY_DOWN;
-            int Exit = GLFW_KEY_ESCAPE;
-        };
+        struct KeyMap {
+            ::user::e_key moveLeft = ::user::e_key_a;
+            ::user::e_key moveRight = ::user::e_key_d;
+            ::user::e_key moveForward = ::user::e_key_w;
+            ::user::e_key moveBackward = ::user::e_key_s;
+            ::user::e_key moveUp = ::user::e_key_e;
+            ::user::e_key moveDown = ::user::e_key_q;
+            ::user::e_key lookLeft = ::user::e_key_left;
+            ::user::e_key lookRight = ::user::e_key_right;
+            ::user::e_key lookUp = ::user::e_key_up;
+            ::user::e_key lookDown = ::user::e_key_down;
+            ::user::e_key Exit = ::user::e_key_escape;
+        } m_keymap;
 
-        void moveInPlaneXZ(GLFWwindow* window, float dt, VkcGameObject& gameObject);
+        void moveInPlaneXZ(vkc::VkContainer * pcontainer, float dt, VkcGameObject& gameObject);
 
         void processMouseMovement(float xOffset, float yOffset);
-        void processKeyboardInput(GLFWwindow* window, float deltaTime);
+        void processKeyboardInput(vkc::VkContainer* pcontainer, float deltaTime);
 
         glm::vec3 getCameraDirection() const;
         glm::vec3 getCameraPosition() const;
 
-        KeyMappings keys{};
+        //KeyMappings keys{};
         float moveSpeed{ 3.f };
         float lookSpeed{ 1.5f };
 
 
-    private:
+    public:
         double lastX = 400.0;
         double lastY = 300.0;
         bool firstMouse = true;

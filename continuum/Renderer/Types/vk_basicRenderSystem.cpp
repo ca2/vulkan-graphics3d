@@ -20,15 +20,15 @@ namespace vkc {
 	};
 
 
-	SimpleRenderSystem::SimpleRenderSystem(VkcDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout)
-		: vkcDevice{ device } {
+	SimpleRenderSystem::SimpleRenderSystem(VkcDevice * pvkcdevice, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout)
+		: m_pvkcdevice{ pvkcdevice } {
 		createPipelineLayout(globalSetLayout);
 		createPipeline(renderPass);
 
 	}
 
 	SimpleRenderSystem::~SimpleRenderSystem() {
-		vkDestroyPipelineLayout(vkcDevice.device(), pipelineLayout, nullptr);
+		vkDestroyPipelineLayout(m_pvkcdevice->device(), pipelineLayout, nullptr);
 	}
 
 
@@ -48,7 +48,7 @@ namespace vkc {
 		pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
 		pipelineLayoutInfo.pushConstantRangeCount = 1;
 		pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
-		if (vkCreatePipelineLayout(vkcDevice.device(), &pipelineLayoutInfo, nullptr, &pipelineLayout) !=
+		if (vkCreatePipelineLayout(m_pvkcdevice->device(), &pipelineLayoutInfo, nullptr, &pipelineLayout) !=
 			VK_SUCCESS) {
 			throw std::runtime_error("Failed to create pipeline layout");
 		}
@@ -67,8 +67,10 @@ namespace vkc {
 		std::string vertShaderPath = "matter://Shaders/SpirV/vert.vert.spv";
 		std::string fragShaderPath = "matter://Shaders/SpirV/frag.frag.spv";
 
-		vkcPipeline = std::make_unique<VkcPipeline>(
-			vkcDevice,
+		vkcPipeline = __allocate VkcPipeline();
+		
+		vkcPipeline->initialize_pipeline(
+			m_pvkcdevice,
 			vertShaderPath.c_str(),
 			fragShaderPath.c_str(),
 			pipelineConfig

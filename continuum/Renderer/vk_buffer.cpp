@@ -30,28 +30,34 @@ namespace vkc {
         return instanceSize;
     }
 
-    VkcBuffer::VkcBuffer(
-        VkcDevice& device,
+    VkcBuffer::VkcBuffer()
+    {
+
+    }
+    void VkcBuffer::initialize_buffer(
+        VkcDevice * pvkcdevice,
         VkDeviceSize instanceSize,
         uint32_t instanceCount,
         VkBufferUsageFlags usageFlags,
         VkMemoryPropertyFlags memoryPropertyFlags,
         VkDeviceSize minOffsetAlignment)
-        : vkcDevice{ device },
-        instanceSize{ instanceSize },
-        instanceCount{ instanceCount },
-        usageFlags{ usageFlags },
-        memoryPropertyFlags{ memoryPropertyFlags } {
-        alignmentSize = getAlignment(instanceSize, minOffsetAlignment);
-        bufferSize = alignmentSize * instanceCount;
-        device.createBuffer(bufferSize, usageFlags, memoryPropertyFlags, buffer, memory);
+    {
+       m_pvkcdevice = pvkcdevice;
+       m_instanceSize = instanceSize;
+       m_instanceCount = instanceCount;
+       m_usageFlags = usageFlags;
+       m_memoryPropertyFlags = memoryPropertyFlags;
+
+       m_alignmentSize = getAlignment(instanceSize, minOffsetAlignment);
+       m_bufferSize = m_alignmentSize * instanceCount;
+        pvkcdevice->createBuffer(m_bufferSize, m_usageFlags, m_memoryPropertyFlags, m_buffer, m_memory);
     }
 
     VkcBuffer::~VkcBuffer() {
         unmap();
 
-        vkDestroyBuffer(vkcDevice.device(), buffer, nullptr);
-        vkFreeMemory(vkcDevice.device(), memory, nullptr);
+        vkDestroyBuffer(m_pvkcdevice->device(), m_buffer, nullptr);
+        vkFreeMemory(m_pvkcdevice->device(), m_memory, nullptr);
      
     }
 
@@ -65,8 +71,8 @@ namespace vkc {
      * @return VkResult of the buffer mapping call
      */
     VkResult VkcBuffer::map(VkDeviceSize size, VkDeviceSize offset) {
-        assert(buffer && memory && "Called map on buffer before create");
-        return vkMapMemory(vkcDevice.device(), memory, offset, size, 0, &mapped);
+        assert(m_buffer && m_memory && "Called map on buffer before create");
+        return vkMapMemory(m_pvkcdevice->device(), m_memory, offset, size, 0, &m_mapped);
     }
 
     /**
@@ -75,9 +81,9 @@ namespace vkc {
      * @note Does not return a result as vkUnmapMemory can't fail
      */
     void VkcBuffer::unmap() {
-        if (mapped) {
-            vkUnmapMemory(vkcDevice.device(), memory);
-            mapped = nullptr;
+        if (m_mapped) {
+            vkUnmapMemory(m_pvkcdevice->device(), m_memory);
+            m_mapped = nullptr;
         }
     }
 
@@ -91,20 +97,20 @@ namespace vkc {
      *
      */
     void VkcBuffer::writeToBuffer(void* data, VkDeviceSize size, VkDeviceSize offset) {
-        assert(mapped && "Cannot copy to unmapped buffer");
+        assert(m_mapped && "Cannot copy to unmapped buffer");
 
         if (size == VK_WHOLE_SIZE) {
-            memcpy(mapped, data, bufferSize);
+            memcpy(m_mapped, data, m_bufferSize);
         }
         else {
-            char* memOffset = (char*)mapped;
+            char* memOffset = (char*)m_mapped;
             memOffset += offset;
             memcpy(memOffset, data, size);
         }
     }
 
     /**
-     * Flush a memory range of the buffer to make it visible to the device
+     * Flush a memory range of the buffer to make it visible to the pvkcdevice
      *
      * @note Only required for non-coherent memory
      *
@@ -117,10 +123,10 @@ namespace vkc {
     VkResult VkcBuffer::flush(VkDeviceSize size, VkDeviceSize offset) {
         VkMappedMemoryRange mappedRange = {};
         mappedRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
-        mappedRange.memory = memory;
+        mappedRange.memory = m_memory;
         mappedRange.offset = offset;
         mappedRange.size = size;
-        return vkFlushMappedMemoryRanges(vkcDevice.device(), 1, &mappedRange);
+        return vkFlushMappedMemoryRanges(m_pvkcdevice->device(), 1, &mappedRange);
     }
 
     /**
@@ -137,10 +143,10 @@ namespace vkc {
     VkResult VkcBuffer::invalidate(VkDeviceSize size, VkDeviceSize offset) {
         VkMappedMemoryRange mappedRange = {};
         mappedRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
-        mappedRange.memory = memory;
+        mappedRange.memory = m_memory;
         mappedRange.offset = offset;
         mappedRange.size = size;
-        return vkInvalidateMappedMemoryRanges(vkcDevice.device(), 1, &mappedRange);
+        return vkInvalidateMappedMemoryRanges(m_pvkcdevice->device(), 1, &mappedRange);
     }
 
     /**
@@ -153,7 +159,7 @@ namespace vkc {
      */
     VkDescriptorBufferInfo VkcBuffer::descriptorInfo(VkDeviceSize size, VkDeviceSize offset) {
         return VkDescriptorBufferInfo{
-            buffer,
+            m_buffer,
             offset,
             size,
         };
@@ -167,16 +173,16 @@ namespace vkc {
      *
      */
     void VkcBuffer::writeToIndex(void* data, int index) {
-        writeToBuffer(data, instanceSize, index * alignmentSize);
+        writeToBuffer(data, m_instanceSize, index * m_alignmentSize);
     }
 
     /**
-     *  Flush the memory range at index * alignmentSize of the buffer to make it visible to the device
+     *  Flush the memory range at index * alignmentSize of the buffer to make it visible to the pvkcdevice
      *
      * @param index Used in offset calculation
      *
      */
-    VkResult VkcBuffer::flushIndex(int index) { return flush(alignmentSize, index * alignmentSize); }
+    VkResult VkcBuffer::flushIndex(int index) { return flush(m_alignmentSize, index * m_alignmentSize); }
 
     /**
      * Create a buffer info descriptor
@@ -186,7 +192,7 @@ namespace vkc {
      * @return VkDescriptorBufferInfo for instance at index
      */
     VkDescriptorBufferInfo VkcBuffer::descriptorInfoForIndex(int index) {
-        return descriptorInfo(alignmentSize, index * alignmentSize);
+        return descriptorInfo(m_alignmentSize, index * m_alignmentSize);
     }
 
     /**
@@ -199,7 +205,7 @@ namespace vkc {
      * @return VkResult of the invalidate call
      */
     VkResult VkcBuffer::invalidateIndex(int index) {
-        return invalidate(alignmentSize, index * alignmentSize);
+        return invalidate(m_alignmentSize, index * m_alignmentSize);
     }
 
 }  // namespace Vkc

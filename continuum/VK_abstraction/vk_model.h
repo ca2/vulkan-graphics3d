@@ -14,7 +14,8 @@
 
 namespace vkc {
 
-    class VkcModel {
+    class VkcModel :
+    virtual public ::particle{
     public:
         struct Vertex {
             glm::vec3 position{};
@@ -32,16 +33,16 @@ namespace vkc {
             std::vector<Vertex> vertices{};
             std::vector<uint32_t> indices{};
 
-            void loadModel(const std::string& filepath);
+            void loadModel(::particle * pparticle, const std::string& filepath);
         };
 
 
 
 
-        static std::unique_ptr<VkcModel> createModelFromFile(VkcDevice& device, const std::string& filepath);
+        static ::pointer<VkcModel> createModelFromFile(VkcDevice * pvkcdevice, const std::string& filepath);
 
 
-        VkcModel(VkcDevice& device, const VkcModel::Builder& builder);
+        VkcModel(VkcDevice * pvkcdevice, const VkcModel::Builder& builder);
         ~VkcModel();
 
         VkcModel(const VkcModel&) = delete;
@@ -55,13 +56,13 @@ namespace vkc {
         void createIndexBuffers(const std::vector<uint32_t>& indices);
 
         bool hasIndexBuffer = false;
-        VkcDevice& vkcDevice;
+        ::pointer < VkcDevice > m_pvkcdevice;
 
 
-        std::unique_ptr<VkcBuffer> vertexBuffer;
+        ::pointer<VkcBuffer> vertexBuffer;
         uint32_t vertexCount;
 
-        std::unique_ptr<VkcBuffer> indexBuffer;
+        ::pointer<VkcBuffer> indexBuffer;
         uint32_t indexCount;
     };
 }  // namespace vkc

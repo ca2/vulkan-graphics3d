@@ -1,6 +1,7 @@
 #include "framework.h"
 #include "vk_model.h"
 #include "Utils/vkc_utils.h"
+#include "acme/filesystem/filesystem/directory_context.h"
 
 
 // lib headers
@@ -33,19 +34,20 @@ namespace std {
 
 
 namespace vkc {
-    VkcModel::VkcModel(VkcDevice& device, const VkcModel::Builder& builder) : vkcDevice{ device } {
+    VkcModel::VkcModel(VkcDevice * pvkcdevice, const VkcModel::Builder& builder) : m_pvkcdevice{ pvkcdevice } {
+       initialize(pvkcdevice);
         createVertexBuffers(builder.vertices);
         createIndexBuffers(builder.indices);
     }
     VkcModel::~VkcModel() {
     }
 
-    std::unique_ptr<VkcModel> VkcModel::createModelFromFile(VkcDevice& device, const std::string& filepath) {
+    ::pointer<VkcModel> VkcModel::createModelFromFile(VkcDevice * pvkcdevice, const std::string& filepath) {
         Builder builder{};
-        builder.loadModel(filepath);
+        builder.loadModel(pvkcdevice, filepath);
 
 
-        return std::make_unique<VkcModel>(device, builder);
+        return __allocate VkcModel(pvkcdevice, builder);
     }
 
 
@@ -55,19 +57,23 @@ namespace vkc {
         VkDeviceSize bufferSize = sizeof(vertices[0]) * vertexCount;
         uint32_t vertexSize = sizeof(vertices[0]);
 
-        VkcBuffer stagingBuffer{
-            vkcDevice,
+        VkcBuffer stagingBuffer;
+        
+        stagingBuffer.initialize_buffer(
+            m_pvkcdevice,
             vertexSize,
             vertexCount,
             VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-        };
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+        );
 
         stagingBuffer.map();
         stagingBuffer.writeToBuffer((void*)vertices.data());
 
-        vertexBuffer = std::make_unique<VkcBuffer>(
-            vkcDevice,
+        vertexBuffer = __allocate VkcBuffer;
+        
+           vertexBuffer->initialize_buffer(
+            m_pvkcdevice,
             vertexSize,
             vertexCount,
             VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
@@ -75,7 +81,7 @@ namespace vkc {
         );
 
 
-        vkcDevice.copyBuffer(stagingBuffer.getBuffer(), vertexBuffer->getBuffer(), bufferSize);
+        m_pvkcdevice->copyBuffer(stagingBuffer.getBuffer(), vertexBuffer->getBuffer(), bufferSize);
 
 
     }
@@ -91,25 +97,28 @@ namespace vkc {
         VkDeviceSize bufferSize = sizeof(indices[0]) * indexCount;
         uint32_t indexSize = sizeof(indices[0]);
 
-        VkcBuffer stagingBuffer{
-            vkcDevice,
+        VkcBuffer stagingBuffer;
+        stagingBuffer.initialize_buffer(
+            m_pvkcdevice,
             indexSize,
             indexCount,
             VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-        };
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)
+        ;
 
         stagingBuffer.map();
         stagingBuffer.writeToBuffer((void*)indices.data());
 
-        indexBuffer = std::make_unique<VkcBuffer>(
-            vkcDevice,
+        indexBuffer = __allocate VkcBuffer();
+        
+        indexBuffer->initialize_buffer(
+            m_pvkcdevice,
             indexSize,
             indexCount,
             VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
             VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-        vkcDevice.copyBuffer(stagingBuffer.getBuffer(), indexBuffer->getBuffer(), bufferSize);
+        m_pvkcdevice->copyBuffer(stagingBuffer.getBuffer(), indexBuffer->getBuffer(), bufferSize);
     }
 
 
@@ -151,13 +160,19 @@ namespace vkc {
     }
 
 
-    void VkcModel::Builder::loadModel(const std::string& filepath) {
+    void VkcModel::Builder::loadModel(::particle * pparticle, const std::string& filepath) {
         tinyobj::attrib_t attrib;
         std::vector<tinyobj::shape_t> shapes;
         std::vector<tinyobj::material_t> materials;
         std::string warn, err;
 
-        if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, filepath.c_str())) {
+        
+
+        auto path = pparticle->directory()->defer_get_file_system_file(filepath.c_str(), true);
+
+        ::string str(path.windows_path().path());
+
+        if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, str.c_str())) {
             throw std::runtime_error(warn + err);
         }
 

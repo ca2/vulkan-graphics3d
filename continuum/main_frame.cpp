@@ -3,7 +3,7 @@
 #include "acme/constant/message.h"
 
 
-namespace app_simple_application
+namespace lowland_continuum
 {
 
 
@@ -26,7 +26,7 @@ namespace app_simple_application
    ::pointer < ::experience::frame > main_frame::frame_experience()
    {
 
-      auto pframe = ::simple_main_frame::frame_experience("", "022", "LightBlue");
+      auto pframe = lowland_landen::frame::frame_experience(nullptr, "022", "LightBlue");
 
       return pframe;
 
@@ -44,9 +44,9 @@ namespace app_simple_application
    void main_frame::install_message_routing(::channel * pchannel)
    {
 
-      simple_main_frame::install_message_routing(pchannel);
+      lowland_landen::frame::install_message_routing(pchannel);
 
-      MESSAGE_LINK(e_message_create, pchannel, this, &simple_main_frame::on_message_create);
+      MESSAGE_LINK(e_message_create, pchannel, this, &lowland_landen::frame::on_message_create);
 
    }
 
@@ -54,12 +54,12 @@ namespace app_simple_application
    void main_frame::on_message_create(::message::message * pmessage)
    {
 
-      set_bitmap_source("Simple papp!!");
+      //set_bitmap_source("Simple papp!!");
 
    }
 
 
-} // namespace app_simple_application
+} // namespace lowland_continuum
 
 
 

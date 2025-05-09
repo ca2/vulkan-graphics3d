@@ -25,15 +25,16 @@ namespace vkc {
         return *this;
     }
 
-    std::unique_ptr<VkcDescriptorSetLayout> VkcDescriptorSetLayout::Builder::build() const {
-        return std::make_unique<VkcDescriptorSetLayout>(vkcDevice, bindings);
+    ::pointer<VkcDescriptorSetLayout> VkcDescriptorSetLayout::Builder::build() const 
+    {
+        return __allocate VkcDescriptorSetLayout(m_pvkcdevice, bindings);
     }
 
     // *************** Descriptor Set Layout *********************
 
     VkcDescriptorSetLayout::VkcDescriptorSetLayout(
-        VkcDevice& lveDevice, std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings)
-        : vkcDevice{ lveDevice }, bindings{ bindings } {
+        VkcDevice *pvkcdevice, std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings)
+        : m_pvkcdevice{ pvkcdevice }, bindings{ bindings } {
         std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings{};
         for (auto kv : bindings) {
             setLayoutBindings.push_back(kv.second);
@@ -45,7 +46,7 @@ namespace vkc {
         descriptorSetLayoutInfo.pBindings = setLayoutBindings.data();
 
         if (vkCreateDescriptorSetLayout(
-            lveDevice.device(),
+            m_pvkcdevice->device(),
             &descriptorSetLayoutInfo,
             nullptr,
             &descriptorSetLayout) != VK_SUCCESS) {
@@ -55,7 +56,7 @@ namespace vkc {
 
     VkcDescriptorSetLayout::~VkcDescriptorSetLayout() {
         if (descriptorSetLayout != VK_NULL_HANDLE) {
-            vkDestroyDescriptorSetLayout(vkcDevice.device(), descriptorSetLayout, nullptr);
+            vkDestroyDescriptorSetLayout(m_pvkcdevice->device(), descriptorSetLayout, nullptr);
             descriptorSetLayout = VK_NULL_HANDLE;
         }
     }
@@ -78,18 +79,18 @@ namespace vkc {
         return *this;
     }
 
-    std::unique_ptr<VkcDescriptorPool> VkcDescriptorPool::Builder::build() const {
-        return std::make_unique<VkcDescriptorPool>(vkcDevice, maxSets, poolFlags, poolSizes);
+    ::pointer <VkcDescriptorPool> VkcDescriptorPool::Builder::build() const {
+        return __allocate VkcDescriptorPool (m_pvkcdevice, maxSets, poolFlags, poolSizes);
     }
 
     // *************** Descriptor Pool *********************
 
     VkcDescriptorPool::VkcDescriptorPool(
-        VkcDevice& vkcDevice,
+        VkcDevice * pvkcdevice,
         uint32_t maxSets,
         VkDescriptorPoolCreateFlags poolFlags,
         const std::vector<VkDescriptorPoolSize>& poolSizes)
-        : vkcDevice{ vkcDevice } {
+        : m_pvkcdevice{ pvkcdevice } {
         VkDescriptorPoolCreateInfo descriptorPoolInfo{};
         descriptorPoolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
         descriptorPoolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
@@ -97,7 +98,7 @@ namespace vkc {
         descriptorPoolInfo.maxSets = maxSets;
         descriptorPoolInfo.flags = poolFlags;
 
-        if (vkCreateDescriptorPool(vkcDevice.device(), &descriptorPoolInfo, nullptr, &descriptorPool) !=
+        if (vkCreateDescriptorPool(m_pvkcdevice->device(), &descriptorPoolInfo, nullptr, &descriptorPool) !=
             VK_SUCCESS) {
             throw std::runtime_error("failed to create descriptor pool!");
         }
@@ -105,7 +106,7 @@ namespace vkc {
 
     VkcDescriptorPool::~VkcDescriptorPool() {
         if (descriptorPool != VK_NULL_HANDLE) {
-            vkDestroyDescriptorPool(vkcDevice.device(), descriptorPool, nullptr);
+            vkDestroyDescriptorPool(m_pvkcdevice->device(), descriptorPool, nullptr);
             descriptorPool = VK_NULL_HANDLE;
         }
     }
@@ -120,7 +121,7 @@ namespace vkc {
 
         // Might want to create a "DescriptorPoolManager" class that handles this case, and builds
         // a new pool whenever an old pool fills up. But this is beyond our current scope
-        if (vkAllocateDescriptorSets(vkcDevice.device(), &allocInfo, &descriptor) != VK_SUCCESS) {
+        if (vkAllocateDescriptorSets(m_pvkcdevice->device(), &allocInfo, &descriptor) != VK_SUCCESS) {
             return false;
         }
         return true;
@@ -128,14 +129,14 @@ namespace vkc {
 
     void VkcDescriptorPool::freeDescriptors(std::vector<VkDescriptorSet>& descriptors) const {
         vkFreeDescriptorSets(
-            vkcDevice.device(),
+            m_pvkcdevice->device(),
             descriptorPool,
             static_cast<uint32_t>(descriptors.size()),
             descriptors.data());
     }
 
     void VkcDescriptorPool::resetPool() {
-        vkResetDescriptorPool(vkcDevice.device(), descriptorPool, 0);
+        vkResetDescriptorPool(m_pvkcdevice->device(), descriptorPool, 0);
     }
 
     // *************** Descriptor Writer *********************
@@ -199,7 +200,7 @@ namespace vkc {
         for (auto& write : writes) {
             write.dstSet = set;
         }
-        vkUpdateDescriptorSets(pool.vkcDevice.device(), writes.size(), writes.data(), 0, nullptr);
+        vkUpdateDescriptorSets(pool.m_pvkcdevice->device(), writes.size(), writes.data(), 0, nullptr);
     }
 
 

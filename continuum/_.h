@@ -1,18 +1,18 @@
 #pragma once
 
 
-#include "base/_.h"
+#include "landen/_.h"
 
 
 
-#if defined(_app_simple_application_project)
-#define CLASS_DECL_APP_SIMPLE_APPLICATION  CLASS_DECL_EXPORT
+#if defined(_lowland_continuum_project)
+#define CLASS_DECL_lowland_continuum  CLASS_DECL_EXPORT
 #else
-#define CLASS_DECL_APP_SIMPLE_APPLICATION  CLASS_DECL_IMPORT
+#define CLASS_DECL_lowland_continuum  CLASS_DECL_IMPORT
 #endif
 
 
-namespace app_simple_application
+namespace lowland_continuum
 {
 
    class application;

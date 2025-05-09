@@ -25,7 +25,8 @@ namespace vkc {
 
 	};
 
-	struct PointLightComponent {
+	struct PointLightComponent :
+	virtual public ::particle{
 		float lightIntensity = 1.0f;
 	};
 
@@ -50,9 +51,9 @@ namespace vkc {
 		TransformComponent transform;
 		glm::vec3 color{};
 
-		std::shared_ptr<VkcModel> model{};
+		::pointer<VkcModel> model{};
 		
-		std::unique_ptr<PointLightComponent> pointLight = nullptr;
+		::pointer<PointLightComponent> pointLight = nullptr;
 	private:
 		VkcGameObject(id_t objId) : id{ objId } {}
 

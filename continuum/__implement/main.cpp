@@ -1,5 +1,5 @@
 #include "framework.h"
-#define APPLICATION_NAMESPACE app_simple_application
+#define APPLICATION_NAMESPACE lowland_continuum
 #include "acme/inline/application/main.inl"
 
 

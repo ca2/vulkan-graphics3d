@@ -1,15 +1,15 @@
 #pragma once
 
 
-#include "base/user/simple/main_frame.h"
+#include "lowland/landen/frame.h"
 
 
-namespace app_simple_application
+namespace lowland_continuum
 {
 
 
-   class CLASS_DECL_APP_SIMPLE_APPLICATION main_frame :
-      virtual public simple_main_frame
+   class CLASS_DECL_lowland_continuum main_frame :
+      virtual public lowland_landen::frame
    {
    public:
 
@@ -40,7 +40,7 @@ namespace app_simple_application
    };
 
 
-} // namespace app_simple_application
+} // namespace lowland_continuum
 
 
 

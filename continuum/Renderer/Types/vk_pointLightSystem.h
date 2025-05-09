@@ -14,7 +14,7 @@ namespace vkc {
     class PointLightSystem {
     public:
         PointLightSystem(
-            VkcDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
+            VkcDevice *pvkcdevice, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
         ~PointLightSystem();
 
         PointLightSystem(const PointLightSystem&) = delete;
@@ -28,9 +28,9 @@ namespace vkc {
         void createPipelineLayout(VkDescriptorSetLayout globalSetLayout);
         void createPipeline(VkRenderPass renderPass);
 
-        VkcDevice& vkcDevice;
+        ::pointer < VkcDevice > m_pvkcdevice;
 
-        std::unique_ptr<VkcPipeline> vkcPipeline;
+        ::pointer<VkcPipeline> vkcPipeline;
         VkPipelineLayout pipelineLayout;
     };
 }  // namespace lve

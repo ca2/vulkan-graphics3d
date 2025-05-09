@@ -1,15 +1,15 @@
 #pragma once
 
 
-#include "base/platform/application.h"
+#include "lowland/landen/application.h"
 
 
-namespace app_simple_application
+namespace lowland_continuum
 {
 
 
-   class CLASS_DECL_APP_SIMPLE_APPLICATION application :
-      virtual public ::base::application
+   class CLASS_DECL_lowland_continuum application :
+      virtual public lowland_landen::application
    {
    public:
 
@@ -17,7 +17,7 @@ namespace app_simple_application
       ::file::path                                    m_pathApplicationText;
       ::user::document *                              m_pdocMenu;
       //::pointer<::user::single_document_template>  m_ptemplateSimpleDrawingMain;
-      pane_impact *                                     m_ppaneimpact;
+      //pane_impact *                                     m_ppaneimpact;
 
       application();
       ~application() override;
@@ -40,7 +40,7 @@ namespace app_simple_application
    };
 
 
-} // namespace app_simple_application
+} // namespace lowland_continuum
 
 
 

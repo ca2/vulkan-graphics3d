@@ -58,20 +58,20 @@
     <ClCompile Include="Renderer\Types\vk_pointLightSystem.cpp">
       <Filter>Source Files\Renderer\Types</Filter>
     </ClCompile>
-    <ClCompile Include="AppCore\vk_core.cpp">
+    <ClCompile Include="AppCore\vk_application.cpp">
       <Filter>Source Files\AppCore</Filter>
     </ClCompile>
     <ClCompile Include="AppCore\vk_window.cpp">
       <Filter>Source Files\AppCore</Filter>
     </ClCompile>
+    <ClCompile Include="VK_abstraction\vk_offscreen.cpp">
+      <Filter>Source Files\VK_abstraction</Filter>
+    </ClCompile>
+    <ClCompile Include="VK_abstraction\vk_renderpass.cpp">
+      <Filter>Source Files\VK_abstraction</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="framework.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="_.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="application.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -90,7 +90,7 @@
     <ClInclude Include="AppCore\vk_window.h">
       <Filter>Header Files\AppCore</Filter>
     </ClInclude>
-    <ClInclude Include="AppCore\vk_core.h">
+    <ClInclude Include="AppCore\vk_application.h">
       <Filter>Header Files\AppCore</Filter>
     </ClInclude>
     <ClInclude Include="IMCommon\vk_types.h">
@@ -142,6 +142,18 @@
       <Filter>Header Files\VK_abstraction</Filter>
     </ClInclude>
     <ClInclude Include="VK_abstraction\vk_swapchain.h">
+      <Filter>Header Files\VK_abstraction</Filter>
+    </ClInclude>
+    <ClInclude Include="_.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="framework.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="VK_abstraction\vk_offscreen.h">
+      <Filter>Header Files\VK_abstraction</Filter>
+    </ClInclude>
+    <ClInclude Include="VK_abstraction\vk_renderpass.h">
       <Filter>Header Files\VK_abstraction</Filter>
     </ClInclude>
   </ItemGroup>

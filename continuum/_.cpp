@@ -3,7 +3,7 @@
 #include "acme/platform/release_time.h"
 
 
-__BEGIN_RELEASE_TIME(app_simple_application)
+__BEGIN_RELEASE_TIME(lowland_continuum)
 #include "release_time.txt"
 __END_RELEASE_TIME()
 

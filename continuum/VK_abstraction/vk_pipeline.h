@@ -28,10 +28,12 @@ namespace vkc {
 		uint32_t subpass = 0;
 	};
 
-	class VkcPipeline {
+	class VkcPipeline :
+	virtual public ::particle{
 	public:
-		VkcPipeline(
-			VkcDevice& device,
+		VkcPipeline();
+		virtual void initialize_pipeline(
+			VkcDevice * pvkcdevice,
 			const std::string& vertFilepath,
 			const std::string& fragFilepath,
 			const PipelineConfigInfo& configInfo);
@@ -51,9 +53,9 @@ namespace vkc {
 			const std::string& fragFilepath,
 			const PipelineConfigInfo& configInfo);
 
-		void createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule);
+		void createShaderModule(const ::block & block, VkShaderModule* shaderModule);
 
-		VkcDevice& vkcDevice;
+		::pointer < VkcDevice > m_pvkcdevice;
 		VkPipeline graphicsPipeline;
 		VkShaderModule vertShaderModule;
 		VkShaderModule fragShaderModule;

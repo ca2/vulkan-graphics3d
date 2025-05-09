@@ -109,7 +109,7 @@ struct Node : public IRenderable {
 
     // parent pointer must be a weak pointer to avoid circular dependencies
     std::weak_ptr<Node> parent;
-    std::vector<std::shared_ptr<Node>> children;
+    std::vector<::pointer<Node>> children;
 
     glm::mat4 localTransform;
     glm::mat4 worldTransform;

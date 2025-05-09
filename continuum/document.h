@@ -4,11 +4,11 @@
 #include "base/user/user/document.h"
 
 
-namespace app_simple_application
+namespace lowland_continuum
 {
 
 
-   class CLASS_DECL_APP_SIMPLE_APPLICATION document :
+   class CLASS_DECL_lowland_continuum document :
       public ::user::document
    {
    public:
@@ -38,7 +38,7 @@ namespace app_simple_application
    };
 
 
-} // namespace app_simple_application
+} // namespace lowland_continuum
 
 
 

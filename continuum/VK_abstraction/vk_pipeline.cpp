@@ -1,6 +1,9 @@
 #include "framework.h"
 #include "vk_pipeline.h"
 #include "vk_model.h"
+#include "acme/platform/application.h"
+#include "acme/filesystem/filesystem/directory_context.h"
+#include "acme/filesystem/filesystem/file_context.h"
 
 // std
 #include <fstream>
@@ -9,21 +12,28 @@
 #include <cassert>
 
 namespace vkc {
-	VkcPipeline::VkcPipeline(
-		VkcDevice& device,
+	VkcPipeline::VkcPipeline()
+	{
+
+	}
+	
+	void VkcPipeline::initialize_pipeline(
+		VkcDevice * pvkcdevice,
 		const std::string& vertFilepath,
 		const std::string& fragFilepath,
 		const PipelineConfigInfo& configInfo)
-		: vkcDevice{ device } {
+	{
+		initialize(pvkcdevice);
+		m_pvkcdevice = pvkcdevice;
 		createGraphicsPipeline(vertFilepath, fragFilepath, configInfo);
 	}
 
  
 
 	VkcPipeline::~VkcPipeline() {
-		vkDestroyShaderModule(vkcDevice.device(), vertShaderModule, nullptr);
-		vkDestroyShaderModule(vkcDevice.device(), fragShaderModule, nullptr);
-		vkDestroyPipeline(vkcDevice.device(), graphicsPipeline, nullptr);
+		vkDestroyShaderModule(m_pvkcdevice->device(), vertShaderModule, nullptr);
+		vkDestroyShaderModule(m_pvkcdevice->device(), fragShaderModule, nullptr);
+		vkDestroyPipeline(m_pvkcdevice->device(), graphicsPipeline, nullptr);
 	}
 
 	void VkcPipeline::bind(VkCommandBuffer commandBuffer) {
@@ -61,8 +71,8 @@ namespace vkc {
 			configInfo.renderPass != VK_NULL_HANDLE &&
 			"Cannot create graphics pipeline: no renderPass provided in configInfo");
 
-		auto vertCode = readFile(vertFilepath);
-		auto fragCode = readFile(fragFilepath);
+		auto vertCode = file()->as_memory(vertFilepath.c_str());
+		auto fragCode = file()->as_memory(fragFilepath.c_str());
 
 		createShaderModule(vertCode, &vertShaderModule);
 		createShaderModule(fragCode, &fragShaderModule);
@@ -115,7 +125,7 @@ namespace vkc {
 
 
 		if (vkCreateGraphicsPipelines(
-			vkcDevice.device(),
+			m_pvkcdevice->device(),
 			VK_NULL_HANDLE,
 			1,
 			&pipelineInfo,
@@ -124,14 +134,14 @@ namespace vkc {
 			throw std::runtime_error("Failed to create graphics pipeline");
 		}
 	}
-	void VkcPipeline::createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule)
+	void VkcPipeline::createShaderModule(const block & block, VkShaderModule* shaderModule)
 	{
 		VkShaderModuleCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-		createInfo.codeSize = code.size();
-		createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
+		createInfo.codeSize = block.size();
+		createInfo.pCode = reinterpret_cast<const uint32_t*>(block.data());
 
-		if (vkCreateShaderModule(vkcDevice.device(), &createInfo, nullptr, shaderModule) != VK_SUCCESS) {
+		if (vkCreateShaderModule(m_pvkcdevice->device(), &createInfo, nullptr, shaderModule) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create shader module");
 		}
 	}

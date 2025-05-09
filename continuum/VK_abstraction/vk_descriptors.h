@@ -9,26 +9,27 @@
 
 
 namespace vkc {
-    class VkcDescriptorSetLayout {
+    class VkcDescriptorSetLayout:
+    virtual public ::particle{
     public:
-        class Builder {
+        class Builder  {
         public:
-            Builder(VkcDevice& vkcDevice) : vkcDevice{ vkcDevice } {}
+            Builder(VkcDevice *pvkcDevice) : m_pvkcdevice{ pvkcDevice } {}
 
             Builder& addBinding(
                 uint32_t binding,
                 VkDescriptorType descriptorType,
                 VkShaderStageFlags stageFlags,
                 uint32_t count = 1);
-            std::unique_ptr<VkcDescriptorSetLayout> build() const;
+            ::pointer<VkcDescriptorSetLayout> build() const;
 
         private:
-            VkcDevice& vkcDevice;
+            ::pointer < VkcDevice > m_pvkcdevice;
             std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings{};
         };
 
         VkcDescriptorSetLayout(
-            VkcDevice& vkcDevice, std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings);
+            VkcDevice * pvkcdevice, std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings);
         ~VkcDescriptorSetLayout();
         VkcDescriptorSetLayout(const VkcDescriptorSetLayout&) = delete;
         VkcDescriptorSetLayout& operator=(const VkcDescriptorSetLayout&) = delete;
@@ -36,33 +37,40 @@ namespace vkc {
         VkDescriptorSetLayout getDescriptorSetLayout() const { return descriptorSetLayout; }
 
     private:
-        VkcDevice& vkcDevice;
+        ::pointer < VkcDevice > m_pvkcdevice;
         VkDescriptorSetLayout descriptorSetLayout;
         std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings;
 
         friend class VkcDescriptorWriter;
     };
 
-    class VkcDescriptorPool {
+    class VkcDescriptorPool :
+    virtual public ::particle {
     public:
-        class Builder {
+        class Builder :
+        virtual public ::particle{
         public:
-            Builder(VkcDevice& vkcDevice) : vkcDevice{ vkcDevice } {}
+            //Builder(VkcDevice& m_pvkcdevice) : m_pvkcdevice{ m_pvkcdevice } {}
+            Builder() {}
+            void initialize_builder(VkcDevice* pvkcDevice)
+            {
+               m_pvkcdevice = pvkcDevice;
 
+            }
             Builder& addPoolSize(VkDescriptorType descriptorType, uint32_t count);
             Builder& setPoolFlags(VkDescriptorPoolCreateFlags flags);
             Builder& setMaxSets(uint32_t count);
-            std::unique_ptr<VkcDescriptorPool> build() const;
+            ::pointer<VkcDescriptorPool> build() const;
 
         private:
-            VkcDevice& vkcDevice;
+            ::pointer < VkcDevice > m_pvkcdevice;
             std::vector<VkDescriptorPoolSize> poolSizes{};
             uint32_t maxSets = 1000;
             VkDescriptorPoolCreateFlags poolFlags = 0;
         };
 
         VkcDescriptorPool(
-            VkcDevice& vkcDevice,
+            VkcDevice * pvkcdevice,
             uint32_t maxSets,
             VkDescriptorPoolCreateFlags poolFlags,
             const std::vector<VkDescriptorPoolSize>& poolSizes);
@@ -78,7 +86,7 @@ namespace vkc {
         void resetPool();
 
     private:
-        VkcDevice& vkcDevice;
+        ::pointer < VkcDevice > m_pvkcdevice;
         VkDescriptorPool descriptorPool;
 
         friend class VkcDescriptorWriter;

@@ -5,7 +5,7 @@
 #include "acme/filesystem/filesystem/file_context.h"
 
 
-namespace app_simple_application
+namespace lowland_continuum
 {
 
 
@@ -24,44 +24,44 @@ namespace app_simple_application
    bool document::on_new_document()
    {
 
-      ::file::path path;
-      
-      ::pointer < ::app_simple_application::application > papp = application();
-      
-      path = papp->m_pathApplicationText;
+      //::file::path path;
+      //
+      //::pointer < ::lowland_continuum::application > papp = application();
+      //
+      //path = papp->m_pathApplicationText;
 
-      //const char * pszPath = path.c_str();
-      
-      try
-      {
+      ////const char * pszPath = path.c_str();
+      //
+      //try
+      //{
 
-         file()->get_lines(m_straLine, path);
-         
-      }
-      catch(...)
-      {
-       
-      }
+      //   file()->get_lines(m_straLine, path);
+      //   
+      //}
+      //catch(...)
+      //{
+      // 
+      //}
 
 
-      if (m_straLine.is_empty())
-      {
-         
-         try
-         {
-            
-            file()->get_lines(m_straLine, "document://application/app-simple/application/application.txt");
-            
-         }
-         catch (...)
-         {
-         
-            
-         }
+      //if (m_straLine.is_empty())
+      //{
+      //   
+      //   try
+      //   {
+      //      
+      //      file()->get_lines(m_straLine, "document://application/app-simple/application/application.txt");
+      //      
+      //   }
+      //   catch (...)
+      //   {
+      //   
+      //      
+      //   }
 
-      }
+      //}
 
-         
+      //   
 
 
       return true;
@@ -109,7 +109,7 @@ namespace app_simple_application
 #endif
 
 
-} // namespace app_simple_application
+} // namespace lowland_continuum
 
 
 

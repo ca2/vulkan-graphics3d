@@ -12,11 +12,11 @@
 #include "base/user/user/single_document_template.h"
 
 
-__IMPLEMENT_APPLICATION_RELEASE_TIME(app_simple_application);
-IMPLEMENT_APPLICATION_FACTORY(app_simple_application);
+__IMPLEMENT_APPLICATION_RELEASE_TIME(lowland_continuum);
+IMPLEMENT_APPLICATION_FACTORY(lowland_continuum);
 
 
-namespace app_simple_application
+namespace lowland_continuum
 {
 
 
@@ -27,17 +27,17 @@ namespace app_simple_application
 
       //m_bImaging = true; // for showing application icon
       
-      m_bImaging = false; // showing application icon may use innate_ui icon?
+      //m_bImaging = false; // showing application icon may use innate_ui icon?
 
-      m_bNetworking = false;
+      //m_bNetworking = false;
 
-      m_ppaneimpact = nullptr;
+      //m_ppaneimpact = nullptr;
 
-      m_strAppId = "app-simple/application";
+      m_strAppId = "lowland/continuum";
 
-      m_strAppName = "app-simple/application";
+      m_strAppName = "lowland/continuum";
 
-      m_strBaseSupportId = "app_simple_application";
+      m_strBaseSupportId = "lowland_continuum";
 
       m_bLicense = false;
       
@@ -57,11 +57,11 @@ namespace app_simple_application
    void application::init_instance()
    {
 
-      factory()->add_factory_item <::app_simple_application::document >();
-      factory()->add_factory_item <::app_simple_application::main_frame >();
-      factory()->add_factory_item <::app_simple_application::impact >();
+      factory()->add_factory_item <::lowland_continuum::document >();
+      factory()->add_factory_item <::lowland_continuum::main_frame >();
+      factory()->add_factory_item <::lowland_continuum::impact >();
 
-      ::base::application::init_instance();
+      ::lowland_landen::application::init_instance();
 
       add_impact_system(
          "main", __initialize_new ::user::single_document_template(
@@ -117,12 +117,12 @@ namespace app_simple_application
 
       }
 
-      if (is_true("wfi_maximize"))
-      {
+      //if (is_true("wfi_maximize"))
+      //{
 
-         prequest->payload("document").cast < document >()->get_typed_impact < ::user::tab_impact >()->top_level_frame()->design_window_maximize();
+      //   prequest->payload("document").cast < document >()->get_typed_impact < ::user::tab_impact >()->top_level_frame()->design_window_maximize();
 
-      }
+      //}
 
       informationf("finished simple_application::on_request");
 
@@ -159,7 +159,7 @@ namespace app_simple_application
 #endif
 
 
-} // namespace app_simple_application
+} // namespace lowland_continuum
 
 
 
