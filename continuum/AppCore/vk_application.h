@@ -134,6 +134,8 @@ namespace vkc {
 
 	public:
 
+      void resize(int cx, int cy) override;
+
 		void loadGameObjects();
 
 		// Private Members

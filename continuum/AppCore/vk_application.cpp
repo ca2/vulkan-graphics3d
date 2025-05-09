@@ -55,9 +55,15 @@ namespace vkc {
    }
 
 
-   Application::Application() {
+   Application::Application() 
+   {
+
+
    }
-   Application::~Application() {
+   
+   
+   Application::~Application() 
+   {
 
 
    }
@@ -160,7 +166,7 @@ namespace vkc {
 
       auto currentTime = std::chrono::high_resolution_clock::now();
       //while (!_window.shouldClose())
-      while (true) 
+      while (!m_pvkcontainer->m_bShouldClose) 
       {
          //glfwPollEvents();
 
@@ -170,7 +176,13 @@ namespace vkc {
 
          currentTime = newTime;
 
-         cameraController.moveInPlaneXZ(m_pvkcontainer, frameTime, viewerObject);
+         cameraController.handleMouseInput(m_pvkcontainer);
+         
+         cameraController.updateLook(cameraController.getXOffset(), cameraController.getYOffset(), viewerObject);
+         
+         cameraController.updateMovement(m_pvkcontainer, frameTime, viewerObject);
+
+         //cameraController.moveInPlaneXZ(m_pvkcontainer, frameTime, viewerObject);
 
          camera.setViewYXZ(viewerObject.transform.translation, viewerObject.transform.rotation);
 
@@ -193,6 +205,7 @@ namespace vkc {
                GlobalUbo ubo{};
                ubo.projection = camera.getProjection();
                ubo.view = camera.getView();
+               ubo.inverseView = camera.getInverseView();
                pointLightSystem.update(frameInfo, ubo);
                uboBuffers[frameIndex]->writeToBuffer(&ubo);
                uboBuffers[frameIndex]->flush();
@@ -221,6 +234,14 @@ namespace vkc {
 
    }
 
+   void Application::resize(int cx, int cy)
+   {
+
+      m_prenderer->m_pvkcrenderpass->windowExtent.width = cx;
+      m_prenderer->m_pvkcrenderpass->windowExtent.height = cy;
+
+   }
+
 
    void Application::loadGameObjects()
    {
@@ -241,7 +262,7 @@ namespace vkc {
          floor.model = vkcModel;
          assert(vkcModel);
          floor.transform.translation = { 0.f, .5f, 0.f };
-         floor.transform.scale = { 3.f, 1.f, 3.f };
+         floor.transform.scale = { 8.f, 1.f, 8.f };
          m_gameObjects.emplace(floor.getId(), std::move(floor));
       }
 
@@ -255,13 +276,36 @@ namespace vkc {
 
       }
 
+      {
+         ::pointer<VkcModel> vkcModel = VkcModel::createModelFromFile(m_pvkcdevice, "matter://models/StoneSphere.obj");
+         auto stoneSphere = VkcGameObject::createGameObject();
+         stoneSphere.model = vkcModel;
+         stoneSphere.transform.translation = { .0f, 1.f, -40.f };
+         stoneSphere.transform.scale = { 3.f, 1.5f, 3.f };
+         m_gameObjects.emplace(stoneSphere.getId(), std::move(stoneSphere));
+
+      }
+
+      {
+
+         ::pointer<VkcModel> vkcModel = VkcModel::createModelFromFile(m_pvkcdevice, "matter://models/Barrel_OBJ.obj");
+         auto woodBarrel = VkcGameObject::createGameObject();
+         woodBarrel.model = vkcModel;
+         woodBarrel.transform.translation = { .0f, 1.f, -4.f };
+         woodBarrel.transform.scale = { 2.f, 1.5f, 2.f };
+         m_gameObjects.emplace(woodBarrel.getId(), std::move(woodBarrel));
+
+      }
+
+      float fLo = 0.5f;
+
       std::vector<glm::vec3> lightColors{
-            {1.f, .1f, .1f},
-            {.1f, .1f, 1.f},
-            {.1f, 1.f, .1f},
-            {1.f, 1.f, .1f},
-            {.1f, 1.f, 1.f},
-            {1.f, 1.f, 1.f}  //
+            {1.f, fLo, fLo},
+            {fLo, fLo, 1.f},
+            {fLo, 1.f, fLo},
+            {1.f, 1.f, fLo},
+            {fLo, 1.f, 1.f},
+            {1.f, 1.f, 1.f}  
       };
 
       for (int i = 0; i < lightColors.size(); i++) {
@@ -271,6 +315,7 @@ namespace vkc {
             glm::mat4(1.f),
             (i * glm::two_pi<float>()) / lightColors.size(),
             { 0.f, -1.f, 0.f });
+         pointLight.pointLight->lightIntensity = 1.0f;
          pointLight.transform.translation = glm::vec3(rotateLight * glm::vec4(-1.f, -1.f, -1.f, 1.f));
          m_gameObjects.emplace(pointLight.getId(), std::move(pointLight));
       }

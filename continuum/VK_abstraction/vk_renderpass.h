@@ -56,7 +56,7 @@ namespace vkc {
       virtual void createRenderPass();
       virtual void createFramebuffers();
       virtual void createSyncObjects();
-
+      //virtual void defer_layout();
       //// Helper functions
       //VkSurfaceFormatKHR chooseSwapSurfaceFormat(
       //   const std::vector<VkSurfaceFormatKHR>& availableFormats);

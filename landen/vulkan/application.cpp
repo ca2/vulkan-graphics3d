@@ -19,6 +19,14 @@ namespace vulkan
 
    }
 
+
+   void application::resize(int cx, int cy)
+   {
+
+
+   }
+
+
 } // namespace vulkan
 
 

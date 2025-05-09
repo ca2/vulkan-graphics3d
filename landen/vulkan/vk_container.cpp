@@ -11,7 +11,9 @@ namespace vkc
 
 	VkContainer::VkContainer() 
 	{
-
+		m_bShouldClose = false;
+		m_iMouseLastX = 0;
+		m_iMouseLastY = 0;
 		// initWindow();
 	}
 

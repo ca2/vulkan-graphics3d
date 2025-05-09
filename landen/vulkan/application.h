@@ -16,6 +16,7 @@ namespace vulkan
 
       virtual void run_application();
 
+      virtual void resize(int cx, int cy);
 
    };
 

@@ -27,7 +27,7 @@ namespace vkc {
 
       m_poffscreensampler->initialize_offscreen_sampler(pvkcdevice);
 
-      recreateRenderPass();
+      defer_layout();
       createCommandBuffers();
    }
 
@@ -36,18 +36,26 @@ namespace vkc {
    }
 
 
-   void Renderer::recreateRenderPass()
+   void Renderer::defer_layout()
    {
 
-      VkExtent2D extent;
+      auto size = m_pvkcontainer->size();
 
-      extent.width = m_pvkcontainer->getExtent().width();
-      extent.height = m_pvkcontainer->getExtent().height();
+      if (m_extentRenderer.width == size.width()
+         && m_extentRenderer.height == size.height())
+      {
+
+         return;
+
+      }
+
+      m_extentRenderer.width = size.width();
+      m_extentRenderer.height = size.height();
 
       if (m_bOffScreen)
       {
 
-         m_pvkcrenderpass = __allocate VkcOffScreen(m_pvkcdevice, extent, m_pvkcrenderpass);
+         m_pvkcrenderpass = __allocate VkcOffScreen(m_pvkcdevice, m_extentRenderer, m_pvkcrenderpass);
 
       }
 
@@ -100,6 +108,8 @@ namespace vkc {
    VkCommandBuffer Renderer::beginFrame()
    {
 
+      defer_layout();
+      
       assert(!isFrameStarted && "Can't call beginFrame while already in progress");
 
       //if (m_bOffScreen)
@@ -108,7 +118,7 @@ namespace vkc {
          auto result = m_pvkcrenderpass->acquireNextImage(&currentImageIndex);
 
          if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-            recreateRenderPass();
+            defer_layout();
             return nullptr;
          }
          if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
@@ -629,7 +639,8 @@ namespace vkc {
          renderPassInfo.renderArea.extent = m_pvkcrenderpass->getExtent();
 
          std::array<VkClearValue, 2> clearValues{};
-         clearValues[0].color = { 2.01f, 0.01f, 0.01f, 1.0f };
+         //clearValues[0].color = { 2.01f, 0.01f, 0.01f, 1.0f };
+         clearValues[0].color = { 0.5f, 0.75f, 1.0f, 1.0f };
          clearValues[1].depthStencil = { 1.0f, 0 };
          renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
          renderPassInfo.pClearValues = clearValues.data();

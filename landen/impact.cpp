@@ -151,6 +151,8 @@ namespace lowland_landen
       pmessage->m_bRet = true;
 
    }
+
+
    void impact::on_message_mouse_move(::message::message * pmessage)
    {
 
@@ -168,7 +170,10 @@ namespace lowland_landen
          //m_mousestate.position.x = point.x();
          //m_mousestate.position.y = point.y();
          //m_mousestate.buttons.left = true;
+         //         pmouse->m_p
 
+         m_iMouseLastX = point.x();
+         m_iMouseLastY = point.y();
 
 
          m_pvulkanapplication->handleMouseMove(point.x(), point.y());
@@ -223,7 +228,7 @@ namespace lowland_landen
    }
 
 
-   ::int_size impact::getExtent()
+   ::int_size impact::size()
    {
 
       return this->raw_rectangle().size();
@@ -492,6 +497,12 @@ namespace lowland_landen
                m_pvulkanapplication->run_application();
 
             });
+
+      }
+      else
+      {
+
+         m_pvulkanapplication->resize(rectangleX.width(), rectangleX.height());
 
       }
 

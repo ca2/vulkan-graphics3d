@@ -25,10 +25,14 @@ namespace vkc {
             ::user::e_key Exit = ::user::e_key_escape;
         } m_keymap;
 
-        void moveInPlaneXZ(vkc::VkContainer * pcontainer, float dt, VkcGameObject& gameObject);
+        //void moveInPlaneXZ(vkc::VkContainer * pcontainer, float dt, VkcGameObject& gameObject);
+
+        void updateMovement(vkc::VkContainer* pcontainer, float dt, VkcGameObject& gameObject);
+        void updateLook(float xOffset, float yOffset, VkcGameObject& gameObject);
 
         void processMouseMovement(float xOffset, float yOffset);
         void processKeyboardInput(vkc::VkContainer* pcontainer, float deltaTime);
+        void handleMouseInput(vkc::VkContainer* pcontainer);
 
         glm::vec3 getCameraDirection() const;
         glm::vec3 getCameraPosition() const;
@@ -38,10 +42,25 @@ namespace vkc {
         float lookSpeed{ 1.5f };
 
 
-    public:
-        double lastX = 400.0;
-        double lastY = 300.0;
-        bool firstMouse = true;
+    //public:
+        //double lastX = 400.0;
+        //double lastY = 300.0;
+        //bool firstMouse = true;
+
+            public:
+        // Existing functions...
+        //void handleMouseInput(GLFWwindow* window);
+
+        float getXOffset() const { return _xOffset; }
+        float getYOffset() const { return _yOffset; }
+
+    private:
+        double _lastX = 0.0, _lastY = 0.0;
+        bool _firstMouse = true;
+        float _xOffset = 0.f, _yOffset = 0.f;
+
+
+
 
         float _sensitivity;  // Sensitivity factor for mouse movement
         float _yaw;          // Camera yaw (horizontal rotation)

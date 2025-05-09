@@ -85,7 +85,7 @@ namespace vkc {
 
 		void freeCommandBuffers();
 		//void recreateSwapchain();
-		void recreateRenderPass();
+		void defer_layout();
 
 		//void prepareOffScreen();
 
@@ -126,7 +126,7 @@ namespace vkc {
 		//::pointer<VkcOffScreen>			m_pvkcoffscreen;
 		::pointer<VkcRenderPass>			m_pvkcrenderpass;
 		std::vector<VkCommandBuffer>	commandBuffers;
-
+		VkExtent2D m_extentRenderer;
 		uint32_t currentImageIndex;
 		int currentFrameIndex = 0;
 		bool isFrameStarted = false;

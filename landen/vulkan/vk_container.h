@@ -29,6 +29,10 @@ namespace vkc
 
 		::function < void(void*, int, int, int)> m_callbackOffscreen;
 
+		int      m_iMouseLastX;
+		int      m_iMouseLastY;
+
+		bool		m_bShouldClose;
 
 		
 		VkContainer();
@@ -39,7 +43,7 @@ namespace vkc
 
 		//bool shouldClose() { return glfwWindowShouldClose(window); }
 		bool shouldClose() { return false; }
-		virtual ::int_size getExtent() = 0;
+		virtual ::int_size size() = 0;
 		bool wasWindowResized() { return framebufferResized; }
 		void resetWindowResizedFlag() { framebufferResized = false; }
 		//GLFWwindow* getGLFWwindow() const { return window; }

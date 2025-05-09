@@ -169,12 +169,13 @@ namespace lowland_landen
 
       ::pointer < ::vulkan::application > m_pvulkanapplication;
 
+
       impact();
       ~impact() override;
 
 //      // void assert_ok() const override;
 //      // void dump(dump_context & dumpcontext) const override;
-      ::int_size getExtent() override;
+      ::int_size size() override;
 
 
 
