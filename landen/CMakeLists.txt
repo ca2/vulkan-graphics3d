@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(app_core_vulken CXX)
+project(lowland_landen CXX)
 
 
 list(APPEND library_source
@@ -7,8 +7,8 @@ list(APPEND library_source
    _.h
    application.cpp
    application.h
-   child_frame.cpp
-   child_frame.h
+#   child_frame.cpp
+#   child_frame.h
    document.cpp
    document.h
    #edit_impact.cpp
@@ -21,8 +21,8 @@ list(APPEND library_source
    impact.h
    #main_impact.cpp
    #main_impact.h
-   pane_impact.cpp
-   pane_impact.h
+   #pane_impact.cpp
+   #pane_impact.h
    #toggle_impact.cpp
    #toggle_impact.h
    #top_impact.cpp

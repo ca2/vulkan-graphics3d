@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(_app_core_vulken CXX)
+project(_lowland_landen CXX)
 
 
 
@@ -40,7 +40,7 @@ list(APPEND executable_references
    base
    bred
    core
-   app_core_vulken)
+   lowland_landen)
 
 
 if (MSVC)

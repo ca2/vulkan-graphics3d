@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(_app_simple_application CXX)
+project(_lowland_continuum CXX)
 
 
 
@@ -24,7 +24,7 @@ list(APPEND executable_references
    aura
    axis
    base
-   app_simple_application
+   lowland_continuum
    )
 
 
