@@ -1,14 +1,14 @@
 #pragma once
 
 
-#include "vulkan_example_base.h"
+#include "vulkan_example_base_no_swap_chain.h"
 #include "VulkanglTFModel.h"
 
 // Offscreen frame buffer properties
 #define FB_DIM 512
 #define FB_COLOR_FORMAT VK_FORMAT_R8G8B8A8_UNORM
 
-class VulkanExample : public VulkanExampleBase
+class VulkanExample20 : public VulkanExampleBaseNoSwapChain
 {
 public:
    bool debugDisplay = false;
@@ -72,8 +72,8 @@ public:
    glm::vec3 modelPosition = glm::vec3(0.0f, -1.0f, 0.0f);
    glm::vec3 modelRotation = glm::vec3(0.0f);
 
-   VulkanExample();
-   ~VulkanExample();
+   VulkanExample20();
+   ~VulkanExample20();
 
    // Setup the offscreen framebuffer for rendering the mirrored scene
    // The color attachment of this framebuffer will then be used to sample from in the fragment shader of the final pass
@@ -82,7 +82,7 @@ public:
    void buildCommandBuffers();
 
    void loadAssets();
-   
+
    void setupDescriptors();
 
    void preparePipelines();
@@ -91,12 +91,19 @@ public:
 
    void updateUniformBuffers();
    void updateUniformBufferOffscreen();
-   
+
    void prepare();
 
-   void draw();
+   void submitWork(VkCommandBuffer cmdBuffer, VkQueue queue);
 
-   virtual void render();
+   void draw(const ::function < void(void *, int, int, int)> & callback);
+
+   virtual void render(const ::function < void(void *, int, int, int)> & callback);
 
    virtual void OnUpdateUIOverlay(vks::UIOverlay * overlay);
+
+   void sample(const ::function < void(void *, int, int, int)> & callback);
+
+   void render_loop(const ::function < void(void *, int, int, int)> & callback);
+
 };
