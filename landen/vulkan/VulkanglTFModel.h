@@ -22,9 +22,10 @@
 
 #include "vulkan/vulkan.h"
 #include "VulkanDevice.h"
-
+#ifdef HAS_KTX
 #include <ktx.h>
 #include <ktxvulkan.h>
+#endif
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE

@@ -27,7 +27,7 @@ namespace vkc {
     class VkcDevice :
     virtual public ::particle{
     public:
-#ifdef NDEBUG
+#if defined(NDEBUG) || defined(LINUX)
         const bool enableValidationLayers = false;
 #else
       const bool enableValidationLayers = true;

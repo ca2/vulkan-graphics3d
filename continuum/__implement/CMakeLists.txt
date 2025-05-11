@@ -24,6 +24,8 @@ list(APPEND executable_references
    aura
    axis
    base
+        bred
+        core
    lowland_continuum
    )
 

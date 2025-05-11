@@ -283,12 +283,12 @@ namespace lowland_landen
    }
 
 
-   ::string application::draw2d_get_default_implementation_name()
-   {
+//   ::string application::draw2d_get_default_implementation_name()
+  // {
 
-      return system()->implementation_name("draw2d"_ansi, "gdiplus"_ansi);
+    //  return system()->implementation_name("draw2d"_ansi, "gdiplus"_ansi);
 
-   }
+   //}
 
 
    //__namespace_application_factory("app-core/vulken"_ansi);

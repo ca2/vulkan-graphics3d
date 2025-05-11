@@ -2,6 +2,7 @@
 #include "vk_model.h"
 #include "Utils/vkc_utils.h"
 #include "acme/filesystem/filesystem/directory_context.h"
+#include "acme/filesystem/filesystem/path_system.h"
 
 
 // lib headers
@@ -46,6 +47,7 @@ namespace vkc {
         Builder builder{};
         builder.loadModel(pvkcdevice, filepath);
 
+        __refdbg_this(pvkcdevice);
 
         return __allocate VkcModel(pvkcdevice, builder);
     }
@@ -170,7 +172,7 @@ namespace vkc {
 
         auto path = pparticle->directory()->defer_get_file_system_file(filepath.c_str(), true);
 
-        ::string str(path.windows_path().path());
+        ::string str(::system()->path_system()->shell_path(path));
 
         if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, str.c_str())) {
             throw std::runtime_error(warn + err);

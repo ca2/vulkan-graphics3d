@@ -8,6 +8,10 @@
 #include "framework.h"
 #include "VulkanTexture.h"
 
+
+#ifdef HAS_KTX
+
+
 namespace vks
 {
 	void Texture::updateDescriptor()
@@ -867,3 +871,8 @@ namespace vks
 	}
 
 }
+
+
+#endif
+
+

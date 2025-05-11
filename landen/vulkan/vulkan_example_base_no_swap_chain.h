@@ -8,28 +8,28 @@
 
 #pragma once
 #include "shared.h"
-#ifdef _WIN32
-#pragma comment(linker, "/subsystem:windows")
-#include <windows.h>
-#include <fcntl.h>
-#include <io.h>
-#include <ShellScalingAPI.h>
-#elif defined(VK_USE_PLATFORM_ANDROID_KHR)
-#include <android/native_activity.h>
-#include <android/asset_manager.h>
-#include <android_native_app_glue.h>
-#include <sys/system_properties.h>
-#include "VulkanAndroid.h"
-#elif defined(VK_USE_PLATFORM_DIRECTFB_EXT)
-#include <directfb.h>
-#elif defined(VK_USE_PLATFORM_WAYLAND_KHR)
-#include <wayland-client.h>
-#include "xdg-shell-client-protocol.h"
-#elif defined(_DIRECT2DISPLAY)
-//
-#elif defined(VK_USE_PLATFORM_XCB_KHR)
-#include <xcb/xcb.h>
-#endif
+// #ifdef _WIN32
+// #pragma comment(linker, "/subsystem:windows")
+// #include <windows.h>
+// #include <fcntl.h>
+// #include <io.h>
+// #include <ShellScalingAPI.h>
+// #elif defined(VK_USE_PLATFORM_ANDROID_KHR)
+// #include <android/native_activity.h>
+// #include <android/asset_manager.h>
+// #include <android_native_app_glue.h>
+// #include <sys/system_properties.h>
+// #include "VulkanAndroid.h"
+// #elif defined(VK_USE_PLATFORM_DIRECTFB_EXT)
+// #include <directfb.h>
+// #elif defined(VK_USE_PLATFORM_WAYLAND_KHR)
+// #include <wayland-client.h>
+// #include "xdg-shell-client-protocol.h"
+// #elif defined(_DIRECT2DISPLAY)
+// //
+// #elif defined(VK_USE_PLATFORM_XCB_KHR)
+// #include <xcb/xcb.h>
+// #endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -78,24 +78,10 @@ class CLASS_DECL_LOWLAND_LANDEN VulkanExampleBaseNoSwapChain :
    virtual public ::vulkan::application
 {
 public:
-   std::string getWindowTitle();
-   uint32_t destWidth;
-   uint32_t destHeight;
-   bool resizing = false;
-   void handleMouseMove(int32_t x, int32_t y) override;
-   void nextFrame(const ::function < void(void *, int, int, int)> & callback);
-   void updateOverlay();
-   void createPipelineCache();
-   void createCommandPool();
-   void createSynchronizationPrimitives();
-   void initSwapchain();
-   void setupSwapChain();
-   void createCommandBuffers();
-   void destroyCommandBuffers();
-   std::string shaderDir = "glsl"_ansi;
-protected:
+
+   std::string shaderDir = "glsl";
+//protected:
    // Returns the path to the root of the glsl or hlsl shader directory.
-   std::string getShadersPath() const;
 
    // Frame counter to display fps
    uint32_t frameCounter = 0;
@@ -234,194 +220,222 @@ public:
       VkImageView view;
    } depthStencil{};
 
-   // OS specific
-#if defined(_WIN32)
-   HWND window;
-   HINSTANCE windowInstance;
-#elif defined(VK_USE_PLATFORM_ANDROID_KHR)
-   // true if application has focused, false if moved to background
-   bool focused = false;
-   struct TouchPos {
-      int32_t x;
-      int32_t y;
-   } touchPos;
-   bool touchDown = false;
-   double touchTimer = 0.0;
-   long long lastTapTime = 0;
-#elif (defined(VK_USE_PLATFORM_IOS_MVK) || defined(VK_USE_PLATFORM_MACOS_MVK) || defined(VK_USE_PLATFORM_METAL_EXT))
-   void * view;
-#if defined(VK_USE_PLATFORM_METAL_EXT)
-   CAMetalLayer * metalLayer;
-#endif
-#if defined(VK_EXAMPLE_XCODE_GENERATED)
-   bool quit = false;
-#endif
-#elif defined(VK_USE_PLATFORM_DIRECTFB_EXT)
-   bool quit = false;
-   IDirectFB * dfb = nullptr;
-   IDirectFBDisplayLayer * layer = nullptr;
-   IDirectFBWindow * window = nullptr;
-   IDirectFBSurface * surface = nullptr;
-   IDirectFBEventBuffer * event_buffer = nullptr;
-#elif defined(VK_USE_PLATFORM_WAYLAND_KHR)
-   wl_display * display = nullptr;
-   wl_registry * registry = nullptr;
-   wl_compositor * compositor = nullptr;
-   struct xdg_wm_base * shell = nullptr;
-   wl_seat * seat = nullptr;
-   wl_pointer * pointer = nullptr;
-   wl_keyboard * keyboard = nullptr;
-   wl_surface * surface = nullptr;
-   struct xdg_surface * xdg_surface;
-   struct xdg_toplevel * xdg_toplevel;
-   bool quit = false;
-   bool configured = false;
 
-#elif defined(_DIRECT2DISPLAY)
-   bool quit = false;
-#elif defined(VK_USE_PLATFORM_XCB_KHR)
-   bool quit = false;
-   xcb_connection_t * connection;
-   xcb_screen_t * screen;
-   xcb_window_t window;
-   xcb_intern_atom_reply_t * atom_wm_delete_window;
-#elif defined(VK_USE_PLATFORM_HEADLESS_EXT)
-   bool quit = false;
-#elif defined(VK_USE_PLATFORM_SCREEN_QNX)
-   screen_context_t screen_context = nullptr;
-   screen_window_t screen_window = nullptr;
-   screen_event_t screen_event = nullptr;
-   bool quit = false;
-#endif
 
-   /** @brief Default base class constructor */
-   VulkanExampleBaseNoSwapChain();
-   virtual ~VulkanExampleBaseNoSwapChain();
-   /** @brief Setup the vulkan instance, enable required extensions and connect to the physical device (GPU) */
-   bool initVulkan();
+   uint32_t destWidth;
+   uint32_t destHeight;
+   bool resizing = false;
+       bool quit = false;
+       bool configured = false;
 
-#if defined(_WIN32)
-   void setupConsole(std::string title);
-   void setupDPIAwareness();
-   HWND setupWindow(HINSTANCE hinstance, WNDPROC wndproc);
-   //void handleMessages(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-#elif defined(VK_USE_PLATFORM_ANDROID_KHR)
-   static int32_t handleAppInput(struct android_app * app, AInputEvent * happening);
-   static void handleAppCommand(android_app * app, int32_t cmd);
-#elif (defined(VK_USE_PLATFORM_IOS_MVK) || defined(VK_USE_PLATFORM_MACOS_MVK) || defined(VK_USE_PLATFORM_METAL_EXT))
-   void * setupWindow(void * view);
-   void displayLinkOutputCb();
-   void mouseDragged(float x, float y);
-   void windowWillResize(float x, float y);
-   void windowDidResize();
-#elif defined(VK_USE_PLATFORM_DIRECTFB_EXT)
-   IDirectFBSurface * setupWindow();
-   void handleEvent(const DFBWindowEvent * happening);
-#elif defined(VK_USE_PLATFORM_WAYLAND_KHR)
-   struct xdg_surface * setupWindow();
-   void initWaylandConnection();
-   void setSize(int width, int height);
-   static void registryGlobalCb(void * data, struct wl_registry * registry,
-         uint32_t name, const char * interface, uint32_t version);
-   void registryGlobal(struct wl_registry * registry, uint32_t name,
-         const char * interface, uint32_t version);
-   static void registryGlobalRemoveCb(void * data, struct wl_registry * registry,
-         uint32_t name);
-   static void seatCapabilitiesCb(void * data, wl_seat * seat, uint32_t caps);
-   void seatCapabilities(wl_seat * seat, uint32_t caps);
-   static void pointerEnterCb(void * data, struct wl_pointer * pointer,
-         uint32_t serial, struct wl_surface * surface, wl_fixed_t sx,
-         wl_fixed_t sy);
-   static void pointerLeaveCb(void * data, struct wl_pointer * pointer,
-         uint32_t serial, struct wl_surface * surface);
-   static void pointerMotionCb(void * data, struct wl_pointer * pointer,
-         uint32_t time, wl_fixed_t sx, wl_fixed_t sy);
-   void pointerMotion(struct wl_pointer * pointer,
-         uint32_t time, wl_fixed_t sx, wl_fixed_t sy);
-   static void pointerButtonCb(void * data, struct wl_pointer * wl_pointer,
-         uint32_t serial, uint32_t time, uint32_t button, uint32_t state);
-   void pointerButton(struct wl_pointer * wl_pointer,
-         uint32_t serial, uint32_t time, uint32_t button, uint32_t state);
-   static void pointerAxisCb(void * data, struct wl_pointer * wl_pointer,
-         uint32_t time, uint32_t axis, wl_fixed_t value);
-   void pointerAxis(struct wl_pointer * wl_pointer,
-         uint32_t time, uint32_t axis, wl_fixed_t value);
-   static void keyboardKeymapCb(void * data, struct wl_keyboard * keyboard,
-         uint32_t format, int fd, uint32_t size);
-   static void keyboardEnterCb(void * data, struct wl_keyboard * keyboard,
-         uint32_t serial, struct wl_surface * surface, struct wl_array * keys);
-   static void keyboardLeaveCb(void * data, struct wl_keyboard * keyboard,
-         uint32_t serial, struct wl_surface * surface);
-   static void keyboardKeyCb(void * data, struct wl_keyboard * keyboard,
-         uint32_t serial, uint32_t time, uint32_t key, uint32_t state);
-   void keyboardKey(struct wl_keyboard * keyboard,
-         uint32_t serial, uint32_t time, uint32_t key, uint32_t state);
-   static void keyboardModifiersCb(void * data, struct wl_keyboard * keyboard,
-         uint32_t serial, uint32_t mods_depressed, uint32_t mods_latched,
-         uint32_t mods_locked, uint32_t group);
 
-#elif defined(_DIRECT2DISPLAY)
-   //
-#elif defined(VK_USE_PLATFORM_XCB_KHR)
-   xcb_window_t setupWindow();
-   void initxcbConnection();
-   void handleEvent(const xcb_generic_event_t * happening);
-#elif defined(VK_USE_PLATFORM_SCREEN_QNX)
-   void setupWindow();
-   void handleEvent();
-#else
-   void setupWindow();
-#endif
-   /** @brief (Virtual) Creates the application wide Vulkan instance */
-   virtual VkResult createInstance();
-   /** @brief (Pure virtual) Render function to be implemented by the sample application */
-   virtual void render(const ::function < void(void *, int, int, int)> & callback);
-   /** @brief (Virtual) Called after a key was pressed, can be used to do custom key handling */
-   virtual void keyPressed(uint32_t);
-   /** @brief (Virtual) Called after the mouse cursor moved and before internal happenings (like camera rotation) is handled */
-   virtual void mouseMoved(double x, double y, bool & handled);
-   /** @brief (Virtual) Called when the window has been resized, can be used by the sample application to recreate resources */
-   virtual void windowResized();
-   /** @brief (Virtual) Called when resources have been recreated that require a rebuild of the command buffers (e.g. frame buffer), to be implemented by the sample application */
-   virtual void buildCommandBuffers();
-   /** @brief (Virtual) Setup default depth and stencil views */
-   virtual void setupDepthStencil();
-   /** @brief (Virtual) Setup default framebuffers for all requested swapchain images */
-   virtual void setupFrameBuffer();
-   /** @brief (Virtual) Setup a default renderpass */
-   virtual void setupRenderPass();
-   /** @brief (Virtual) Called after the physical device features have been read, can be used to set features to enable on the device */
-   virtual void getEnabledFeatures();
-   /** @brief (Virtual) Called after the physical device extensions have been read, can be used to enable extensions based on the supported extension listing*/
-   virtual void getEnabledExtensions();
+       VulkanExampleBaseNoSwapChain();
+       ~VulkanExampleBaseNoSwapChain() override;
+       /** @brief Setup the vulkan instance, enable required extensions and connect to the physical device (GPU) */
+       bool initVulkan();
 
-   /** @brief Prepares all Vulkan resources and functions required to run the sample */
-   virtual void prepare();
 
-   /** @brief Loads a SPIR-V shader file for the given shader stage */
-   VkPipelineShaderStageCreateInfo loadShader(std::string fileName, VkShaderStageFlagBits stage);
+   std::string getWindowTitle();
 
-   void windowResize();
+   std::string getShadersPath() const;
 
-   /** @brief Entry point for the main render loop */
-   void renderLoop();
 
-   /** @brief Adds the drawing commands for the ImGui overlay to the given command buffer */
-   void drawUI(const VkCommandBuffer commandBuffer);
+   virtual void handleMouseMove(int32_t x, int32_t y) override;
+   virtual void nextFrame(const ::function < void(void *, int, int, int)> & callback);
+   virtual void updateOverlay();
+   virtual void createPipelineCache();
+   virtual void createCommandPool();
+   virtual void createSynchronizationPrimitives();
+   virtual void initSwapchain();
+   virtual void setupSwapChain();
+   virtual void createCommandBuffers();
+   virtual void destroyCommandBuffers();
+     /** @brief (Virtual) Creates the application wide Vulkan instance */
+    virtual VkResult createInstance();
+    /** @brief (Pure virtual) Render function to be implemented by the sample application */
+    virtual void render(const ::function < void(void *, int, int, int)> & callback);
+    /** @brief (Virtual) Called after a key was pressed, can be used to do custom key handling */
+    virtual void keyPressed(uint32_t);
+    /** @brief (Virtual) Called after the mouse cursor moved and before internal happenings (like camera rotation) is handled */
+    virtual void mouseMoved(double x, double y, bool & handled);
+    /** @brief (Virtual) Called when the window has been resized, can be used by the sample application to recreate resources */
+    virtual void windowResized();
+    /** @brief (Virtual) Called when resources have been recreated that require a rebuild of the command buffers (e.g. frame buffer), to be implemented by the sample application */
+    virtual void buildCommandBuffers();
+    /** @brief (Virtual) Setup default depth and stencil views */
+    virtual void setupDepthStencil();
+    /** @brief (Virtual) Setup default framebuffers for all requested swapchain images */
+    virtual void setupFrameBuffer();
+    /** @brief (Virtual) Setup a default renderpass */
+    virtual void setupRenderPass();
+    /** @brief (Virtual) Called after the physical device features have been read, can be used to set features to enable on the device */
+    virtual void getEnabledFeatures();
+    /** @brief (Virtual) Called after the physical device extensions have been read, can be used to enable extensions based on the supported extension listing*/
+    virtual void getEnabledExtensions();
 
-   /** Prepare the next frame for workload submission by acquiring the next swap chain image */
-   void prepareFrame();
-   /** @brief Presents the current image to the swap chain */
-   void submitFrame();
-   /** @brief (Virtual) Default image acquire + submission and command buffer submission function */
-   virtual void renderFrame();
+    /** @brief Prepares all Vulkan resources and functions required to run the sample */
+    virtual void prepare();
 
-   /** @brief (Virtual) Called when the UI overlay is updating, can be used to add custom elements to the overlay */
-   virtual void OnUpdateUIOverlay(vks::UIOverlay * overlay);
+    /** @brief Loads a SPIR-V shader file for the given shader stage */
+    VkPipelineShaderStageCreateInfo loadShader(std::string fileName, VkShaderStageFlagBits stage);
 
-#if defined(_WIN32)
-   virtual void OnHandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-#endif
+    void windowResize();
+
+    /** @brief Entry point for the main render loop */
+    void renderLoop();
+
+    /** @brief Adds the drawing commands for the ImGui overlay to the given command buffer */
+    void drawUI(const VkCommandBuffer commandBuffer);
+
+    /** Prepare the next frame for workload submission by acquiring the next swap chain image */
+    void prepareFrame();
+    /** @brief Presents the current image to the swap chain */
+    void submitFrame();
+    /** @brief (Virtual) Default image acquire + submission and command buffer submission function */
+    virtual void renderFrame();
+
+    /** @brief (Virtual) Called when the UI overlay is updating, can be used to add custom elements to the overlay */
+    virtual void OnUpdateUIOverlay(vks::UIOverlay * overlay);
+
+//
+//    // OS specific
+// #if defined(_WIN32)
+//    HWND window;
+//    HINSTANCE windowInstance;
+// #elif defined(VK_USE_PLATFORM_ANDROID_KHR)
+//    // true if application has focused, false if moved to background
+//    bool focused = false;
+//    struct TouchPos {
+//       int32_t x;
+//       int32_t y;
+//    } touchPos;
+//    bool touchDown = false;
+//    double touchTimer = 0.0;
+//    long long lastTapTime = 0;
+// #elif (defined(VK_USE_PLATFORM_IOS_MVK) || defined(VK_USE_PLATFORM_MACOS_MVK) || defined(VK_USE_PLATFORM_METAL_EXT))
+//    void * view;
+// #if defined(VK_USE_PLATFORM_METAL_EXT)
+//    CAMetalLayer * metalLayer;
+// #endif
+// #if defined(VK_EXAMPLE_XCODE_GENERATED)
+//    bool quit = false;
+// #endif
+// #elif defined(VK_USE_PLATFORM_DIRECTFB_EXT)
+//    bool quit = false;
+//    IDirectFB * dfb = nullptr;
+//    IDirectFBDisplayLayer * layer = nullptr;
+//    IDirectFBWindow * window = nullptr;
+//    IDirectFBSurface * surface = nullptr;
+//    IDirectFBEventBuffer * event_buffer = nullptr;
+// #elif defined(VK_USE_PLATFORM_WAYLAND_KHR)
+//    wl_display * display = nullptr;
+//    wl_registry * registry = nullptr;
+//    wl_compositor * compositor = nullptr;
+//    struct xdg_wm_base * shell = nullptr;
+//    wl_seat * seat = nullptr;
+//    wl_pointer * pointer = nullptr;
+//    wl_keyboard * keyboard = nullptr;
+//    wl_surface * surface = nullptr;
+//    struct xdg_surface * xdg_surface;
+//    struct xdg_toplevel * xdg_toplevel;
+//    bool quit = false;
+//    bool configured = false;
+//
+// #elif defined(_DIRECT2DISPLAY)
+//    bool quit = false;
+// #elif defined(VK_USE_PLATFORM_XCB_KHR)
+//    bool quit = false;
+//    xcb_connection_t * connection;
+//    xcb_screen_t * screen;
+//    xcb_window_t window;
+//    xcb_intern_atom_reply_t * atom_wm_delete_window;
+// #elif defined(VK_USE_PLATFORM_HEADLESS_EXT)
+//    bool quit = false;
+// #elif defined(VK_USE_PLATFORM_SCREEN_QNX)
+//    screen_context_t screen_context = nullptr;
+//    screen_window_t screen_window = nullptr;
+//    screen_event_t screen_event = nullptr;
+//    bool quit = false;
+// #endif
+//
+//    /** @brief Default base class constructor */
+//
+// #if defined(_WIN32)
+//    void setupConsole(std::string title);
+//    void setupDPIAwareness();
+//    HWND setupWindow(HINSTANCE hinstance, WNDPROC wndproc);
+//    //void handleMessages(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+// #elif defined(VK_USE_PLATFORM_ANDROID_KHR)
+//    static int32_t handleAppInput(struct android_app * app, AInputEvent * happening);
+//    static void handleAppCommand(android_app * app, int32_t cmd);
+// #elif (defined(VK_USE_PLATFORM_IOS_MVK) || defined(VK_USE_PLATFORM_MACOS_MVK) || defined(VK_USE_PLATFORM_METAL_EXT))
+//    void * setupWindow(void * view);
+//    void displayLinkOutputCb();
+//    void mouseDragged(float x, float y);
+//    void windowWillResize(float x, float y);
+//    void windowDidResize();
+// #elif defined(VK_USE_PLATFORM_DIRECTFB_EXT)
+//    IDirectFBSurface * setupWindow();
+//    void handleEvent(const DFBWindowEvent * happening);
+// #elif defined(VK_USE_PLATFORM_WAYLAND_KHR)
+//    struct xdg_surface * setupWindow();
+//    void initWaylandConnection();
+//    void setSize(int width, int height);
+//    static void registryGlobalCb(void * data, struct wl_registry * registry,
+//          uint32_t name, const char * interface, uint32_t version);
+//    void registryGlobal(struct wl_registry * registry, uint32_t name,
+//          const char * interface, uint32_t version);
+//    static void registryGlobalRemoveCb(void * data, struct wl_registry * registry,
+//          uint32_t name);
+//    static void seatCapabilitiesCb(void * data, wl_seat * seat, uint32_t caps);
+//    void seatCapabilities(wl_seat * seat, uint32_t caps);
+//    static void pointerEnterCb(void * data, struct wl_pointer * pointer,
+//          uint32_t serial, struct wl_surface * surface, wl_fixed_t sx,
+//          wl_fixed_t sy);
+//    static void pointerLeaveCb(void * data, struct wl_pointer * pointer,
+//          uint32_t serial, struct wl_surface * surface);
+//    static void pointerMotionCb(void * data, struct wl_pointer * pointer,
+//          uint32_t time, wl_fixed_t sx, wl_fixed_t sy);
+//    void pointerMotion(struct wl_pointer * pointer,
+//          uint32_t time, wl_fixed_t sx, wl_fixed_t sy);
+//    static void pointerButtonCb(void * data, struct wl_pointer * wl_pointer,
+//          uint32_t serial, uint32_t time, uint32_t button, uint32_t state);
+//    void pointerButton(struct wl_pointer * wl_pointer,
+//          uint32_t serial, uint32_t time, uint32_t button, uint32_t state);
+//    static void pointerAxisCb(void * data, struct wl_pointer * wl_pointer,
+//          uint32_t time, uint32_t axis, wl_fixed_t value);
+//    void pointerAxis(struct wl_pointer * wl_pointer,
+//          uint32_t time, uint32_t axis, wl_fixed_t value);
+//    static void keyboardKeymapCb(void * data, struct wl_keyboard * keyboard,
+//          uint32_t format, int fd, uint32_t size);
+//    static void keyboardEnterCb(void * data, struct wl_keyboard * keyboard,
+//          uint32_t serial, struct wl_surface * surface, struct wl_array * keys);
+//    static void keyboardLeaveCb(void * data, struct wl_keyboard * keyboard,
+//          uint32_t serial, struct wl_surface * surface);
+//    static void keyboardKeyCb(void * data, struct wl_keyboard * keyboard,
+//          uint32_t serial, uint32_t time, uint32_t key, uint32_t state);
+//    void keyboardKey(struct wl_keyboard * keyboard,
+//          uint32_t serial, uint32_t time, uint32_t key, uint32_t state);
+//    static void keyboardModifiersCb(void * data, struct wl_keyboard * keyboard,
+//          uint32_t serial, uint32_t mods_depressed, uint32_t mods_latched,
+//          uint32_t mods_locked, uint32_t group);
+//
+// #elif defined(_DIRECT2DISPLAY)
+//    //
+// #elif defined(VK_USE_PLATFORM_XCB_KHR)
+//    xcb_window_t setupWindow();
+//    void initxcbConnection();
+//    void handleEvent(const xcb_generic_event_t * happening);
+// #elif defined(VK_USE_PLATFORM_SCREEN_QNX)
+//    void setupWindow();
+//    void handleEvent();
+// #else
+//    void setupWindow();
+// #endif
+
+// #if defined(_WIN32)
+//    virtual void OnHandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+// #endif
 };
 
-#include "Entrypoints.h"
+//#include "Entrypoints.h"

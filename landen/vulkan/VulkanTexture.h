@@ -15,6 +15,7 @@
 
 #include "vulkan/vulkan.h"
 
+#ifdef HAS_KTX
 #include <ktx.h>
 #include <ktxvulkan.h>
 
@@ -95,3 +96,7 @@ class TextureCubeMap : public Texture
 	    VkImageLayout      imageLayout     = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 };
 }        // namespace vks
+
+
+
+#endif

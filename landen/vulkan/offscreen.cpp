@@ -7,11 +7,11 @@
 */
 #include "framework.h"
 #include "acme/_operating_system.h"
-#include "offscreen20.h"
+#include "offscreen.h"
 #include "vulkan/vk_container.h"
 
 
-VulkanExample20::VulkanExample20()
+VulkanOffScreenApplication::VulkanOffScreenApplication()
 {
    m_colorformatFB = FB_COLOR_FORMAT;
    m_strTitle = "Offscreen rendering"_ansi;
@@ -25,7 +25,7 @@ VulkanExample20::VulkanExample20()
    enabledFeatures.shaderClipDistance = VK_TRUE;
 }
 
-VulkanExample20::~VulkanExample20()
+VulkanOffScreenApplication::~VulkanOffScreenApplication()
 {
    if (device) {
       // Frame buffer
@@ -64,7 +64,7 @@ VulkanExample20::~VulkanExample20()
 
 // Setup the offscreen framebuffer for rendering the mirrored scene
 // The color attachment of this framebuffer will then be used to sample from in the fragment shader of the final pass
-void VulkanExample20::prepareOffscreen()
+void VulkanOffScreenApplication::prepareOffscreen()
 {
    offscreenPass.width = FB_DIM;
    offscreenPass.height = FB_DIM;
@@ -234,7 +234,7 @@ void VulkanExample20::prepareOffscreen()
    offscreenPass.descriptor.sampler = offscreenPass.sampler;
 }
 
-void VulkanExample20::buildCommandBuffers()
+void VulkanOffScreenApplication::buildCommandBuffers()
 {
    VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
 
@@ -330,7 +330,7 @@ void VulkanExample20::buildCommandBuffers()
    }
 }
 
-void VulkanExample20::loadAssets()
+void VulkanOffScreenApplication::loadAssets()
 {
    const uint32_t glTFLoadingFlags = vkglTF::FileLoadingFlags::PreTransformVertices | vkglTF::FileLoadingFlags::PreMultiplyVertexColors | vkglTF::FileLoadingFlags::FlipY;
 
@@ -344,7 +344,7 @@ void VulkanExample20::loadAssets()
    models.example.loadFromFile(pathDragonGltf, pdevice, queue, glTFLoadingFlags);
 }
 
-void VulkanExample20::setupDescriptors()
+void VulkanOffScreenApplication::setupDescriptors()
 {
    // Pool
    std::vector<VkDescriptorPoolSize> poolSizes = {
@@ -408,7 +408,7 @@ void VulkanExample20::setupDescriptors()
 
 }
 
-void VulkanExample20::preparePipelines()
+void VulkanOffScreenApplication::preparePipelines()
 {
    // Layouts
    VkPipelineLayoutCreateInfo pipelineLayoutInfo = vks::initializers::pipelineLayoutCreateInfo(&descriptorSetLayouts.shaded, 1);
@@ -470,7 +470,7 @@ void VulkanExample20::preparePipelines()
 }
 
 // Prepare and initialize uniform buffer containing shader uniforms
-void VulkanExample20::prepareUniformBuffers()
+void VulkanOffScreenApplication::prepareUniformBuffers()
 {
    // Mesh vertex shader uniform buffer block
    VK_CHECK_RESULT(m_pvulkandevice->createBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &uniformBuffers.vsShared, sizeof(UniformData)));
@@ -487,7 +487,7 @@ void VulkanExample20::prepareUniformBuffers()
    updateUniformBufferOffscreen();
 }
 
-void VulkanExample20::updateUniformBuffers()
+void VulkanOffScreenApplication::updateUniformBuffers()
 {
    uniformData.projection = camera.matrices.perspective;
    uniformData.view = camera.matrices.view;
@@ -503,7 +503,7 @@ void VulkanExample20::updateUniformBuffers()
    memcpy(uniformBuffers.vsMirror.mapped, &uniformData, sizeof(UniformData));
 }
 
-void VulkanExample20::updateUniformBufferOffscreen()
+void VulkanOffScreenApplication::updateUniformBufferOffscreen()
 {
    uniformData.projection = camera.matrices.perspective;
    uniformData.view = camera.matrices.view;
@@ -514,7 +514,7 @@ void VulkanExample20::updateUniformBufferOffscreen()
    memcpy(uniformBuffers.vsOffScreen.mapped, &uniformData, sizeof(UniformData));
 }
 
-void VulkanExample20::prepare()
+void VulkanOffScreenApplication::prepare()
 {
    VulkanExampleBaseNoSwapChain::prepare();
    loadAssets();
@@ -526,7 +526,7 @@ void VulkanExample20::prepare()
    prepared = true;
 }
 
-void VulkanExample20::draw(const ::function < void(void *, int, int, int)> & callback)
+void VulkanOffScreenApplication::draw(const ::function < void(void *, int, int, int)> & callback)
 {
    //VulkanExampleBaseNoSwapChain::prepareFrame();
    //submitInfo.commandBufferCount = 1;
@@ -540,7 +540,7 @@ void VulkanExample20::draw(const ::function < void(void *, int, int, int)> & cal
 }
 
 
-void VulkanExample20::submitWork(VkCommandBuffer cmdBuffer, VkQueue queue)
+void VulkanOffScreenApplication::submitWork(VkCommandBuffer cmdBuffer, VkQueue queue)
 {
    VkSubmitInfo submitInfo = vks::initializers::submitInfo();
    submitInfo.commandBufferCount = 1;
@@ -556,7 +556,7 @@ void VulkanExample20::submitWork(VkCommandBuffer cmdBuffer, VkQueue queue)
 }
 
 
-void VulkanExample20::render(const ::function < void(void *, int, int, int)> & callback)
+void VulkanOffScreenApplication::render(const ::function < void(void *, int, int, int)> & callback)
 {
    if (!prepared)
       return;
@@ -571,7 +571,7 @@ void VulkanExample20::render(const ::function < void(void *, int, int, int)> & c
    }
 }
 
-void VulkanExample20::OnUpdateUIOverlay(vks::UIOverlay * overlay)
+void VulkanOffScreenApplication::OnUpdateUIOverlay(vks::UIOverlay * overlay)
 {
    if (overlay->header("Settings"_ansi)) {
       if (overlay->checkBox("Display render target"_ansi, &debugDisplay)) {
@@ -581,7 +581,7 @@ void VulkanExample20::OnUpdateUIOverlay(vks::UIOverlay * overlay)
 }
 ///};
 
-void VulkanExample20::sample(const ::function < void(void *, int, int, int)> & callback)
+void VulkanOffScreenApplication::sample(const ::function < void(void *, int, int, int)> & callback)
 {
 
 
@@ -770,36 +770,10 @@ void VulkanExample20::sample(const ::function < void(void *, int, int, int)> & c
 
 
 
-void VulkanExample20::render_loop(const ::function < void(void *, int, int, int)> & callback)
+void VulkanOffScreenApplication::render_loop(const ::function < void(void *, int, int, int)> & callback)
 {
-   // SRS - for non-apple plaforms, handle benchmarking here within VulkanExampleBase::renderLoop()
-   //     - for macOS, handle benchmarking within NSApp rendering loop via displayLinkOutputCb()
-#if !(defined(VK_USE_PLATFORM_IOS_MVK) || defined(VK_USE_PLATFORM_MACOS_MVK) || defined(VK_USE_PLATFORM_METAL_EXT))
-   if (benchmark.active) {
-#if defined(VK_USE_PLATFORM_WAYLAND_KHR)
-      while (!configured)
-         wl_display_dispatch(display);
-      while (wl_display_prepare_read(display) != 0)
-         wl_display_dispatch_pending(display);
-      wl_display_flush(display);
-      wl_display_read_events(display);
-      wl_display_dispatch_pending(display);
-#endif
 
-      benchmark.run([=] { render(callback); }, m_pvulkandevice->properties);
-      vkDeviceWaitIdle(device);
-      if (benchmark.filename != "") {
-         benchmark.saveResults();
-      }
-      return;
-   }
-#endif
 
-   destWidth = width;
-   destHeight = height;
-   lastTimestamp = std::chrono::high_resolution_clock::now();
-   tPrevEnd = lastTimestamp;
-#if defined(_WIN32)
    //MSG msg;
    //bool quitMessageReceived = false;
    //while (!quitMessageReceived) {
@@ -821,326 +795,375 @@ void VulkanExample20::render_loop(const ::function < void(void *, int, int, int)
       //vkUnmapMemory(m_pvulkandevice->logicalDevice, offscreenPass.color.mem);
       preempt(20_ms);
    }
-#elif defined(VK_USE_PLATFORM_ANDROID_KHR)
-   while (1)
-   {
-      int ident;
-      int happenings;
-      struct android_poll_source * source;
-      bool destroy = false;
-
-      focused = true;
-
-      while ((ident = ALooper_pollAll(focused ? 0 : -1, NULL, &happenings, (void **)&source)) >= 0)
-      {
-         if (source != NULL)
-         {
-            source->process(androidApp, source);
-         }
-         if (androidApp->destroyRequested != 0)
-         {
-            LOGD("Android app destroy requested"_ansi);
-            destroy = true;
-            break;
-         }
-      }
-
-      // App destruction requested
-      // Exit loop, example will be destroyed in application main
-      if (destroy)
-      {
-         ANativeActivity_finish(androidApp->activity);
-         break;
-      }
-
-      // Render frame
-      if (prepared)
-      {
-         auto tStart = std::chrono::high_resolution_clock::now();
-         render();
-         frameCounter++;
-         auto tEnd = std::chrono::high_resolution_clock::now();
-         auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
-         frameTimer = tDiff / 1000.0f;
-         camera.update(frameTimer);
-         // Convert to clamped timer value
-         if (!paused)
-         {
-            timer += timerSpeed * frameTimer;
-            if (timer > 1.0)
-            {
-               timer -= 1.0f;
-            }
-         }
-         float fpsTimer = std::chrono::duration<double, std::milli>(tEnd - lastTimestamp).count();
-         if (fpsTimer > 1000.0f)
-         {
-            lastFPS = (float)frameCounter * (1000.0f / fpsTimer);
-            frameCounter = 0;
-            lastTimestamp = tEnd;
-         }
-
-         updateOverlay();
-
-         bool updateView = false;
-
-         // Check touch state (for movement)
-         if (touchDown) {
-            touchTimer += frameTimer;
-         }
-         if (touchTimer >= 1.0) {
-            camera.keys.up = true;
-         }
-
-         // Check gamepad state
-         const float deadZone = 0.0015f;
-         if (camera.type != Camera::CameraType::firstperson)
-         {
-            // Rotate
-            if (std::abs(gamePadState.axisLeft.x) > deadZone)
-            {
-               camera.rotate(glm::vec3(0.0f, gamePadState.axisLeft.x * 0.5f, 0.0f));
-               updateView = true;
-            }
-            if (std::abs(gamePadState.axisLeft.y) > deadZone)
-            {
-               camera.rotate(glm::vec3(gamePadState.axisLeft.y * 0.5f, 0.0f, 0.0f));
-               updateView = true;
-            }
-            // Zoom
-            if (std::abs(gamePadState.axisRight.y) > deadZone)
-            {
-               camera.translate(glm::vec3(0.0f, 0.0f, gamePadState.axisRight.y * 0.01f));
-               updateView = true;
-            }
-         }
-         else
-         {
-            updateView = camera.updatePad(gamePadState.axisLeft, gamePadState.axisRight, frameTimer);
-         }
-      }
-   }
-#elif defined(_DIRECT2DISPLAY)
-   while (!quit)
-   {
-      auto tStart = std::chrono::high_resolution_clock::now();
-      if (viewUpdated)
-      {
-         viewUpdated = false;
-      }
-      render();
-      frameCounter++;
-      auto tEnd = std::chrono::high_resolution_clock::now();
-      auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
-      frameTimer = tDiff / 1000.0f;
-      camera.update(frameTimer);
-      if (camera.moving())
-      {
-         viewUpdated = true;
-      }
-      // Convert to clamped timer value
-      if (!paused)
-      {
-         timer += timerSpeed * frameTimer;
-         if (timer > 1.0)
-         {
-            timer -= 1.0f;
-         }
-      }
-      float fpsTimer = std::chrono::duration<double, std::milli>(tEnd - lastTimestamp).count();
-      if (fpsTimer > 1000.0f)
-      {
-         lastFPS = (float)frameCounter * (1000.0f / fpsTimer);
-         frameCounter = 0;
-         lastTimestamp = tEnd;
-      }
-      updateOverlay();
-   }
-#elif defined(VK_USE_PLATFORM_DIRECTFB_EXT)
-   while (!quit)
-   {
-      auto tStart = std::chrono::high_resolution_clock::now();
-      if (viewUpdated)
-      {
-         viewUpdated = false;
-      }
-      DFBWindowEvent happening;
-      while (!event_buffer->GetEvent(event_buffer, DFB_EVENT(&happening)))
-      {
-         handleEvent(&happening);
-      }
-      render();
-      frameCounter++;
-      auto tEnd = std::chrono::high_resolution_clock::now();
-      auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
-      frameTimer = tDiff / 1000.0f;
-      camera.update(frameTimer);
-      if (camera.moving())
-      {
-         viewUpdated = true;
-      }
-      // Convert to clamped timer value
-      if (!paused)
-      {
-         timer += timerSpeed * frameTimer;
-         if (timer > 1.0)
-         {
-            timer -= 1.0f;
-         }
-      }
-      float fpsTimer = std::chrono::duration<double, std::milli>(tEnd - lastTimestamp).count();
-      if (fpsTimer > 1000.0f)
-      {
-         lastFPS = (float)frameCounter * (1000.0f / fpsTimer);
-         frameCounter = 0;
-         lastTimestamp = tEnd;
-      }
-      updateOverlay();
-   }
-#elif defined(VK_USE_PLATFORM_WAYLAND_KHR)
-   while (!quit)
-   {
-      auto tStart = std::chrono::high_resolution_clock::now();
-      if (viewUpdated)
-      {
-         viewUpdated = false;
-      }
-
-      while (!configured)
-         wl_display_dispatch(display);
-      while (wl_display_prepare_read(display) != 0)
-         wl_display_dispatch_pending(display);
-      wl_display_flush(display);
-      wl_display_read_events(display);
-      wl_display_dispatch_pending(display);
-
-      render();
-      frameCounter++;
-      auto tEnd = std::chrono::high_resolution_clock::now();
-      auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
-      frameTimer = tDiff / 1000.0f;
-      camera.update(frameTimer);
-      if (camera.moving())
-      {
-         viewUpdated = true;
-      }
-      // Convert to clamped timer value
-      if (!paused)
-      {
-         timer += timerSpeed * frameTimer;
-         if (timer > 1.0)
-         {
-            timer -= 1.0f;
-         }
-      }
-      float fpsTimer = std::chrono::duration<double, std::milli>(tEnd - lastTimestamp).count();
-      if (fpsTimer > 1000.0f)
-      {
-         if (!settings.overlay)
-         {
-            std::string windowTitle = getWindowTitle();
-            xdg_toplevel_set_title(xdg_toplevel, windowTitle.c_str());
-         }
-         lastFPS = (float)frameCounter * (1000.0f / fpsTimer);
-         frameCounter = 0;
-         lastTimestamp = tEnd;
-      }
-      updateOverlay();
-   }
-#elif defined(VK_USE_PLATFORM_XCB_KHR)
-   xcb_flush(connection);
-   while (!quit)
-   {
-      auto tStart = std::chrono::high_resolution_clock::now();
-      if (viewUpdated)
-      {
-         viewUpdated = false;
-      }
-      xcb_generic_event_t * happening;
-      while ((happening = xcb_poll_for_event(connection)))
-      {
-         handleEvent(happening);
-         free(happening);
-      }
-      render();
-      frameCounter++;
-      auto tEnd = std::chrono::high_resolution_clock::now();
-      auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
-      frameTimer = tDiff / 1000.0f;
-      camera.update(frameTimer);
-      if (camera.moving())
-      {
-         viewUpdated = true;
-      }
-      // Convert to clamped timer value
-      if (!paused)
-      {
-         timer += timerSpeed * frameTimer;
-         if (timer > 1.0)
-         {
-            timer -= 1.0f;
-         }
-      }
-      float fpsTimer = std::chrono::duration<double, std::milli>(tEnd - lastTimestamp).count();
-      if (fpsTimer > 1000.0f)
-      {
-         if (!settings.overlay)
-         {
-            std::string windowTitle = getWindowTitle();
-            xcb_change_property(connection, XCB_PROP_MODE_REPLACE,
-               window, XCB_ATOM_WM_NAME, XCB_ATOM_STRING, 8,
-               windowTitle.size(), windowTitle.c_str());
-         }
-         lastFPS = (float)frameCounter * (1000.0f / fpsTimer);
-         frameCounter = 0;
-         lastTimestamp = tEnd;
-      }
-      updateOverlay();
-   }
-#elif defined(VK_USE_PLATFORM_HEADLESS_EXT)
-   while (!quit)
-   {
-      auto tStart = std::chrono::high_resolution_clock::now();
-      if (viewUpdated)
-      {
-         viewUpdated = false;
-      }
-      render();
-      frameCounter++;
-      auto tEnd = std::chrono::high_resolution_clock::now();
-      auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
-      frameTimer = tDiff / 1000.0f;
-      camera.update(frameTimer);
-      if (camera.moving())
-      {
-         viewUpdated = true;
-      }
-      // Convert to clamped timer value
-      timer += timerSpeed * frameTimer;
-      if (timer > 1.0)
-      {
-         timer -= 1.0f;
-      }
-      float fpsTimer = std::chrono::duration<double, std::milli>(tEnd - lastTimestamp).count();
-      if (fpsTimer > 1000.0f)
-      {
-         lastFPS = (float)frameCounter * (1000.0f / fpsTimer);
-         frameCounter = 0;
-         lastTimestamp = tEnd;
-      }
-      updateOverlay();
-   }
-#elif (defined(VK_USE_PLATFORM_MACOS_MVK) || defined(VK_USE_PLATFORM_METAL_EXT)) && defined(VK_EXAMPLE_XCODE_GENERATED)
-   [NSApp run];
-#elif defined(VK_USE_PLATFORM_SCREEN_QNX)
-   while (!quit) {
-      handleEvent();
-
-      if (prepared) {
-         nextFrame();
-      }
-   }
-#endif
+//    // SRS - for non-apple plaforms, handle benchmarking here within VulkanExampleBase::renderLoop()
+//    //     - for macOS, handle benchmarking within NSApp rendering loop via displayLinkOutputCb()
+// #if !(defined(VK_USE_PLATFORM_IOS_MVK) || defined(VK_USE_PLATFORM_MACOS_MVK) || defined(VK_USE_PLATFORM_METAL_EXT))
+//    if (benchmark.active) {
+// #if defined(VK_USE_PLATFORM_WAYLAND_KHR)
+//       while (!configured)
+//          wl_display_dispatch(display);
+//       while (wl_display_prepare_read(display) != 0)
+//          wl_display_dispatch_pending(display);
+//       wl_display_flush(display);
+//       wl_display_read_events(display);
+//       wl_display_dispatch_pending(display);
+// #endif
+//
+//       benchmark.run([=] { render(callback); }, m_pvulkandevice->properties);
+//       vkDeviceWaitIdle(device);
+//       if (benchmark.filename != "") {
+//          benchmark.saveResults();
+//       }
+//       return;
+//    }
+// #endif
+//
+//    destWidth = width;
+//    destHeight = height;
+//    lastTimestamp = std::chrono::high_resolution_clock::now();
+//    tPrevEnd = lastTimestamp;
+// #if defined(_WIN32)
+//    //MSG msg;
+//    //bool quitMessageReceived = false;
+//    //while (!quitMessageReceived) {
+//    //   while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+//    //      TranslateMessage(&msg);
+//    //      DispatchMessage(&msg);
+//    //      if (msg.message == WM_QUIT) {
+//    //         quitMessageReceived = true;
+//    //         break;
+//    //      }
+//    //   }
+//    //   if (prepared && !IsIconic(window)) {
+//    while (::task_get_run())
+//    {
+//       nextFrame(callback);
+//       //void * pData = nullptr;
+//       //vkMapMemory(m_pvulkandevice->logicalDevice, offscreenPass.color.mem, 0, destWidth * destHeight * 4, VK_MEMORY_MAP_PLACED_BIT_EXT, &pData);
+//       //callback(pData, destWidth, destHeight, destWidth * 4);
+//       //vkUnmapMemory(m_pvulkandevice->logicalDevice, offscreenPass.color.mem);
+//       preempt(20_ms);
+//    }
+// #elif defined(VK_USE_PLATFORM_ANDROID_KHR)
+//    while (1)
+//    {
+//       int ident;
+//       int happenings;
+//       struct android_poll_source * source;
+//       bool destroy = false;
+//
+//       focused = true;
+//
+//       while ((ident = ALooper_pollAll(focused ? 0 : -1, NULL, &happenings, (void **)&source)) >= 0)
+//       {
+//          if (source != NULL)
+//          {
+//             source->process(androidApp, source);
+//          }
+//          if (androidApp->destroyRequested != 0)
+//          {
+//             LOGD("Android app destroy requested"_ansi);
+//             destroy = true;
+//             break;
+//          }
+//       }
+//
+//       // App destruction requested
+//       // Exit loop, example will be destroyed in application main
+//       if (destroy)
+//       {
+//          ANativeActivity_finish(androidApp->activity);
+//          break;
+//       }
+//
+//       // Render frame
+//       if (prepared)
+//       {
+//          auto tStart = std::chrono::high_resolution_clock::now();
+//          render();
+//          frameCounter++;
+//          auto tEnd = std::chrono::high_resolution_clock::now();
+//          auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
+//          frameTimer = tDiff / 1000.0f;
+//          camera.update(frameTimer);
+//          // Convert to clamped timer value
+//          if (!paused)
+//          {
+//             timer += timerSpeed * frameTimer;
+//             if (timer > 1.0)
+//             {
+//                timer -= 1.0f;
+//             }
+//          }
+//          float fpsTimer = std::chrono::duration<double, std::milli>(tEnd - lastTimestamp).count();
+//          if (fpsTimer > 1000.0f)
+//          {
+//             lastFPS = (float)frameCounter * (1000.0f / fpsTimer);
+//             frameCounter = 0;
+//             lastTimestamp = tEnd;
+//          }
+//
+//          updateOverlay();
+//
+//          bool updateView = false;
+//
+//          // Check touch state (for movement)
+//          if (touchDown) {
+//             touchTimer += frameTimer;
+//          }
+//          if (touchTimer >= 1.0) {
+//             camera.keys.up = true;
+//          }
+//
+//          // Check gamepad state
+//          const float deadZone = 0.0015f;
+//          if (camera.type != Camera::CameraType::firstperson)
+//          {
+//             // Rotate
+//             if (std::abs(gamePadState.axisLeft.x) > deadZone)
+//             {
+//                camera.rotate(glm::vec3(0.0f, gamePadState.axisLeft.x * 0.5f, 0.0f));
+//                updateView = true;
+//             }
+//             if (std::abs(gamePadState.axisLeft.y) > deadZone)
+//             {
+//                camera.rotate(glm::vec3(gamePadState.axisLeft.y * 0.5f, 0.0f, 0.0f));
+//                updateView = true;
+//             }
+//             // Zoom
+//             if (std::abs(gamePadState.axisRight.y) > deadZone)
+//             {
+//                camera.translate(glm::vec3(0.0f, 0.0f, gamePadState.axisRight.y * 0.01f));
+//                updateView = true;
+//             }
+//          }
+//          else
+//          {
+//             updateView = camera.updatePad(gamePadState.axisLeft, gamePadState.axisRight, frameTimer);
+//          }
+//       }
+//    }
+// #elif defined(_DIRECT2DISPLAY)
+//    while (!quit)
+//    {
+//       auto tStart = std::chrono::high_resolution_clock::now();
+//       if (viewUpdated)
+//       {
+//          viewUpdated = false;
+//       }
+//       render();
+//       frameCounter++;
+//       auto tEnd = std::chrono::high_resolution_clock::now();
+//       auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
+//       frameTimer = tDiff / 1000.0f;
+//       camera.update(frameTimer);
+//       if (camera.moving())
+//       {
+//          viewUpdated = true;
+//       }
+//       // Convert to clamped timer value
+//       if (!paused)
+//       {
+//          timer += timerSpeed * frameTimer;
+//          if (timer > 1.0)
+//          {
+//             timer -= 1.0f;
+//          }
+//       }
+//       float fpsTimer = std::chrono::duration<double, std::milli>(tEnd - lastTimestamp).count();
+//       if (fpsTimer > 1000.0f)
+//       {
+//          lastFPS = (float)frameCounter * (1000.0f / fpsTimer);
+//          frameCounter = 0;
+//          lastTimestamp = tEnd;
+//       }
+//       updateOverlay();
+//    }
+// #elif defined(VK_USE_PLATFORM_DIRECTFB_EXT)
+//    while (!quit)
+//    {
+//       auto tStart = std::chrono::high_resolution_clock::now();
+//       if (viewUpdated)
+//       {
+//          viewUpdated = false;
+//       }
+//       DFBWindowEvent happening;
+//       while (!event_buffer->GetEvent(event_buffer, DFB_EVENT(&happening)))
+//       {
+//          handleEvent(&happening);
+//       }
+//       render();
+//       frameCounter++;
+//       auto tEnd = std::chrono::high_resolution_clock::now();
+//       auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
+//       frameTimer = tDiff / 1000.0f;
+//       camera.update(frameTimer);
+//       if (camera.moving())
+//       {
+//          viewUpdated = true;
+//       }
+//       // Convert to clamped timer value
+//       if (!paused)
+//       {
+//          timer += timerSpeed * frameTimer;
+//          if (timer > 1.0)
+//          {
+//             timer -= 1.0f;
+//          }
+//       }
+//       float fpsTimer = std::chrono::duration<double, std::milli>(tEnd - lastTimestamp).count();
+//       if (fpsTimer > 1000.0f)
+//       {
+//          lastFPS = (float)frameCounter * (1000.0f / fpsTimer);
+//          frameCounter = 0;
+//          lastTimestamp = tEnd;
+//       }
+//       updateOverlay();
+//    }
+// #elif defined(VK_USE_PLATFORM_WAYLAND_KHR)
+//    while (!quit)
+//    {
+//       auto tStart = std::chrono::high_resolution_clock::now();
+//       if (viewUpdated)
+//       {
+//          viewUpdated = false;
+//       }
+//
+//       while (!configured)
+//          wl_display_dispatch(display);
+//       while (wl_display_prepare_read(display) != 0)
+//          wl_display_dispatch_pending(display);
+//       wl_display_flush(display);
+//       wl_display_read_events(display);
+//       wl_display_dispatch_pending(display);
+//
+//       render();
+//       frameCounter++;
+//       auto tEnd = std::chrono::high_resolution_clock::now();
+//       auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
+//       frameTimer = tDiff / 1000.0f;
+//       camera.update(frameTimer);
+//       if (camera.moving())
+//       {
+//          viewUpdated = true;
+//       }
+//       // Convert to clamped timer value
+//       if (!paused)
+//       {
+//          timer += timerSpeed * frameTimer;
+//          if (timer > 1.0)
+//          {
+//             timer -= 1.0f;
+//          }
+//       }
+//       float fpsTimer = std::chrono::duration<double, std::milli>(tEnd - lastTimestamp).count();
+//       if (fpsTimer > 1000.0f)
+//       {
+//          if (!settings.overlay)
+//          {
+//             std::string windowTitle = getWindowTitle();
+//             xdg_toplevel_set_title(xdg_toplevel, windowTitle.c_str());
+//          }
+//          lastFPS = (float)frameCounter * (1000.0f / fpsTimer);
+//          frameCounter = 0;
+//          lastTimestamp = tEnd;
+//       }
+//       updateOverlay();
+//    }
+// #elif defined(VK_USE_PLATFORM_XCB_KHR)
+//    xcb_flush(connection);
+//    while (!quit)
+//    {
+//       auto tStart = std::chrono::high_resolution_clock::now();
+//       if (viewUpdated)
+//       {
+//          viewUpdated = false;
+//       }
+//       xcb_generic_event_t * happening;
+//       while ((happening = xcb_poll_for_event(connection)))
+//       {
+//          handleEvent(happening);
+//          free(happening);
+//       }
+//       render();
+//       frameCounter++;
+//       auto tEnd = std::chrono::high_resolution_clock::now();
+//       auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
+//       frameTimer = tDiff / 1000.0f;
+//       camera.update(frameTimer);
+//       if (camera.moving())
+//       {
+//          viewUpdated = true;
+//       }
+//       // Convert to clamped timer value
+//       if (!paused)
+//       {
+//          timer += timerSpeed * frameTimer;
+//          if (timer > 1.0)
+//          {
+//             timer -= 1.0f;
+//          }
+//       }
+//       float fpsTimer = std::chrono::duration<double, std::milli>(tEnd - lastTimestamp).count();
+//       if (fpsTimer > 1000.0f)
+//       {
+//          if (!settings.overlay)
+//          {
+//             std::string windowTitle = getWindowTitle();
+//             xcb_change_property(connection, XCB_PROP_MODE_REPLACE,
+//                window, XCB_ATOM_WM_NAME, XCB_ATOM_STRING, 8,
+//                windowTitle.size(), windowTitle.c_str());
+//          }
+//          lastFPS = (float)frameCounter * (1000.0f / fpsTimer);
+//          frameCounter = 0;
+//          lastTimestamp = tEnd;
+//       }
+//       updateOverlay();
+//    }
+// #elif defined(VK_USE_PLATFORM_HEADLESS_EXT)
+//    while (!quit)
+//    {
+//       auto tStart = std::chrono::high_resolution_clock::now();
+//       if (viewUpdated)
+//       {
+//          viewUpdated = false;
+//       }
+//       render();
+//       frameCounter++;
+//       auto tEnd = std::chrono::high_resolution_clock::now();
+//       auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
+//       frameTimer = tDiff / 1000.0f;
+//       camera.update(frameTimer);
+//       if (camera.moving())
+//       {
+//          viewUpdated = true;
+//       }
+//       // Convert to clamped timer value
+//       timer += timerSpeed * frameTimer;
+//       if (timer > 1.0)
+//       {
+//          timer -= 1.0f;
+//       }
+//       float fpsTimer = std::chrono::duration<double, std::milli>(tEnd - lastTimestamp).count();
+//       if (fpsTimer > 1000.0f)
+//       {
+//          lastFPS = (float)frameCounter * (1000.0f / fpsTimer);
+//          frameCounter = 0;
+//          lastTimestamp = tEnd;
+//       }
+//       updateOverlay();
+//    }
+// #elif (defined(VK_USE_PLATFORM_MACOS_MVK) || defined(VK_USE_PLATFORM_METAL_EXT)) && defined(VK_EXAMPLE_XCODE_GENERATED)
+//    [NSApp run];
+// #elif defined(VK_USE_PLATFORM_SCREEN_QNX)
+//    while (!quit) {
+//       handleEvent();
+//
+//       if (prepared) {
+//          nextFrame();
+//       }
+//    }
+// #endif
    // Flush device to make sure all resources can be freed
    if (device != VK_NULL_HANDLE) {
       vkDeviceWaitIdle(device);
@@ -1148,18 +1171,18 @@ void VulkanExample20::render_loop(const ::function < void(void *, int, int, int)
 }
 
 
-//VulkanExample20 * VulkanExample;
+//VulkanOffScreenApplication * VulkanExample;
 //LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 //{
 //   if (VulkanExample != NULL)
 //   {
-//      VulkanExample20->handleMessages(hWnd, uMsg, wParam, lParam);
+//      VulkanOffScreenApplication->handleMessages(hWnd, uMsg, wParam, lParam);
 //   }
 //   return (DefWindowProc(hWnd, uMsg, wParam, lParam));
 //}
 ::pointer<::vulkan::application > start_vulkan_example_20(::vkc::VkContainer * pvkcontainer, mouseState * pmousestate)
 {
-   auto pvulkanexample = pvkcontainer->__create_new < VulkanExample20 >();
+   auto pvulkanexample = pvkcontainer->__create_new < VulkanOffScreenApplication >();
 
    pvulkanexample->m_pmousestate = pmousestate;
    pvulkanexample->initVulkan();
@@ -1186,24 +1209,24 @@ void VulkanExample20::render_loop(const ::function < void(void *, int, int, int)
 //  * Windows
 //  */
 //#define VULKAN_EXAMPLE_MAIN()																		\
-//VulkanExample20 *VulkanExample20;																		\
+//VulkanOffScreenApplication *VulkanOffScreenApplication;																		\
 //LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)						\
 //{																									\
-//	if (VulkanExample20 != NULL)																		\
+//	if (VulkanOffScreenApplication != NULL)																		\
 //	{																								\
-//		VulkanExample20->handleMessages(hWnd, uMsg, wParam, lParam);									\
+//		VulkanOffScreenApplication->handleMessages(hWnd, uMsg, wParam, lParam);									\
 //	}																								\
 //	return (DefWindowProc(hWnd, uMsg, wParam, lParam));												\
 //}																									\
 //int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)									\
 //{																									\
-//	for (int32_t i = 0; i < __argc; i++) { VulkanExample20::args.push_back(__argv[i]); };  			\
-//	VulkanExample20 = ___new VulkanExample20();															\
-//	VulkanExample20->initVulkan();																	\
-//	VulkanExample20->setupWindow(hInstance, WndProc);													\
-//	VulkanExample20->prepare();																		\
-//	VulkanExample20->renderLoop();																	\
-//	delete(VulkanExample20);																			\
+//	for (int32_t i = 0; i < __argc; i++) { VulkanOffScreenApplication::args.push_back(__argv[i]); };  			\
+//	VulkanOffScreenApplication = ___new VulkanOffScreenApplication();															\
+//	VulkanOffScreenApplication->initVulkan();																	\
+//	VulkanOffScreenApplication->setupWindow(hInstance, WndProc);													\
+//	VulkanOffScreenApplication->prepare();																		\
+//	VulkanOffScreenApplication->renderLoop();																	\
+//	delete(VulkanOffScreenApplication);																			\
 //	return 0;																						\
 //}
 //
@@ -1212,17 +1235,17 @@ void VulkanExample20::render_loop(const ::function < void(void *, int, int, int)
 //  * Android
 //  */
 //#define VULKAN_EXAMPLE_MAIN()																		\
-//VulkanExample20 *VulkanExample20;																		\
+//VulkanOffScreenApplication *VulkanOffScreenApplication;																		\
 //void android_main(android_app* state)																\
 //{																									\
-//	VulkanExample20 = ___new VulkanExample20();															\
-//	state->userData = VulkanExample20;																\
-//	state->onAppCmd = VulkanExample20::handleAppCommand;												\
-//	state->onInputEvent = VulkanExample20::handleAppInput;											\
+//	VulkanOffScreenApplication = ___new VulkanOffScreenApplication();															\
+//	state->userData = VulkanOffScreenApplication;																\
+//	state->onAppCmd = VulkanOffScreenApplication::handleAppCommand;												\
+//	state->onInputEvent = VulkanOffScreenApplication::handleAppInput;											\
 //	androidApp = state;																				\
 //	vks::android::getDeviceConfig();																\
-//	VulkanExample20->renderLoop();																	\
-//	delete(VulkanExample20);																			\
+//	VulkanOffScreenApplication->renderLoop();																	\
+//	delete(VulkanOffScreenApplication);																			\
 //}
 
 //#elif defined(_DIRECT2DISPLAY)
@@ -1230,18 +1253,18 @@ void VulkanExample20::render_loop(const ::function < void(void *, int, int, int)
 //  * Direct-to-display
 //  */
 //#define VULKAN_EXAMPLE_MAIN()																		\
-//VulkanExample20 *VulkanExample20;																		\
+//VulkanOffScreenApplication *VulkanOffScreenApplication;																		\
 //static void handleEvent()                                											\
 //{																									\
 //}																									\
 //int main(const int argc, const char *argv[])													    \
 //{																									\
-//	for (size_t i = 0; i < argc; i++) { VulkanExample20::args.push_back(argv[i]); };  				\
-//	VulkanExample20 = ___new VulkanExample20();															\
-//	VulkanExample20->initVulkan();																	\
-//	VulkanExample20->prepare();																		\
-//	VulkanExample20->renderLoop();																	\
-//	delete(VulkanExample20);																			\
+//	for (size_t i = 0; i < argc; i++) { VulkanOffScreenApplication::args.push_back(argv[i]); };  				\
+//	VulkanOffScreenApplication = ___new VulkanOffScreenApplication();															\
+//	VulkanOffScreenApplication->initVulkan();																	\
+//	VulkanOffScreenApplication->prepare();																		\
+//	VulkanOffScreenApplication->renderLoop();																	\
+//	delete(VulkanOffScreenApplication);																			\
 //	return 0;																						\
 //}
 
@@ -1250,23 +1273,23 @@ void VulkanExample20::render_loop(const ::function < void(void *, int, int, int)
 //  * Direct FB
 //  */
 //#define VULKAN_EXAMPLE_MAIN()																		\
-//VulkanExample20 *VulkanExample20;																		\
+//VulkanOffScreenApplication *VulkanOffScreenApplication;																		\
 //static void handleEvent(const DFBWindowEvent *happening)												\
 //{																									\
-//	if (VulkanExample20 != NULL)																		\
+//	if (VulkanOffScreenApplication != NULL)																		\
 //	{																								\
-//		VulkanExample20->handleEvent(happening);															\
+//		VulkanOffScreenApplication->handleEvent(happening);															\
 //	}																								\
 //}																									\
 //int main(const int argc, const char *argv[])													    \
 //{																									\
-//	for (size_t i = 0; i < argc; i++) { VulkanExample20::args.push_back(argv[i]); };  				\
-//	VulkanExample20 = ___new VulkanExample20();															\
-//	VulkanExample20->initVulkan();																	\
-//	VulkanExample20->setupWindow();					 												\
-//	VulkanExample20->prepare();																		\
-//	VulkanExample20->renderLoop();																	\
-//	delete(VulkanExample20);																			\
+//	for (size_t i = 0; i < argc; i++) { VulkanOffScreenApplication::args.push_back(argv[i]); };  				\
+//	VulkanOffScreenApplication = ___new VulkanOffScreenApplication();															\
+//	VulkanOffScreenApplication->initVulkan();																	\
+//	VulkanOffScreenApplication->setupWindow();					 												\
+//	VulkanOffScreenApplication->prepare();																		\
+//	VulkanOffScreenApplication->renderLoop();																	\
+//	delete(VulkanOffScreenApplication);																			\
 //	return 0;																						\
 //}
 
@@ -1275,16 +1298,16 @@ void VulkanExample20::render_loop(const ::function < void(void *, int, int, int)
 //  * Wayland / headless
 //  */
 //#define VULKAN_EXAMPLE_MAIN()																		\
-//VulkanExample20 *VulkanExample20;																		\
+//VulkanOffScreenApplication *VulkanOffScreenApplication;																		\
 //int main(const int argc, const char *argv[])													    \
 //{																									\
-//	for (size_t i = 0; i < argc; i++) { VulkanExample20::args.push_back(argv[i]); };  				\
-//	VulkanExample20 = ___new VulkanExample20();															\
-//	VulkanExample20->initVulkan();																	\
-//	VulkanExample20->setupWindow();					 												\
-//	VulkanExample20->prepare();																		\
-//	VulkanExample20->renderLoop();																	\
-//	delete(VulkanExample20);																			\
+//	for (size_t i = 0; i < argc; i++) { VulkanOffScreenApplication::args.push_back(argv[i]); };  				\
+//	VulkanOffScreenApplication = ___new VulkanOffScreenApplication();															\
+//	VulkanOffScreenApplication->initVulkan();																	\
+//	VulkanOffScreenApplication->setupWindow();					 												\
+//	VulkanOffScreenApplication->prepare();																		\
+//	VulkanOffScreenApplication->renderLoop();																	\
+//	delete(VulkanOffScreenApplication);																			\
 //	return 0;																						\
 //}
 
@@ -1293,23 +1316,23 @@ void VulkanExample20::render_loop(const ::function < void(void *, int, int, int)
 //  * X11 Xcb
 //  */
 //#define VULKAN_EXAMPLE_MAIN()																		\
-//VulkanExample20 *VulkanExample20;																		\
+//VulkanOffScreenApplication *VulkanOffScreenApplication;																		\
 //static void handleEvent(const xcb_generic_event_t *happening)											\
 //{																									\
-//	if (VulkanExample20 != NULL)																		\
+//	if (VulkanOffScreenApplication != NULL)																		\
 //	{																								\
-//		VulkanExample20->handleEvent(happening);															\
+//		VulkanOffScreenApplication->handleEvent(happening);															\
 //	}																								\
 //}																									\
 //int main(const int argc, const char *argv[])													    \
 //{																									\
-//	for (size_t i = 0; i < argc; i++) { VulkanExample20::args.push_back(argv[i]); };  				\
-//	VulkanExample20 = ___new VulkanExample20();															\
-//	VulkanExample20->initVulkan();																	\
-//	VulkanExample20->setupWindow();					 												\
-//	VulkanExample20->prepare();																		\
-//	VulkanExample20->renderLoop();																	\
-//	delete(VulkanExample20);																			\
+//	for (size_t i = 0; i < argc; i++) { VulkanOffScreenApplication::args.push_back(argv[i]); };  				\
+//	VulkanOffScreenApplication = ___new VulkanOffScreenApplication();															\
+//	VulkanOffScreenApplication->initVulkan();																	\
+//	VulkanOffScreenApplication->setupWindow();					 												\
+//	VulkanOffScreenApplication->prepare();																		\
+//	VulkanOffScreenApplication->renderLoop();																	\
+//	delete(VulkanOffScreenApplication);																			\
 //	return 0;																						\
 //}
 
@@ -1319,18 +1342,18 @@ void VulkanExample20::render_loop(const ::function < void(void *, int, int, int)
 //  */
 //#if defined(VK_EXAMPLE_XCODE_GENERATED)
 //#define VULKAN_EXAMPLE_MAIN()																		\
-//VulkanExample20 *VulkanExample20;																		\
+//VulkanOffScreenApplication *VulkanOffScreenApplication;																		\
 //int main(const int argc, const char *argv[])														\
 //{																									\
 //	@autoreleasepool																				\
 //	{																								\
-//		for (size_t i = 0; i < argc; i++) { VulkanExample20::args.push_back(argv[i]); };				\
-//		VulkanExample20 = ___new VulkanExample20();														\
-//		VulkanExample20->initVulkan();																\
-//		VulkanExample20->setupWindow(nullptr);														\
-//		VulkanExample20->prepare();																	\
-//		VulkanExample20->renderLoop();																\
-//		delete(VulkanExample20);																		\
+//		for (size_t i = 0; i < argc; i++) { VulkanOffScreenApplication::args.push_back(argv[i]); };				\
+//		VulkanOffScreenApplication = ___new VulkanOffScreenApplication();														\
+//		VulkanOffScreenApplication->initVulkan();																\
+//		VulkanOffScreenApplication->setupWindow(nullptr);														\
+//		VulkanOffScreenApplication->prepare();																	\
+//		VulkanOffScreenApplication->renderLoop();																\
+//		delete(VulkanOffScreenApplication);																		\
 //	}																								\
 //	return 0;																						\
 //}
@@ -1343,16 +1366,16 @@ void VulkanExample20::render_loop(const ::function < void(void *, int, int, int)
 //  * QNX Screen
 //  */
 //#define VULKAN_EXAMPLE_MAIN()																		
-//VulkanExample20 *VulkanExample20;																		
+//VulkanOffScreenApplication *VulkanOffScreenApplication;																		
 //int main(const int argc, const char *argv[])														
 //{																									
-//	for (int i = 0; i < argc; i++) { VulkanExample20::args.push_back(argv[i]); };						
-//	VulkanExample20 = ___new VulkanExample20();															
-//	VulkanExample20->initVulkan();																	
-//	VulkanExample20->setupWindow();																	
-//	VulkanExample20->prepare();																		
-//	VulkanExample20->renderLoop();																	
-//	delete(VulkanExample20);																			
+//	for (int i = 0; i < argc; i++) { VulkanOffScreenApplication::args.push_back(argv[i]); };						
+//	VulkanOffScreenApplication = ___new VulkanOffScreenApplication();															
+//	VulkanOffScreenApplication->initVulkan();																	
+//	VulkanOffScreenApplication->setupWindow();																	
+//	VulkanOffScreenApplication->prepare();																		
+//	VulkanOffScreenApplication->renderLoop();																	
+//	delete(VulkanOffScreenApplication);																			
 //	return 0;																						
 //}
 //

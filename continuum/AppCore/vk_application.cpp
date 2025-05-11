@@ -17,8 +17,8 @@
 
 
 // Third party
-#define VMA_IMPLEMENTATION
-#include <vma/vk_mem_alloc.h>
+//#define VMA_IMPLEMENTATION
+//#include <vma/vk_mem_alloc.h>
 
 #define GLM_FORCE_RADIANS	
 #define GLM_ENABLE_EXPERIMENTAL
@@ -27,7 +27,7 @@
 
 // Project source specific includes
 #include "vk_application.h"
-#include "vkbootstrap/VkBootstrap.h"
+#include "VkBootstrap.h"
 #include "Renderer/vk_buffer.h"
 #include "VK_abstraction/vk_camera.h"
 #include "VK_abstraction/vk_input.h"

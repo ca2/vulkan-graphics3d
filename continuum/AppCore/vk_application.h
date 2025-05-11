@@ -4,7 +4,7 @@
 #include <deque>
 #include <functional>
 
-#include "vma/vk_mem_alloc.h"
+//#include "vma/vk_mem_alloc.h"
 #include "lowland/landen/vulkan/VulkanDevice.h"
 #include "lowland/landen/vulkan/vulkan_example_base_no_swap_chain.h"
 #include "VK_abstraction/vk_descriptors.h"

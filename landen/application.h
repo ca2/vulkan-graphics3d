@@ -38,7 +38,7 @@ namespace lowland_landen
       long long decrement_reference_count() override;
 
       
-      string draw2d_get_default_implementation_name() override;
+      //string draw2d_get_default_implementation_name() override;
 
       
       virtual void update_3d_application(int cx, int cy);

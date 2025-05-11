@@ -53,6 +53,20 @@ list(APPEND library_source
         VK_abstraction/vk_input.h
         Renderer/Types/vk_pointLightSystem.cpp
         Renderer/Types/vk_pointLightSystem.h
+        _.cpp
+        _.h
+        application.cpp
+        application.h
+        document.cpp
+        document.h
+        framework.cpp
+        framework.h
+        impact.cpp
+        impact.h
+        main_frame.cpp
+        main_frame.h
+        pane_impact.cpp
+        pane_impact.h
 )
 
 
@@ -76,8 +90,6 @@ list(APPEND library_source
 
 # Link vendor libs
 list(APPEND library_references
-    ${Vulkan_LIBRARY} 
-    glfw
     acme
     apex
     aqua

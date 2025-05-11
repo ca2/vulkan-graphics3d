@@ -13,6 +13,7 @@
  * If you are looking for a complete glTF implementation, check out https://github.com/SaschaWillems/Vulkan-glTF-PBR/
  */
 #include "framework.h"
+#include "acme/exception/not_implemented.h"
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #define TINYGLTF_NO_STB_IMAGE_WRITE
@@ -285,6 +286,8 @@ void vkglTF::Texture::fromglTfImage(tinygltf::Image &gltfimage, const ::file::pa
 		// Texture is stored in an external ktx file
 		auto filename = pathFolder / gltfimage.uri.c_str();
 
+#ifdef HAS_KTX
+
 		ktxTexture* ktxTexture;
 
 		ktxResult result = KTX_SUCCESS;
@@ -400,6 +403,11 @@ void vkglTF::Texture::fromglTfImage(tinygltf::Image &gltfimage, const ::file::pa
 		vkFreeMemory(m_pvulkandevice->logicalDevice, stagingMemory, nullptr);
 
 		ktxTexture_Destroy(ktxTexture);
+
+		#else
+
+		throw not_implemented();
+		#endif
 	}
 
 	VkSamplerCreateInfo samplerInfo{};

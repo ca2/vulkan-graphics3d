@@ -27,6 +27,8 @@ namespace vkc {
 
     ::pointer<VkcDescriptorSetLayout> VkcDescriptorSetLayout::Builder::build() const 
     {
+        auto pvkcdevice = this->m_pvkcdevice.m_p;
+        __refdbg_this(pvkcdevice);
         return __allocate VkcDescriptorSetLayout(m_pvkcdevice, bindings);
     }
 
