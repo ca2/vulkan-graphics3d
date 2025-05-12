@@ -150,6 +150,13 @@ elseif (${LINUX})
 endif ()
 
 
+add_dependencies(${PROJECT_NAME} ${app_common_dependencies})
+add_dependencies(${PROJECT_NAME} ${default_draw2d})
+add_dependencies(${PROJECT_NAME} ${default_imaging})
+add_dependencies(${PROJECT_NAME} ${default_networking})
+add_dependencies(${PROJECT_NAME} ${default_write_text})
+add_dependencies(${PROJECT_NAME} database_sqlite3)
+
 set(SPIRV_OUTPUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}../_matter/continuum/_std/_std/shaders/spirV")
 file(MAKE_DIRECTORY ${SPIRV_OUTPUT_DIR})
 

@@ -335,13 +335,13 @@ namespace vkc
 
       for (const char* layerName : validationLayers)
       {
-
          bool layerFound = false;
+
 
          printf_line("checking for validation layer : %s", layerName);
          for (const auto& layerProperties : availableLayers)
          {
-            printf_line("an available layer : %s", layerName);
+            printf_line("an available layer : %s", layerProperties.layerName);
             if (strcmp(layerName, layerProperties.layerName) == 0)
             {
                layerFound = true;
