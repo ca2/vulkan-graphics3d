@@ -4,11 +4,11 @@
 #include "base/user/user/document.h"
 
 
-namespace lowland_landen
+namespace vulkan_land_landen
 {
 
 
-   class CLASS_DECL_LOWLAND_LANDEN document :
+   class CLASS_DECL_vulkan_land_LANDEN document :
       virtual public ::user::document
    {
    public:

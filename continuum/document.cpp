@@ -5,7 +5,7 @@
 #include "acme/filesystem/filesystem/file_context.h"
 
 
-namespace lowland_continuum
+namespace vulkan_land_continuum
 {
 
 
@@ -26,7 +26,7 @@ namespace lowland_continuum
 
       //::file::path path;
       //
-      //::pointer < ::lowland_continuum::application > papp = application();
+      //::pointer < ::vulkan_land_continuum::application > papp = application();
       //
       //path = papp->m_pathApplicationText;
 
@@ -109,7 +109,7 @@ namespace lowland_continuum
 #endif
 
 
-} // namespace lowland_continuum
+} // namespace vulkan_land_continuum
 
 
 

@@ -4,11 +4,11 @@
 #include "base/user/simple/frame_window.h"
 
 
-namespace lowland_landen
+namespace vulkan_land_landen
 {
 
 
-   class CLASS_DECL_LOWLAND_LANDEN frame :
+   class CLASS_DECL_vulkan_land_LANDEN frame :
       virtual public simple_frame_window
    {
    public:

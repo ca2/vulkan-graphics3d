@@ -5,14 +5,14 @@
 
 
 
-#if defined(_lowland_landen_project)
-   #define CLASS_DECL_LOWLAND_LANDEN  CLASS_DECL_EXPORT
+#if defined(_vulkan_land_landen_project)
+   #define CLASS_DECL_vulkan_land_LANDEN  CLASS_DECL_EXPORT
 #else
-   #define CLASS_DECL_LOWLAND_LANDEN  CLASS_DECL_IMPORT
+   #define CLASS_DECL_vulkan_land_LANDEN  CLASS_DECL_IMPORT
 #endif
 
 
-namespace lowland_landen
+namespace vulkan_land_landen
 {
 
 
@@ -23,7 +23,7 @@ namespace lowland_landen
    class impact;
 
 
-} // namespace lowland_landen
+} // namespace vulkan_land_landen
 
 
 //#undef APP_TYPE
@@ -32,6 +32,13 @@ namespace lowland_landen
 
 //#include "application.h"
 
+
+#if defined(WINDOWS_DESKTOP)
+
+#define VK_PROTOTYPES
+#define VK_USE_PLATFORM_WIN32_KHR
+
+#endif
 
 
 

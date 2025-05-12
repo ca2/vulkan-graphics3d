@@ -1,7 +1,7 @@
 #pragma once
 
 #include "AppCore/vk_window.h"
-#include "lowland/landen/vulkan/VulkanDevice.h"
+#include "vulkan-land/landen/vulkan/VulkanDevice.h"
 #include "vulkan/vulkan.h"
 // std lib headers
 #include <string>

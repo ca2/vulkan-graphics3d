@@ -29,7 +29,7 @@
 #define DEBUG_GCOM 0
 #endif
 
-namespace lowland_continuum
+namespace vulkan_land_continuum
 {
 
 
@@ -862,7 +862,7 @@ namespace lowland_continuum
    //}
 
 
-} // namespace lowland_continuum
+} // namespace vulkan_land_continuum
 
 
 

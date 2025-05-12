@@ -4,11 +4,11 @@
 #include "base/user/user/document.h"
 
 
-namespace lowland_continuum
+namespace vulkan_land_continuum
 {
 
 
-   class CLASS_DECL_lowland_continuum document :
+   class CLASS_DECL_vulkan_land_continuum document :
       public ::user::document
    {
    public:
@@ -38,7 +38,7 @@ namespace lowland_continuum
    };
 
 
-} // namespace lowland_continuum
+} // namespace vulkan_land_continuum
 
 
 

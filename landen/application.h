@@ -4,11 +4,11 @@
 #include "core/platform/application.h"
 
 
-namespace lowland_landen
+namespace vulkan_land_landen
 {
 
 
-   class CLASS_DECL_LOWLAND_LANDEN application :
+   class CLASS_DECL_vulkan_land_LANDEN application :
       virtual public ::core::application
    {
    public:
@@ -47,7 +47,7 @@ namespace lowland_landen
    };
 
 
-} // namespace lowland_landen
+} // namespace vulkan_land_landen
 
 
 

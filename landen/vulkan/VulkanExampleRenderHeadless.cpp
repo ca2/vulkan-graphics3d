@@ -6,7 +6,7 @@
 * This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)
 */
 #include "framework.h"
-#include "render_headless.h"
+#include "VulkanExampleRenderHeadless.h"
 #include "acme/_operating_system.h"
 #include "VulkanTools.h"
 #include "benchmark.hpp"
@@ -76,14 +76,14 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugMessageCallback(
 #define FB_DIM 512
 #define FB_COLOR_FORMAT VK_FORMAT_R8G8B8A8_UNORM
 
-VulkanExample5_base::VulkanExample5_base(mouseState * pmousestate)
+VulkanExampleRenderHeadless::VulkanExampleRenderHeadless(mouseState * pmousestate)
 {
    m_pmousestate = pmousestate;
 
 }
 
 VulkanExample5::VulkanExample5(mouseState * pmousestate):
-VulkanExample5_base(pmousestate)
+VulkanExampleRenderHeadless(pmousestate)
 {
    //m_pmousestate = pmousestate;
    LOG("Running headless rendering example\n"_ansi);
@@ -627,7 +627,7 @@ VulkanExample5_base(pmousestate)
 }
 
 
-VulkanExample5_base::~VulkanExample5_base()
+VulkanExampleRenderHeadless::~VulkanExampleRenderHeadless()
 {
 
    if (m_device)
@@ -708,34 +708,11 @@ VulkanExample5::~VulkanExample5()
 
 }
 
-   VkResult VulkanExample5_base::createInstance()
+   VkResult VulkanExampleRenderHeadless::createInstance()
    {
+      
       std::vector<const char *> instanceExtensions = { VK_KHR_SURFACE_EXTENSION_NAME };
 
-      // Enable surface extensions depending on os
-#if defined(_WIN32)
-      instanceExtensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
-#elif defined(VK_USE_PLATFORM_ANDROID_KHR)
-      instanceExtensions.push_back(VK_KHR_ANDROID_SURFACE_EXTENSION_NAME);
-#elif defined(_DIRECT2DISPLAY)
-      instanceExtensions.push_back(VK_KHR_DISPLAY_EXTENSION_NAME);
-#elif defined(VK_USE_PLATFORM_DIRECTFB_EXT)
-      instanceExtensions.push_back(VK_EXT_DIRECTFB_SURFACE_EXTENSION_NAME);
-#elif defined(VK_USE_PLATFORM_WAYLAND_KHR)
-      instanceExtensions.push_back(VK_KHR_WAYLAND_SURFACE_EXTENSION_NAME);
-#elif defined(VK_USE_PLATFORM_XCB_KHR)
-      instanceExtensions.push_back(VK_KHR_XCB_SURFACE_EXTENSION_NAME);
-#elif defined(VK_USE_PLATFORM_IOS_MVK)
-      instanceExtensions.push_back(VK_MVK_IOS_SURFACE_EXTENSION_NAME);
-#elif defined(VK_USE_PLATFORM_MACOS_MVK)
-      instanceExtensions.push_back(VK_MVK_MACOS_SURFACE_EXTENSION_NAME);
-#elif defined(VK_USE_PLATFORM_METAL_EXT)
-      instanceExtensions.push_back(VK_EXT_METAL_SURFACE_EXTENSION_NAME);
-#elif defined(VK_USE_PLATFORM_HEADLESS_EXT)
-      instanceExtensions.push_back(VK_EXT_HEADLESS_SURFACE_EXTENSION_NAME);
-#elif defined(VK_USE_PLATFORM_SCREEN_QNX)
-      instanceExtensions.push_back(VK_QNX_SCREEN_SURFACE_EXTENSION_NAME);
-#endif
 
       // Get extensions supported by the instance and store for later use
       uint32_t extCount = 0;
@@ -845,21 +822,21 @@ VulkanExample5::~VulkanExample5()
    }
 
    
-   void VulkanExample5_base::getEnabledFeatures()
+   void VulkanExampleRenderHeadless::getEnabledFeatures()
    {
    
 
    }
 
    
-   void VulkanExample5_base::getEnabledExtensions()
+   void VulkanExampleRenderHeadless::getEnabledExtensions()
    {
    
 
    }
 
 
-   bool VulkanExample5_base::initVulkan()
+   bool VulkanExampleRenderHeadless::initVulkan()
    {
       // Instead of checking for the command line switch, validation can be forced via a define
 #if defined(_VALIDATION)
@@ -1035,7 +1012,7 @@ VulkanExample5::~VulkanExample5()
    /*
       Submit command buffer to a queue and wait for fence until queue operations have been finished
    */
-   void VulkanExample5_base::submitWork(VkCommandBuffer cmdBuffer, VkQueue queue)
+   void VulkanExampleRenderHeadless::submitWork(VkCommandBuffer cmdBuffer, VkQueue queue)
    {
       VkSubmitInfo submitInfo = vks::initializers::submitInfo();
       submitInfo.commandBufferCount = 1;
@@ -1052,7 +1029,7 @@ VulkanExample5::~VulkanExample5()
 
    
 
-   void VulkanExample5_base::renderLoop2(const ::function < void(void *, int, int, int)> & callback)
+   void VulkanExampleRenderHeadless::renderLoop2(const ::function < void(void *, int, int, int)> & callback)
    {
       // SRS - for non-apple plaforms, handle benchmarking here within VulkanExampleBase::renderLoop()
       //     - for macOS, handle benchmarking within NSApp rendering loop via displayLinkOutputCb()
@@ -1430,7 +1407,7 @@ VulkanExample5::~VulkanExample5()
    }
 
 
-      void VulkanExample5_base::sample(const ::function < void(void *, int, int, int)> & callback)
+      void VulkanExampleRenderHeadless::sample(const ::function < void(void *, int, int, int)> & callback)
       {
 
 
@@ -1610,7 +1587,7 @@ VulkanExample5::~VulkanExample5()
       }
 
       /** @brief Adds the drawing commands for the ImGui overlay to the given command buffer */
-      void VulkanExample5_base::drawUI(const VkCommandBuffer commandBuffer)
+      void VulkanExampleRenderHeadless::drawUI(const VkCommandBuffer commandBuffer)
       {
 
          if (m_settings.overlay && m_ui.visible) {
@@ -1625,7 +1602,7 @@ VulkanExample5::~VulkanExample5()
       }
 
 
-   void VulkanExample5_base::buildCommandBuffers()
+   void VulkanExampleRenderHeadless::buildCommandBuffers()
    {
    }
 
@@ -1726,7 +1703,7 @@ VulkanExample5::~VulkanExample5()
       }
    }
 
-   void VulkanExample5_base::nextFrame(const ::function < void(void *, int, int, int)> & callback)
+   void VulkanExampleRenderHeadless::nextFrame(const ::function < void(void *, int, int, int)> & callback)
    {
       auto tStart = std::chrono::high_resolution_clock::now();
       if (m_viewUpdated)
@@ -1775,7 +1752,7 @@ VulkanExample5::~VulkanExample5()
 
       updateOverlay();
    }
-   void VulkanExample5_base::OnUpdateUIOverlay(vks::UIOverlay * overlay)
+   void VulkanExampleRenderHeadless::OnUpdateUIOverlay(vks::UIOverlay * overlay)
    {
       if (overlay->header("Settings"_ansi)) {
          if (overlay->checkBox("Display render target"_ansi, &m_debugDisplay)) {
@@ -1784,7 +1761,7 @@ VulkanExample5::~VulkanExample5()
       }
    }
 
-   void VulkanExample5_base::updateOverlay()
+   void VulkanExampleRenderHeadless::updateOverlay()
    {
       if (!m_settings.overlay)
          return;
@@ -1845,7 +1822,7 @@ VulkanExample5::~VulkanExample5()
    }
 
 
-   void VulkanExample5_base::loadAssets()
+   void VulkanExampleRenderHeadless::loadAssets()
    {
       
 
@@ -1873,7 +1850,7 @@ VulkanExample5::~VulkanExample5()
    }
 
 
-   void VulkanExample5_base::setupDescriptors()
+   void VulkanExampleRenderHeadless::setupDescriptors()
    {
       // Pool
       std::vector<VkDescriptorPoolSize> poolSizes = {
@@ -1976,7 +1953,7 @@ VulkanExample5::~VulkanExample5()
    //}
 
 
-   void VulkanExample5_base::createTransferCommandPool()
+   void VulkanExampleRenderHeadless::createTransferCommandPool()
    {
       // Create a default command pool for graphics command buffers
       m_commandPoolTransfer = m_pvulkandevice->createCommandPool(m_pvulkandevice->queueFamilyIndices.transfer);
@@ -1984,7 +1961,7 @@ VulkanExample5::~VulkanExample5()
    }
 
 
-   void VulkanExample5_base::createCommandBuffers()
+   void VulkanExampleRenderHeadless::createCommandBuffers()
    {
       // Create one command buffer for each swap chain image
 //      m_drawCmdBuffers.resize(m_swapchain.imageCount);
@@ -1993,7 +1970,7 @@ VulkanExample5::~VulkanExample5()
       VK_CHECK_RESULT(vkAllocateCommandBuffers(m_device, &cmdBufAllocateInfo, m_drawCmdBuffers.data()));
    }
 
-   void VulkanExample5_base::createSynchronizationPrimitives()
+   void VulkanExampleRenderHeadless::createSynchronizationPrimitives()
    {
       // Wait fences to sync command buffer access
       VkFenceCreateInfo fenceCreateInfo = vks::initializers::fenceCreateInfo(VK_FENCE_CREATE_SIGNALED_BIT);
@@ -2002,7 +1979,7 @@ VulkanExample5::~VulkanExample5()
          VK_CHECK_RESULT(vkCreateFence(m_device, &fenceCreateInfo, nullptr, &fence));
       }
    }
-   void VulkanExample5_base::setupDepthStencil()
+   void VulkanExampleRenderHeadless::setupDepthStencil()
    {
       VkImageCreateInfo imageCI{};
       imageCI.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -2043,7 +2020,7 @@ VulkanExample5::~VulkanExample5()
       VK_CHECK_RESULT(vkCreateImageView(m_device, &imageViewCI, nullptr, &m_depthStencil.view));
    }
 
-   void VulkanExample5_base::setupRenderPass()
+   void VulkanExampleRenderHeadless::setupRenderPass()
    {
       std::array<VkAttachmentDescription, 2> attachments = {};
       // Color attachment
@@ -2116,7 +2093,7 @@ VulkanExample5::~VulkanExample5()
 
       VK_CHECK_RESULT(vkCreateRenderPass(m_device, &renderPassInfo, nullptr, &m_renderPass));
    }
-   void VulkanExample5_base::createPipelineCache()
+   void VulkanExampleRenderHeadless::createPipelineCache()
    {
       VkPipelineCacheCreateInfo pipelineCacheCreateInfo = {};
       pipelineCacheCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
@@ -2127,7 +2104,7 @@ VulkanExample5::~VulkanExample5()
    //VkDeviceMemory m_devicememoryRender[1];
    //VkImageView m_imageviewRender[1];
 
-   void VulkanExample5_base::setupFrameBuffer()
+   void VulkanExampleRenderHeadless::setupFrameBuffer()
    {
 
 
@@ -2308,13 +2285,13 @@ VulkanExample5::~VulkanExample5()
    }
 
 
-   ::string VulkanExample5_base::getShadersPath() const
+   ::string VulkanExampleRenderHeadless::getShadersPath() const
    {
       return "M:/Vulkan-Assets-main/shaders/glsl/"_ansi;
    }
 
    /** @brief Loads a SPIR-V shader file for the given shader stage */
-   VkPipelineShaderStageCreateInfo VulkanExample5_base::loadShader(const ::string fileName, VkShaderStageFlagBits stage)
+   VkPipelineShaderStageCreateInfo VulkanExampleRenderHeadless::loadShader(const ::string fileName, VkShaderStageFlagBits stage)
    {
       VkPipelineShaderStageCreateInfo shaderStage = {};
       shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -2330,7 +2307,7 @@ VulkanExample5::~VulkanExample5()
       return shaderStage;
    }
 
-   void VulkanExample5_base::_prepare()
+   void VulkanExampleRenderHeadless::_prepare()
    {
       //initSwapchain();
       //createCommandPool();
@@ -2360,7 +2337,7 @@ VulkanExample5::~VulkanExample5()
 
    // Setup the offscreen framebuffer for rendering the mirrored scene
 // The color attachment of this framebuffer will then be used to sample from in the fragment shader of the final pass
-   void VulkanExample5_base::prepareOffscreen()
+   void VulkanExampleRenderHeadless::prepareOffscreen()
    {
       m_offscreenPass.width = FB_DIM;
       m_offscreenPass.height = FB_DIM;
@@ -2531,7 +2508,7 @@ VulkanExample5::~VulkanExample5()
    }
 
 
-   void VulkanExample5_base::prepare()
+   void VulkanExampleRenderHeadless::prepare()
    {
       _prepare();
       loadAssets();
@@ -2544,7 +2521,7 @@ VulkanExample5::~VulkanExample5()
    }
 
 
-   void VulkanExample5_base::preparePipelines()
+   void VulkanExampleRenderHeadless::preparePipelines()
    {
       // Layouts
       VkPipelineLayoutCreateInfo pipelineLayoutInfo = vks::initializers::pipelineLayoutCreateInfo(&m_descriptorSetLayouts.shaded, 1);
@@ -2606,7 +2583,7 @@ VulkanExample5::~VulkanExample5()
    }
 
    // Prepare and initialize uniform buffer containing shader uniforms
-   void VulkanExample5_base::prepareUniformBuffers()
+   void VulkanExampleRenderHeadless::prepareUniformBuffers()
    {
       // Mesh vertex shader uniform buffer block
       VK_CHECK_RESULT(m_pvulkandevice->createBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &m_uniformBuffers.vsShared, sizeof(UniformData)));
@@ -2623,7 +2600,7 @@ VulkanExample5::~VulkanExample5()
       updateUniformBufferOffscreen();
    }
 
-   void VulkanExample5_base::updateUniformBuffers()
+   void VulkanExampleRenderHeadless::updateUniformBuffers()
    {
       m_uniformData.projection = m_camera.matrices.perspective;
       m_uniformData.view = m_camera.matrices.view;
@@ -2639,7 +2616,7 @@ VulkanExample5::~VulkanExample5()
       memcpy(m_uniformBuffers.vsMirror.mapped, &m_uniformData, sizeof(UniformData));
    }
 
-   void VulkanExample5_base::updateUniformBufferOffscreen()
+   void VulkanExampleRenderHeadless::updateUniformBufferOffscreen()
    {
       m_uniformData.projection = m_camera.matrices.perspective;
       m_uniformData.view = m_camera.matrices.view;
@@ -2685,7 +2662,7 @@ VulkanExample5::~VulkanExample5()
    //}
 
 
-   void VulkanExample5_base::draw(const ::function < void(void *, int, int, int)> & callback)
+   void VulkanExampleRenderHeadless::draw(const ::function < void(void *, int, int, int)> & callback)
    {
       //prepareFrame();
       //m_submitInfo.commandBufferCount = 1;
@@ -2697,7 +2674,7 @@ VulkanExample5::~VulkanExample5()
       //submitFrame();
    }
 
-   void VulkanExample5_base::render(const ::function < void(void *, int, int, int)> & callback)
+   void VulkanExampleRenderHeadless::render(const ::function < void(void *, int, int, int)> & callback)
    {
       if (!m_prepared)
          return;

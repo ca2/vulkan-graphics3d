@@ -25,32 +25,33 @@ std::vector<const char *> VulkanExampleBaseNoSwapChain::args;
 
 VkResult VulkanExampleBaseNoSwapChain::createInstance()
 {
+
    std::vector<const char *> instanceExtensions = { VK_KHR_SURFACE_EXTENSION_NAME };
 
-   // Enable surface extensions depending on os
-#if defined(_WIN32)
-   instanceExtensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
-#elif defined(VK_USE_PLATFORM_ANDROID_KHR)
-   instanceExtensions.push_back(VK_KHR_ANDROID_SURFACE_EXTENSION_NAME);
-#elif defined(_DIRECT2DISPLAY)
-   instanceExtensions.push_back(VK_KHR_DISPLAY_EXTENSION_NAME);
-#elif defined(VK_USE_PLATFORM_DIRECTFB_EXT)
-   instanceExtensions.push_back(VK_EXT_DIRECTFB_SURFACE_EXTENSION_NAME);
-#elif defined(VK_USE_PLATFORM_WAYLAND_KHR)
-   instanceExtensions.push_back(VK_KHR_WAYLAND_SURFACE_EXTENSION_NAME);
-#elif defined(VK_USE_PLATFORM_XCB_KHR)
-   instanceExtensions.push_back(VK_KHR_XCB_SURFACE_EXTENSION_NAME);
-#elif defined(VK_USE_PLATFORM_IOS_MVK)
-   instanceExtensions.push_back(VK_MVK_IOS_SURFACE_EXTENSION_NAME);
-#elif defined(VK_USE_PLATFORM_MACOS_MVK)
-   instanceExtensions.push_back(VK_MVK_MACOS_SURFACE_EXTENSION_NAME);
-#elif defined(VK_USE_PLATFORM_METAL_EXT)
-   instanceExtensions.push_back(VK_EXT_METAL_SURFACE_EXTENSION_NAME);
-#elif defined(VK_USE_PLATFORM_HEADLESS_EXT)
-   instanceExtensions.push_back(VK_EXT_HEADLESS_SURFACE_EXTENSION_NAME);
-#elif defined(VK_USE_PLATFORM_SCREEN_QNX)
-   instanceExtensions.push_back(VK_QNX_SCREEN_SURFACE_EXTENSION_NAME);
-#endif
+//   // Enable surface extensions depending on os
+//#if defined(_WIN32)
+//   instanceExtensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
+//#elif defined(VK_USE_PLATFORM_ANDROID_KHR)
+//   instanceExtensions.push_back(VK_KHR_ANDROID_SURFACE_EXTENSION_NAME);
+//#elif defined(_DIRECT2DISPLAY)
+//   instanceExtensions.push_back(VK_KHR_DISPLAY_EXTENSION_NAME);
+//#elif defined(VK_USE_PLATFORM_DIRECTFB_EXT)
+//   instanceExtensions.push_back(VK_EXT_DIRECTFB_SURFACE_EXTENSION_NAME);
+//#elif defined(VK_USE_PLATFORM_WAYLAND_KHR)
+//   instanceExtensions.push_back(VK_KHR_WAYLAND_SURFACE_EXTENSION_NAME);
+//#elif defined(VK_USE_PLATFORM_XCB_KHR)
+//   instanceExtensions.push_back(VK_KHR_XCB_SURFACE_EXTENSION_NAME);
+//#elif defined(VK_USE_PLATFORM_IOS_MVK)
+//   instanceExtensions.push_back(VK_MVK_IOS_SURFACE_EXTENSION_NAME);
+//#elif defined(VK_USE_PLATFORM_MACOS_MVK)
+//   instanceExtensions.push_back(VK_MVK_MACOS_SURFACE_EXTENSION_NAME);
+//#elif defined(VK_USE_PLATFORM_METAL_EXT)
+//   instanceExtensions.push_back(VK_EXT_METAL_SURFACE_EXTENSION_NAME);
+//#elif defined(VK_USE_PLATFORM_HEADLESS_EXT)
+//   instanceExtensions.push_back(VK_EXT_HEADLESS_SURFACE_EXTENSION_NAME);
+//#elif defined(VK_USE_PLATFORM_SCREEN_QNX)
+//   instanceExtensions.push_back(VK_QNX_SCREEN_SURFACE_EXTENSION_NAME);
+//#endif
 
    // Get extensions supported by the instance and store for later use
    uint32_t extCount = 0;
@@ -278,12 +279,12 @@ void VulkanExampleBaseNoSwapChain::nextFrame(const ::function < void(void *, int
    if (fpsTimer > 1000.0f)
    {
       lastFPS = static_cast<uint32_t>((float)frameCounter * (1000.0f / fpsTimer));
-#if defined(_WIN32)
-      if (!settings.overlay) {
-         std::string windowTitle = getWindowTitle();
-         SetWindowText(window, ::wstring(windowTitle.c_str()));
-      }
-#endif
+//#if defined(_WIN32)
+//      if (!settings.overlay) {
+//         std::string windowTitle = getWindowTitle();
+//         SetWindowText(window, ::wstring(windowTitle.c_str()));
+//      }
+//#endif
       frameCounter = 0;
       lastTimestamp = tEnd;
    }
@@ -3344,6 +3345,6 @@ void VulkanExampleBaseNoSwapChain::setupSwapChain()
 
 void VulkanExampleBaseNoSwapChain::OnUpdateUIOverlay(vks::UIOverlay * overlay) {}
 
-#if defined(_WIN32)
-void VulkanExampleBaseNoSwapChain::OnHandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {};
-#endif
+//#if defined(_WIN32)
+//void VulkanExampleBaseNoSwapChain::OnHandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {};
+//#endif

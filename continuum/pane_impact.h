@@ -5,11 +5,11 @@
 #include "core/user/userex/pane_tab_impact.h"
 
 
-namespace lowland_continuum
+namespace vulkan_land_continuum
 {
 
 
-   class CLASS_DECL_lowland_continuum pane_impact :
+   class CLASS_DECL_vulkan_land_continuum pane_impact :
       virtual public ::app_consumer < application, ::userex::pane_tab_impact, ::user::form_callback >
    {
    public:
@@ -60,7 +60,7 @@ namespace lowland_continuum
    };
 
 
-} // namespace lowland_continuum
+} // namespace vulkan_land_continuum
 
 
 

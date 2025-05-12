@@ -17,11 +17,11 @@
 #include "base/user/user/single_document_template.h"
 
 
-__IMPLEMENT_APPLICATION_RELEASE_TIME(lowland_continuum);
-IMPLEMENT_APPLICATION_FACTORY(lowland_continuum);
+__IMPLEMENT_APPLICATION_RELEASE_TIME(vulkan_land_continuum);
+IMPLEMENT_APPLICATION_FACTORY(vulkan_land_continuum);
 
 
-namespace lowland_continuum
+namespace vulkan_land_continuum
 {
 
 
@@ -39,11 +39,11 @@ namespace lowland_continuum
 
       //m_ppaneimpact = nullptr;
 
-      m_strAppId = "lowland/continuum";
+      m_strAppId = "vulkan-land/continuum";
 
-      m_strAppName = "lowland/continuum";
+      m_strAppName = "vulkan-land/continuum";
 
-      m_strBaseSupportId = "lowland_continuum";
+      m_strBaseSupportId = "vulkan_land_continuum";
 
       m_bLicense = false;
       
@@ -63,12 +63,12 @@ namespace lowland_continuum
    void application::init_instance()
    {
 
-      factory()->add_factory_item <::lowland_continuum::document >();
-      factory()->add_factory_item <::lowland_continuum::main_frame >();
-      factory()->add_factory_item <::lowland_continuum::impact >();
-      factory()->add_factory_item <::lowland_continuum::pane_impact >();
+      factory()->add_factory_item <::vulkan_land_continuum::document >();
+      factory()->add_factory_item <::vulkan_land_continuum::main_frame >();
+      factory()->add_factory_item <::vulkan_land_continuum::impact >();
+      factory()->add_factory_item <::vulkan_land_continuum::pane_impact >();
 
-      ::lowland_landen::application::init_instance();
+      ::vulkan_land_landen::application::init_instance();
 
       add_impact_system(
          "main", __initialize_new ::user::single_document_template(
@@ -175,7 +175,7 @@ namespace lowland_continuum
    void application::create_options_body(::user::interaction* pparent)
    {
 
-      auto pstillTitle = create_label<::user::still>(pparent, "lowland continuum Options");
+      auto pstillTitle = create_label<::user::still>(pparent, "vulkan-land continuum Options");
 
       __defer_construct(pstillTitle->m_pfont);
 
@@ -298,7 +298,7 @@ namespace lowland_continuum
    }
 
 
-} // namespace lowland_continuum
+} // namespace vulkan_land_continuum
 
 
 

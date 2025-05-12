@@ -74,7 +74,7 @@
 #include "benchmark.hpp"
 #include "application.h"
 
-class CLASS_DECL_LOWLAND_LANDEN VulkanExampleBaseNoSwapChain :
+class CLASS_DECL_vulkan_land_LANDEN VulkanExampleBaseNoSwapChain :
    virtual public ::vulkan::application
 {
 public:

@@ -1,5 +1,5 @@
 #include "framework.h"
-#define APPLICATION_NAMESPACE lowland_continuum
+#define APPLICATION_NAMESPACE vulkan_land_continuum
 #include "acme/inline/application/main.inl"
 
 

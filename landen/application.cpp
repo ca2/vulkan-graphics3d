@@ -18,11 +18,11 @@
 #include "base/user/user/single_document_template.h"
 
 
-__IMPLEMENT_APPLICATION_RELEASE_TIME(lowland_landen);
-IMPLEMENT_APPLICATION_FACTORY(lowland_landen);
+__IMPLEMENT_APPLICATION_RELEASE_TIME(vulkan_land_landen);
+IMPLEMENT_APPLICATION_FACTORY(vulkan_land_landen);
 
 
-namespace lowland_landen
+namespace vulkan_land_landen
 {
 
 
@@ -36,9 +36,9 @@ namespace lowland_landen
       //m_ptemplateFuelMain = nullptr;
       //m_ptemplateFuelImpact = nullptr;
 
-      m_strAppId              = "lowland/landen";
-      m_strAppName            = "lowland/landen";
-      m_strBaseSupportId      = "lowland/landen";
+      m_strAppId              = "vulkan-land/landen";
+      m_strAppName            = "vulkan-land/landen";
+      m_strBaseSupportId      = "vulkan-land/landen";
       m_bLicense              = false;
 
    }
@@ -54,10 +54,10 @@ namespace lowland_landen
    {
 
       //factory()->add_factory_item <::app_core_vulken::child_frame >();
-      factory()->add_factory_item <::lowland_landen::document >();
-      factory()->add_factory_item <::lowland_landen::frame >();
+      factory()->add_factory_item <::vulkan_land_landen::document >();
+      factory()->add_factory_item <::vulkan_land_landen::frame >();
       //factory()->add_factory_item <::app_core_vulken::edit_impact >();
-      factory()->add_factory_item <::lowland_landen::impact >();
+      factory()->add_factory_item <::vulkan_land_landen::impact >();
       //factory()->add_factory_item <::app_core_vulken::main_impact >();
       //factory()->add_factory_item <::app_core_vulken::pane_impact >();
       //factory()->add_factory_item <::app_core_vulken::top_impact >();
@@ -78,9 +78,9 @@ namespace lowland_landen
       add_impact_system(
          "main"_ansi, __initialize_new ::user::single_document_template(
                           "main"_ansi,
-                          ::type < ::lowland_landen::document >(),
-                          ::type < ::lowland_landen::frame >(),       // top level SDI frame::windowing::window
-                        ::type < ::lowland_landen::impact >()));
+                          ::type < ::vulkan_land_landen::document >(),
+                          ::type < ::vulkan_land_landen::frame >(),       // top level SDI frame::windowing::window
+                        ::type < ::vulkan_land_landen::impact >()));
       //::type < ::app_core_vulken::pane_impact >()));
       
       //add_document_template(pdocumenttemplate);
@@ -294,7 +294,7 @@ namespace lowland_landen
    //__namespace_application_factory("app-core/vulken"_ansi);
 
 
-} // namespace lowland_landen
+} // namespace vulkan_land_landen
 
 
 

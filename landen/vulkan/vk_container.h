@@ -21,7 +21,7 @@ namespace vkc
 {
 
 	
-	class CLASS_DECL_LOWLAND_LANDEN VkContainer :
+	class CLASS_DECL_vulkan_land_LANDEN VkContainer :
 		virtual public ::particle
 	{
 	public:

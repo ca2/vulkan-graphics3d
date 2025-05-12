@@ -27,7 +27,7 @@
 
 // Project source specific includes
 #include "vk_application.h"
-#include "VkBootstrap.h"
+#include "vkbootstrap/VkBootstrap.h"
 #include "Renderer/vk_buffer.h"
 #include "VK_abstraction/vk_camera.h"
 #include "VK_abstraction/vk_input.h"
@@ -81,7 +81,7 @@ namespace vkc {
    void Application::run_application()
    {
 
-      ::pointer < lowland_continuum::application> papp = m_papplication;
+      ::pointer < vulkan_land_continuum::application> papp = m_papplication;
 
 
       __construct_new(m_pvkcdevice);

@@ -5,11 +5,11 @@
 #include <functional>
 
 //#include "vma/vk_mem_alloc.h"
-#include "lowland/landen/vulkan/VulkanDevice.h"
-#include "lowland/landen/vulkan/vulkan_example_base_no_swap_chain.h"
+#include "vulkan-land/landen/vulkan/VulkanDevice.h"
+#include "vulkan-land/landen/vulkan/vulkan_example_base_no_swap_chain.h"
 #include "VK_abstraction/vk_descriptors.h"
 #include "VK_abstraction/vk_gameObject.h"
-#include "lowland/landen/vulkan/vk_container.h"
+#include "vulkan-land/landen/vulkan/vk_container.h"
 #include "Renderer/vk_renderer.h"
 
 namespace vkc {

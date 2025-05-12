@@ -5,14 +5,14 @@
 
 
 
-#if defined(_lowland_continuum_project)
-#define CLASS_DECL_lowland_continuum  CLASS_DECL_EXPORT
+#if defined(_vulkan_land_continuum_project)
+#define CLASS_DECL_vulkan_land_continuum  CLASS_DECL_EXPORT
 #else
-#define CLASS_DECL_lowland_continuum  CLASS_DECL_IMPORT
+#define CLASS_DECL_vulkan_land_continuum  CLASS_DECL_IMPORT
 #endif
 
 
-namespace lowland_continuum
+namespace vulkan_land_continuum
 {
 
    class application;

@@ -1,15 +1,15 @@
 #pragma once
 
 
-#include "lowland/landen/application.h"
+#include "vulkan-land/landen/application.h"
 
 
-namespace lowland_continuum
+namespace vulkan_land_continuum
 {
 
 
-   class CLASS_DECL_lowland_continuum application :
-      virtual public lowland_landen::application
+   class CLASS_DECL_vulkan_land_continuum application :
+      virtual public vulkan_land_landen::application
    {
    public:
 
@@ -48,7 +48,7 @@ bool is_absolute_mouse_position();
    };
 
 
-} // namespace lowland_continuum
+} // namespace vulkan_land_continuum
 
 
 

@@ -147,15 +147,15 @@
 #include "vulkan/application.h"
 #include "vulkan/vk_container.h"
 #include "apex/platform/app_consumer.h"
-#include "lowland/landen/vulkan/vk_container.h"
+#include "vulkan-land/landen/vulkan/vk_container.h"
 
 
 
-namespace lowland_landen
+namespace vulkan_land_landen
 {
 
 
-   class CLASS_DECL_LOWLAND_LANDEN impact :
+   class CLASS_DECL_vulkan_land_LANDEN impact :
       virtual public ::app_consumer < application, ::user::impact, ::vkc::VkContainer>
    {
    public:
@@ -228,7 +228,7 @@ namespace lowland_landen
    };
 
 
-} // namespace lowland_landen
+} // namespace vulkan_land_landen
 
 
 

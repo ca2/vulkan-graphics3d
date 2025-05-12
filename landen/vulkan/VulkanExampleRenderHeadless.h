@@ -74,7 +74,7 @@
 //
 
 
-class VulkanExample5_base
+class VulkanExampleRenderHeadless
 {
 public:
 
@@ -279,8 +279,8 @@ public:
 
    VkDebugReportCallbackEXT m_debugReportCallback{};
 
-   VulkanExample5_base(mouseState * pmousestate);
-   ~VulkanExample5_base();
+   VulkanExampleRenderHeadless(mouseState * pmousestate);
+   ~VulkanExampleRenderHeadless();
 
 
    VkResult createInstance();
@@ -366,7 +366,7 @@ public:
 
 
 class VulkanExample5 :
-   public VulkanExample5_base
+   public VulkanExampleRenderHeadless
 {
 public:
 

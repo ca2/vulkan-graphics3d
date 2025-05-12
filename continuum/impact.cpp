@@ -18,7 +18,7 @@ namespace vkc
    ::pointer<::vulkan::application > start_vulkan_application(::vkc::VkContainer* pvkcontainer, mouseState* pmousestate);
 } // namespace vkc
 
-namespace lowland_continuum
+namespace vulkan_land_continuum
 {
 
 
@@ -70,7 +70,7 @@ namespace lowland_continuum
    void impact::install_message_routing(::channel * psender)
    {
 
-      ::lowland_landen::impact::install_message_routing(psender);
+      ::vulkan_land_landen::impact::install_message_routing(psender);
 
       MESSAGE_LINK(e_message_create,psender,this,&impact::on_message_create);
       MESSAGE_LINK(e_message_destroy, psender, this, &impact::on_message_destroy);
@@ -303,7 +303,7 @@ namespace lowland_continuum
       pgraphics->text_out(point.x(), point.y() + y + size.cy(), strText);
 
       pgraphics->set_smooth_mode(::draw2d::e_smooth_mode_none);
-      ::lowland_landen::impact::_001OnDraw(pgraphics);
+      ::vulkan_land_landen::impact::_001OnDraw(pgraphics);
    }
 
 
@@ -319,7 +319,7 @@ namespace lowland_continuum
 
       }
 
-      ::lowland_landen::impact::on_layout(pgraphics);
+      ::vulkan_land_landen::impact::on_layout(pgraphics);
       
       setup_default_client_area_user_item();
 
@@ -380,7 +380,7 @@ namespace lowland_continuum
    }
 
 
-} // namespace lowland_continuum
+} // namespace vulkan_land_continuum
 
 
 

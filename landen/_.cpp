@@ -3,7 +3,7 @@
 #include "acme/platform/release_time.h"
 
 
-__BEGIN_RELEASE_TIME(lowland_landen)
+__BEGIN_RELEASE_TIME(vulkan_land_landen)
 #include "release_time.txt"
 __END_RELEASE_TIME()
 

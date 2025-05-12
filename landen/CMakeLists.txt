@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(lowland_landen CXX)
+project(vulkan_land_landen CXX)
 
 
 list(APPEND library_source

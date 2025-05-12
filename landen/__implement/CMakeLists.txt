@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(_lowland_landen CXX)
+project(_vulkan_land_landen CXX)
 
 
 
@@ -40,7 +40,7 @@ list(APPEND executable_references
    base
    bred
    core
-   lowland_landen)
+   vulkan_land_landen)
 
 
 if (MSVC)

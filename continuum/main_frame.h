@@ -1,15 +1,15 @@
 #pragma once
 
 
-#include "lowland/landen/frame.h"
+#include "vulkan-land/landen/frame.h"
 
 
-namespace lowland_continuum
+namespace vulkan_land_continuum
 {
 
 
-   class CLASS_DECL_lowland_continuum main_frame :
-      virtual public lowland_landen::frame
+   class CLASS_DECL_vulkan_land_continuum main_frame :
+      virtual public vulkan_land_landen::frame
    {
    public:
 
@@ -40,7 +40,7 @@ namespace lowland_continuum
    };
 
 
-} // namespace lowland_continuum
+} // namespace vulkan_land_continuum
 
 
 

@@ -5,7 +5,7 @@
 namespace vulkan
 {
 
-   class CLASS_DECL_LOWLAND_LANDEN application :
+   class CLASS_DECL_vulkan_land_LANDEN application :
       virtual public ::particle
    {
    public:

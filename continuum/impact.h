@@ -1,15 +1,15 @@
 #pragma once
 
 
-#include "lowland/landen/impact.h"
+#include "vulkan-land/landen/impact.h"
 
 
-namespace lowland_continuum
+namespace vulkan_land_continuum
 {
 
 
-   class CLASS_DECL_lowland_continuum impact :
-      virtual public ::app_consumer < application, ::lowland_landen::impact >
+   class CLASS_DECL_vulkan_land_continuum impact :
+      virtual public ::app_consumer < application, ::vulkan_land_landen::impact >
    {
    public:
 
@@ -56,6 +56,6 @@ namespace lowland_continuum
    };
 
 
-} // namespace lowland_continuum
+} // namespace vulkan_land_continuum
 
 

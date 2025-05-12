@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(_lowland_continuum CXX)
+project(_vulkan_land_continuum CXX)
 
 
 
@@ -26,7 +26,7 @@ list(APPEND executable_references
    base
         bred
         core
-   lowland_continuum
+   vulkan_land_continuum
    )
 
 
