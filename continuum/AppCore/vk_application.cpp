@@ -177,6 +177,7 @@ namespace vkc {
       //while (!_window.shouldClose())
       while (!m_pvkcontainer->m_bShouldClose && task_get_run()) 
       {
+
          task_iteration();
          //glfwPollEvents();
 
@@ -247,6 +248,7 @@ namespace vkc {
       }
 
    }
+
 
    void Application::resize(int cx, int cy)
    {

@@ -812,7 +812,7 @@ VulkanExample5::~VulkanExample5()
 
       // The VK_LAYER_KHRONOS_validation contains all current validation functionality.
       // Note that on Android this layer requires at least NDK r20
-      const char * validationLayerName = "VK_LAYER_KHRONOS_validation"_ansi;
+      const char * validationLayerName = "VK_LAYER_KHRONOS_validation";
       if (m_settings.validation) {
          // Check if this layer is available at instance level
          uint32_t instanceLayerCount;

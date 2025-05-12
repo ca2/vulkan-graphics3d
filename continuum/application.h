@@ -13,6 +13,9 @@ namespace lowland_continuum
    {
    public:
 
+
+bool m_bAbsoluteMousePosition;
+
       pane_impact* m_ppaneimpact;
       ::file::path                                    m_pathApplicationText;
       ::user::document *                              m_pdocMenu;
@@ -38,6 +41,10 @@ namespace lowland_continuum
       virtual long long decrement_reference_count() override;
 #endif
       void create_options_body(::user::interaction* pparent);
+
+
+bool is_absolute_mouse_position();
+
    };
 
 

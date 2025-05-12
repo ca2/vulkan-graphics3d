@@ -27,6 +27,7 @@ namespace lowland_continuum
 
    application::application()
    {
+      m_bAbsoluteMousePosition = false;
       m_ppaneimpact = nullptr;
       //m_bImaging = false;
 
@@ -186,21 +187,29 @@ namespace lowland_continuum
 
          auto pcheckbox = create_check_box<::user::check_box>(playoutLine, "");
 
-         bool bCheck = false;
+         bool bAbsoluteMousePosition = false;
 
-         if (datastream()->get("Absolute Mouse Position", bCheck))
+         if (datastream()->get("Absolute Mouse Position", bAbsoluteMousePosition))
          {
 
-            pcheckbox->set_check(bCheck, ::e_source_initialize);
+            pcheckbox->set_check(bAbsoluteMousePosition, ::e_source_initialize);
 
          }
+
+         m_bAbsoluteMousePosition = bAbsoluteMousePosition;
 
          pcheckbox->check_changed(this) += [this](auto& check)
             {
 
-               bool bCheck = check.payload().as_bool();
+               auto bAbsoluteMousePosition = check.payload().as_bool();
 
-               datastream()->set("Absolute Mouse Position", bCheck);
+               datastream()->set("Absolute Mouse Position", bAbsoluteMousePosition);
+
+
+            bAbsoluteMousePosition = false;
+            datastream()->get("Absolute Mouse Position", bAbsoluteMousePosition);
+
+            m_bAbsoluteMousePosition = bAbsoluteMousePosition;
 
                //on_change_synchronize_with_weather();
 
@@ -277,6 +286,14 @@ namespace lowland_continuum
       //m_pbuttonClear->set_window_text("Clear");
 
       //m_pbuttonSend->set_window_text("Send");
+
+   }
+
+
+   bool application::is_absolute_mouse_position()
+   {
+
+      return m_bAbsoluteMousePosition;
 
    }
 

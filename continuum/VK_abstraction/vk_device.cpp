@@ -333,11 +333,17 @@ namespace vkc
       std::vector<VkLayerProperties> availableLayers(layerCount);
       vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
 
-      for (const char* layerName : validationLayers) {
+      for (const char* layerName : validationLayers)
+      {
+
          bool layerFound = false;
 
-         for (const auto& layerProperties : availableLayers) {
-            if (strcmp(layerName, layerProperties.layerName) == 0) {
+         printf_line("checking for validation layer : %s", layerName);
+         for (const auto& layerProperties : availableLayers)
+         {
+            printf_line("an available layer : %s", layerName);
+            if (strcmp(layerName, layerProperties.layerName) == 0)
+            {
                layerFound = true;
                break;
             }

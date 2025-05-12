@@ -14,6 +14,9 @@
 #undef max
 
 
+#define VK_CHECK(x) do { VkResult err = x; if (err) { std::cerr << "Detected Vulkan error: " << err << std::endl; abort(); } } while (0)
+
+
 namespace vkc
 {
 
@@ -140,10 +143,15 @@ namespace vkc
       submitInfo.pSignalSemaphores = signalSemaphores;
 
       vkResetFences(m_pvkcdevice->device(), 1, &inFlightFences[currentFrame]);
-      if (vkQueueSubmit(m_pvkcdevice->graphicsQueue(), 1, &submitInfo, inFlightFences[currentFrame]) !=
-         VK_SUCCESS) {
+
+      if (vkQueueSubmit(m_pvkcdevice->graphicsQueue(), 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS) 
+      {
+
          throw std::runtime_error("failed to submit draw command buffer!");
+         
       }
+
+      //VK_CHECK(vkWaitForFences(m_pvkcdevice->device(), 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX));
 
       //VkPresentInfoKHR presentInfo = {};
       //presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;

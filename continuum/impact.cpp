@@ -375,14 +375,10 @@ namespace lowland_continuum
    bool impact::is_absolute_mouse_position()
    {
 
-
-      bool bAbsoluteMousePosition = false;
-
-      get_app()->datastream()->get("Absolute Mouse Position", bAbsoluteMousePosition);
-
-      return bAbsoluteMousePosition;
+      return get_app()->is_absolute_mouse_position();
 
    }
+
 
 } // namespace lowland_continuum
 
