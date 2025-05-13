@@ -12,7 +12,8 @@
 #include "vulkan-land/landen/vulkan/vk_container.h"
 #include "Renderer/vk_renderer.h"
 
-namespace vkc {
+namespace vkc 
+{
 
 
    //class VulkanExample20 : public VulkanExampleBaseNoSwapChain
