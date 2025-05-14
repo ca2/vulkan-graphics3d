@@ -8,7 +8,7 @@ namespace vulkan_land_continuum
 {
 
 
-   class CLASS_DECL_vulkan_land_continuum impact :
+   class CLASS_DECL_VULKAN_LAND_CONTINUUM impact :
       virtual public ::app_consumer < application, ::vulkan_land_landen::impact >
    {
    public:

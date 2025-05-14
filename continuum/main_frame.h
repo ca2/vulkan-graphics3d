@@ -8,7 +8,7 @@ namespace vulkan_land_continuum
 {
 
 
-   class CLASS_DECL_vulkan_land_continuum main_frame :
+   class CLASS_DECL_VULKAN_LAND_CONTINUUM main_frame :
       virtual public vulkan_land_landen::frame
    {
    public:

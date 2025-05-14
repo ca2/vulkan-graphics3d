@@ -9,7 +9,7 @@ namespace vulkan_land_continuum
 {
 
 
-   class CLASS_DECL_vulkan_land_continuum pane_impact :
+   class CLASS_DECL_VULKAN_LAND_CONTINUUM pane_impact :
       virtual public ::app_consumer < application, ::userex::pane_tab_impact, ::user::form_callback >
    {
    public:

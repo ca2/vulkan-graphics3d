@@ -8,7 +8,7 @@ namespace vulkan_land_continuum
 {
 
 
-   class CLASS_DECL_vulkan_land_continuum document :
+   class CLASS_DECL_VULKAN_LAND_CONTINUUM document :
       public ::user::document
    {
    public:

@@ -178,28 +178,36 @@ namespace vulkan_land_landen
 
          if (m_bLastMouse)
          {
+
             m_bLastMouse = false;
             m_bFirstMouse = true;
 
          }
 
+         double xCursor;
+         double yCursor;
+
          if (is_absolute_mouse_position())
          {
-            m_dMouseLastX = ((point.x() - (w / 2.0)) * 2.0);
-            m_dMouseLastY = ((point.y() - (h / 2.0)) * 2.0);
+
+            m_dCursorX = ((point.x() - (w / 2.0)) * 2.0);
+            m_dCursorY = ((point.y() - (h / 2.0)) * 2.0);
+
          }
          else
          {
 
-            m_dMouseLastX = point.x();
-            m_dMouseLastY = point.y();
+            //xCursor = point.x();
+            //yCursor = point.y();
+
+            m_dCursorX = point.x();
+            m_dCursorY = point.y();
 
          }
 
          track_mouse_leave();
 
-
-         get_app()->m_pvulkanapplication->handleMouseMove(point.x(), point.y());
+         //get_app()->m_pvulkanapplication->handleMouseMove(xCursor, yCursor);
 
       }
 
@@ -224,9 +232,12 @@ namespace vulkan_land_landen
 
       if (is_absolute_mouse_position())
       {
-         m_dMouseLastX = 0.;
-         m_dMouseLastY = 0.;
+         
+         m_dCursorX = 0.;
+         m_dCursorY = 0.;
+
       }
+
       m_bLastMouse = true;
 
    }

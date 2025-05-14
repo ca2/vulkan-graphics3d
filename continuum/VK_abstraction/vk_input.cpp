@@ -158,18 +158,22 @@ namespace vkc {
 
    void MNKController::handleMouseInput(vkc::VkContainer* pvkcontainer)
    {
-      double xpos, ypos;
+      
+      double x, y;
       double newx, newy;
+
       if (pvkcontainer->is_absolute_mouse_position())
       {
-         newx = pvkcontainer->m_dMouseLastX * 1.25 * MATH_PI;
-         newy = pvkcontainer->m_dMouseLastY * 1.25 * MATH_PI/2.0;
+
+         newx = pvkcontainer->m_dCursorX * 1.25 * MATH_PI;
+         newy = pvkcontainer->m_dCursorY * 1.25 * MATH_PI/2.0;
+
       }
       else
       {
 
-         newx = pvkcontainer->m_dMouseLastX;
-         newy = pvkcontainer->m_dMouseLastY;
+         newx = pvkcontainer->m_dCursorX;
+         newy = pvkcontainer->m_dCursorY;
 
       }
       //glfwGetCursorPos(window, &xpos, &ypos);
@@ -187,40 +191,41 @@ namespace vkc {
 
          if (pvkcontainer->m_bFirstMouse)
          {
-            _lastX = newx;
-            _lastY = newy;
+            m_dMouseLastX = newx;
+            m_dMouseLastY = newy;
             pvkcontainer->m_bFirstMouse = false;
 
          }
-
-      }
-      {
-
-
 
       }
 
       if (pvkcontainer->is_absolute_mouse_position())
       {
 
-         xpos = _lastX + (newx - _lastX) * 0.05;
-         ypos = _lastY + (newy - _lastY) * 0.05;
-         _x = xpos;
-         _y = -ypos;  // reversed Y
+         x = m_dMouseLastX + (newx - m_dMouseLastX) * 0.05;
+         y = m_dMouseLastY + (newy - m_dMouseLastY) * 0.05;
+         m_Δx = x;
+         m_Δy = -y;  // reversed Y
+
       }
       else
       {
 
-         xpos = newx;
-         ypos = newy;
+         x = newx;
+         y = newy;
 
-         _x = _x + static_cast<float>(xpos - _lastX - _x) * 0.05;
-         _y = _y + static_cast<float>(_lastY - ypos - _y) * 0.05;  // reversed Y
+         m_Δx = m_Δx + static_cast<float>(x - m_dMouseLastX - m_Δx) * 0.05;
+         m_Δy = m_Δy + static_cast<float>(m_dMouseLastY - y - m_Δy) * 0.05;  // reversed Y
 
 
       }
 
-      _lastX = xpos;
-      _lastY = ypos;
+      m_dMouseLastX = x;
+      m_dMouseLastY = y;
+
    }
+
+
 } // namespace vkc
+
+

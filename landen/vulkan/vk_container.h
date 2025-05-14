@@ -29,8 +29,8 @@ namespace vkc
 
 		::function < void(void*, int, int, int)> m_callbackOffscreen;
 
-		double   m_dMouseLastX;
-		double   m_dMouseLastY;
+		double   m_dCursorX;
+		double   m_dCursorY;
 		bool		m_bFirstMouse;
 		bool		m_bLastMouse;
 

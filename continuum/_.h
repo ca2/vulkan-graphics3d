@@ -6,9 +6,9 @@
 
 
 #if defined(_vulkan_land_continuum_project)
-#define CLASS_DECL_vulkan_land_continuum  CLASS_DECL_EXPORT
+#define CLASS_DECL_VULKAN_LAND_CONTINUUM  CLASS_DECL_EXPORT
 #else
-#define CLASS_DECL_vulkan_land_continuum  CLASS_DECL_IMPORT
+#define CLASS_DECL_VULKAN_LAND_CONTINUUM  CLASS_DECL_IMPORT
 #endif
 
 
