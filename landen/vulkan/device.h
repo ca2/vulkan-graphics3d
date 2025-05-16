@@ -1,77 +1,128 @@
-/*
- * Vulkan device class
- *
- * Encapsulates a physical Vulkan device and its logical representation
- *
- * Copyright (C) 2016-2023 by Sascha Willems - www.saschawillems.de
- *
- * This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)
- */
 #pragma once
 
+#include "AppCore/vk_window.h"
+//#include "vulkan-land/graphics3d_vulkan/device.h"
+#include "vulkan/vulkan.h"
+// std lib headers
+#include <string>
+#include <vector>
 
-#include "buffer.h"
-#include "tools.h"
-#include "_vulkan.h"
-#include <algorithm>
-#include <assert.h>
-#include <exception>
-
-
-namespace vulkan
+namespace vkc
 {
 
+   
+   class VkContainer;
 
-   struct device
+   struct SwapChainSupportDetails
    {
-      /** @brief Physical device representation */
-      VkPhysicalDevice physicalDevice;
-      /** @brief Logical device representation (application's view of the device) */
-      VkDevice logicalDevice;
-      /** @brief Properties of the physical device including limits that the application can check against */
+      VkSurfaceCapabilitiesKHR capabilities;
+      std::vector<VkSurfaceFormatKHR> formats;
+      std::vector<VkPresentModeKHR> presentModes;
+   };
+
+   struct QueueFamilyIndices {
+      uint32_t graphicsFamily;
+      uint32_t presentFamily;
+      bool graphicsFamilyHasValue = false;
+      bool presentFamilyHasValue = false;
+      bool isComplete() { return graphicsFamilyHasValue && presentFamilyHasValue; }
+   };
+
+   class VkcDevice :
+      virtual public ::particle {
+   public:
+#if defined(NDEBUG)
+      const bool enableValidationLayers = false;
+#else
+      const bool enableValidationLayers = true;
+#endif
+
+      //VkcDevice(VkWindow& window);
+      //VkcDevice(VkPhysicalDevice physicalDevice);
+      //VkcDevice(vks::VulkanDevice * pdevice);
+      VkcDevice();
+      ~VkcDevice();
+
+      virtual void initialize_device(::vkc::VkContainer* pvkcontainer);
+
+      // Not copyable or movable
+      VkcDevice(const VkcDevice&) = delete;
+      void operator=(const VkcDevice&) = delete;
+      //VkcDevice(vks::VulkanDevice&&) = delete;
+      VkcDevice& operator=(VkcDevice&&) = delete;
+
+      VkCommandPool getCommandPool() { return commandPool; }
+      VkDevice device() { return m_vkdevice; }
+
+      VkSurfaceKHR surface() { return surface_; }
+      VkQueue graphicsQueue() { return graphicsQueue_; }
+      VkQueue presentQueue() { return presentQueue_; }
+
+      SwapChainSupportDetails getSwapChainSupport() { return querySwapChainSupport(physicalDevice); }
+      uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
+      QueueFamilyIndices findPhysicalQueueFamilies() { return findQueueFamilies(physicalDevice); }
+      VkFormat findSupportedFormat(
+         const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
+
+      // Buffer Helper Functions
+      void createBuffer(
+         VkDeviceSize size,
+         VkBufferUsageFlags usage,
+         VkMemoryPropertyFlags properties,
+         VkBuffer& buffer,
+         VkDeviceMemory& bufferMemory);
+      VkCommandBuffer beginSingleTimeCommands();
+      void endSingleTimeCommands(VkCommandBuffer commandBuffer);
+      void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+      void copyBufferToImage(
+         VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, uint32_t layerCount);
+
+      void createImageWithInfo(
+         const VkImageCreateInfo& imageInfo,
+         VkMemoryPropertyFlags properties,
+         VkImage& image,
+         VkDeviceMemory& imageMemory);
+
       VkPhysicalDeviceProperties properties;
-      /** @brief Features of the physical device that an application can use to check if a feature is supported */
-      VkPhysicalDeviceFeatures features;
-      /** @brief Features that have been enabled for use on the physical device */
-      VkPhysicalDeviceFeatures enabledFeatures;
-      /** @brief Memory types and heaps of the physical device */
-      VkPhysicalDeviceMemoryProperties memoryProperties;
-      /** @brief Queue family properties of the physical device */
-      std::vector<VkQueueFamilyProperties> queueFamilyProperties;
-      /** @brief List of extensions supported by the device */
-      std::vector<std::string> supportedExtensions;
-      /** @brief Default command pool for the graphics queue family index */
-      VkCommandPool commandPool = VK_NULL_HANDLE;
-      /** @brief Contains queue family indices */
-      struct
-      {
-         uint32_t graphics;
-         uint32_t compute;
-         uint32_t transfer;
-      } queueFamilyIndices;
-      operator VkDevice() const
-      {
-         return logicalDevice;
-      };
-      explicit device(VkPhysicalDevice physicalDevice);
-      ~device();
-      uint32_t        getMemoryType(uint32_t typeBits, VkMemoryPropertyFlags properties, VkBool32* memTypeFound = nullptr) const;
-      uint32_t        getQueueFamilyIndex(VkQueueFlags queueFlags) const;
-      VkResult        createLogicalDevice(VkPhysicalDeviceFeatures enabledFeatures, std::vector<const char*> enabledExtensions, void* pNextChain, bool useSwapChain = true, VkQueueFlags requestedQueueTypes = VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT);
-      VkResult        createBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, VkDeviceSize size, VkBuffer* buffer, VkDeviceMemory* memory, void* data = nullptr);
-      VkResult        createBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, vulkan::buffer* buffer, VkDeviceSize size, void* data = nullptr);
-      void            copyBuffer(vulkan::buffer* src, vulkan::buffer* dst, VkQueue queue, VkBufferCopy* copyRegion = nullptr);
-      VkCommandPool   createCommandPool(uint32_t queueFamilyIndex, VkCommandPoolCreateFlags createFlags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
-      VkCommandBuffer createCommandBuffer(VkCommandBufferLevel level, VkCommandPool pool, bool begin = false);
-      VkCommandBuffer createCommandBuffer(VkCommandBufferLevel level, bool begin = false);
-      void            flushCommandBuffer(VkCommandBuffer commandBuffer, VkQueue queue, VkCommandPool pool, bool free = true);
-      void            flushCommandBuffer(VkCommandBuffer commandBuffer, VkQueue queue, bool free = true);
-      bool            extensionSupported(std::string extension);
-      VkFormat        getSupportedDepthFormat(bool checkSamplingSupport);
+
+
+      void submitWork(VkCommandBuffer cmdBuffer, VkQueue queue);
+
+   public:
+      void createInstance();
+      void setupDebugMessenger();
+      void createSurface();
+      void pickPhysicalDevice();
+      void createLogicalDevice();
+      void createCommandPool();
+
+      // helper functions
+      bool isDeviceSuitable(VkPhysicalDevice pvkcdevice);
+      std::vector<const char*> getRequiredExtensions();
+      bool checkValidationLayerSupport();
+      QueueFamilyIndices findQueueFamilies(VkPhysicalDevice pvkcdevice);
+      void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
+      void hasGflwRequiredInstanceExtensions();
+      bool checkDeviceExtensionSupport(VkPhysicalDevice pvkcdevice);
+      SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice pvkcdevice);
+
+      VkInstance instance;
+      VkDebugUtilsMessengerEXT debugMessenger;
+      VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
+      ::pointer < vkc::VkContainer > m_pvkcontainer;
+      VkCommandPool commandPool;
+
+      VkDevice m_vkdevice;
+      VkSurfaceKHR surface_;
+      VkQueue graphicsQueue_;
+      VkQueue presentQueue_;
+
+      const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
+      const std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+
    };
 
 
-} // namespace vulkan
-
+}  // namespace vkc
 
 

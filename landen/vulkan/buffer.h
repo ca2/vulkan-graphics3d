@@ -1,60 +1,60 @@
-/*
-* Vulkan buffer class
-*
-* Encapsulates a Vulkan buffer
-*
-* Copyright (C) 2016 by Sascha Willems - www.saschawillems.de
-*
-* This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)
-*/
 #pragma once
 
+#include "VK_abstraction/vk_device.h"
 
-#include <vector>
+namespace vkc {
 
+    class VkcBuffer:
+    virtual public ::particle{
+    public:
+       VkcBuffer();
+        ~VkcBuffer();
+       void initialize_buffer(VkcDevice *pdevice,
+           VkDeviceSize instanceSize,
+           uint32_t instanceCount,
+           VkBufferUsageFlags usageFlags,
+           VkMemoryPropertyFlags memoryPropertyFlags,
+           VkDeviceSize minOffsetAlignment = 1);
 
-#include "_vulkan.h"
-#include "tools.h"
+        VkcBuffer(const VkcBuffer&) = delete;
+        VkcBuffer& operator=(const VkcBuffer&) = delete;
 
+        VkResult map(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
+        void unmap();
 
-namespace vulkan
-{	
+        void writeToBuffer(void* data, VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
+        VkResult flush(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
+        VkDescriptorBufferInfo descriptorInfo(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
+        VkResult invalidate(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
 
+        void writeToIndex(void* data, int index);
+        VkResult flushIndex(int index);
+        VkDescriptorBufferInfo descriptorInfoForIndex(int index);
+        VkResult invalidateIndex(int index);
 
-	/**
-	* @brief Encapsulates access to a Vulkan buffer backed up by device memory
-	* @note To be filled by an external source like the device
-	*/
-	struct buffer
-	{
+        VkBuffer getBuffer() const { return m_buffer; }
+        void* getMappedMemory() const { return m_mapped; }
+        uint32_t getInstanceCount() const { return m_instanceCount; }
+        VkDeviceSize getInstanceSize() const { return m_instanceSize; }
+        VkDeviceSize getAlignmentSize() const { return m_instanceSize; }
+        VkBufferUsageFlags getUsageFlags() const { return m_usageFlags; }
+        VkMemoryPropertyFlags getMemoryPropertyFlags() const { return m_memoryPropertyFlags; }
+        VkDeviceSize getBufferSize() const { return m_bufferSize; }
 
+    private:
+        static VkDeviceSize getAlignment(VkDeviceSize instanceSize, VkDeviceSize minOffsetAlignment);
 
-		VkDevice device;
-		VkBuffer m_vkbuffer = VK_NULL_HANDLE;
-		VkDeviceMemory memory = VK_NULL_HANDLE;
-		VkDescriptorBufferInfo descriptor;
-		VkDeviceSize size = 0;
-		VkDeviceSize alignment = 0;
-		void* mapped = nullptr;
-		/** @brief Usage flags to be filled by external source at buffer creation (to query at some later point) */
-		VkBufferUsageFlags usageFlags;
-		/** @brief Memory property flags to be filled by external source at buffer creation (to query at some later point) */
-		VkMemoryPropertyFlags memoryPropertyFlags;
+        VkcDevice *m_pvkcdevice;
+        void* m_mapped = nullptr;
+        VkBuffer m_buffer = VK_NULL_HANDLE;
+        VkDeviceMemory m_memory = VK_NULL_HANDLE;
 
+        VkDeviceSize m_bufferSize;
+        uint32_t m_instanceCount;
+        VkDeviceSize m_instanceSize;
+        VkDeviceSize m_alignmentSize;
+        VkBufferUsageFlags m_usageFlags;
+        VkMemoryPropertyFlags m_memoryPropertyFlags;
+    };
 
-		VkResult map(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
-		void unmap();
-		VkResult bind(VkDeviceSize offset = 0);
-		void setupDescriptor(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
-		void copyTo(void* data, VkDeviceSize size);
-		VkResult flush(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
-		VkResult invalidate(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
-		void destroy();
-
-
-	};
-
-
-} // namespace vulkan
-
-
+}  // namespace vkc

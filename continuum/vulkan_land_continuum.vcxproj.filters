@@ -19,57 +19,6 @@
     <ClCompile Include="main_frame.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="VK_abstraction\vk_camera.cpp">
-      <Filter>Source Files\VK_abstraction</Filter>
-    </ClCompile>
-    <ClCompile Include="VK_abstraction\vk_descriptors.cpp">
-      <Filter>Source Files\VK_abstraction</Filter>
-    </ClCompile>
-    <ClCompile Include="VK_abstraction\vk_device.cpp">
-      <Filter>Source Files\VK_abstraction</Filter>
-    </ClCompile>
-    <ClCompile Include="VK_abstraction\vk_gameObject.cpp">
-      <Filter>Source Files\VK_abstraction</Filter>
-    </ClCompile>
-    <ClCompile Include="VK_abstraction\vk_initializers.cpp">
-      <Filter>Source Files\VK_abstraction</Filter>
-    </ClCompile>
-    <ClCompile Include="VK_abstraction\vk_input.cpp">
-      <Filter>Source Files\VK_abstraction</Filter>
-    </ClCompile>
-    <ClCompile Include="VK_abstraction\vk_model.cpp">
-      <Filter>Source Files\VK_abstraction</Filter>
-    </ClCompile>
-    <ClCompile Include="VK_abstraction\vk_pipeline.cpp">
-      <Filter>Source Files\VK_abstraction</Filter>
-    </ClCompile>
-    <ClCompile Include="VK_abstraction\vk_swapchain.cpp">
-      <Filter>Source Files\VK_abstraction</Filter>
-    </ClCompile>
-    <ClCompile Include="Renderer\vk_buffer.cpp">
-      <Filter>Source Files\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="Renderer\vk_renderer.cpp">
-      <Filter>Source Files\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="Renderer\Types\vk_basicRenderSystem.cpp">
-      <Filter>Source Files\Renderer\Types</Filter>
-    </ClCompile>
-    <ClCompile Include="Renderer\Types\vk_pointLightSystem.cpp">
-      <Filter>Source Files\Renderer\Types</Filter>
-    </ClCompile>
-    <ClCompile Include="AppCore\vk_application.cpp">
-      <Filter>Source Files\AppCore</Filter>
-    </ClCompile>
-    <ClCompile Include="AppCore\vk_window.cpp">
-      <Filter>Source Files\AppCore</Filter>
-    </ClCompile>
-    <ClCompile Include="VK_abstraction\vk_offscreen.cpp">
-      <Filter>Source Files\VK_abstraction</Filter>
-    </ClCompile>
-    <ClCompile Include="VK_abstraction\vk_renderpass.cpp">
-      <Filter>Source Files\VK_abstraction</Filter>
-    </ClCompile>
     <ClCompile Include="pane_impact.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -90,76 +39,16 @@
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="AppCore\vk_window.h">
-      <Filter>Header Files\AppCore</Filter>
-    </ClInclude>
-    <ClInclude Include="AppCore\vk_application.h">
-      <Filter>Header Files\AppCore</Filter>
-    </ClInclude>
-    <ClInclude Include="IMCommon\vk_types.h">
-      <Filter>Header Files\IMCommon</Filter>
-    </ClInclude>
-    <ClInclude Include="IMCommon\vkc_types.h">
-      <Filter>Header Files\IMCommon</Filter>
-    </ClInclude>
-    <ClInclude Include="Renderer\Types\vk_pointLightSystem.h">
-      <Filter>Header Files\Renderer\Types</Filter>
-    </ClInclude>
-    <ClInclude Include="Renderer\Types\vk_basicRenderSystem.h">
-      <Filter>Header Files\Renderer\Types</Filter>
-    </ClInclude>
-    <ClInclude Include="Renderer\vk_renderer.h">
-      <Filter>Header Files\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="Renderer\vk_buffer.h">
-      <Filter>Header Files\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="Utils\vkc_utils.h">
-      <Filter>Header Files\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="VK_abstraction\vk_camera.h">
-      <Filter>Header Files\VK_abstraction</Filter>
-    </ClInclude>
-    <ClInclude Include="VK_abstraction\vk_descriptors.h">
-      <Filter>Header Files\VK_abstraction</Filter>
-    </ClInclude>
-    <ClInclude Include="VK_abstraction\vk_device.h">
-      <Filter>Header Files\VK_abstraction</Filter>
-    </ClInclude>
-    <ClInclude Include="VK_abstraction\vk_frameInfo.h">
-      <Filter>Header Files\VK_abstraction</Filter>
-    </ClInclude>
-    <ClInclude Include="VK_abstraction\vk_gameObject.h">
-      <Filter>Header Files\VK_abstraction</Filter>
-    </ClInclude>
-    <ClInclude Include="VK_abstraction\vk_initializers.h">
-      <Filter>Header Files\VK_abstraction</Filter>
-    </ClInclude>
-    <ClInclude Include="VK_abstraction\vk_input.h">
-      <Filter>Header Files\VK_abstraction</Filter>
-    </ClInclude>
-    <ClInclude Include="VK_abstraction\vk_model.h">
-      <Filter>Header Files\VK_abstraction</Filter>
-    </ClInclude>
-    <ClInclude Include="VK_abstraction\vk_pipeline.h">
-      <Filter>Header Files\VK_abstraction</Filter>
-    </ClInclude>
-    <ClInclude Include="VK_abstraction\vk_swapchain.h">
-      <Filter>Header Files\VK_abstraction</Filter>
-    </ClInclude>
     <ClInclude Include="_.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="framework.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="VK_abstraction\vk_offscreen.h">
-      <Filter>Header Files\VK_abstraction</Filter>
-    </ClInclude>
-    <ClInclude Include="VK_abstraction\vk_renderpass.h">
-      <Filter>Header Files\VK_abstraction</Filter>
-    </ClInclude>
     <ClInclude Include="pane_impact.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="_vulkan.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -169,36 +58,6 @@
     </Filter>
     <Filter Include="Header Files">
       <UniqueIdentifier>{553e2ad6-0eec-4e39-9937-6581b3f77c18}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\AppCore">
-      <UniqueIdentifier>{4bddc2e6-2e97-4661-951e-8d9762d74d53}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\AppCore">
-      <UniqueIdentifier>{769ceb91-d65b-48f7-b5fd-54a057cc310d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\IMCommon">
-      <UniqueIdentifier>{88bbf5e8-25fd-4d85-b2da-55a790479c7c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Renderer">
-      <UniqueIdentifier>{ae42b619-2044-47ce-9aca-e9a7abcb573d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Renderer\Types">
-      <UniqueIdentifier>{9cdaba3b-caa2-413e-9410-dcfa57003e84}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Renderer">
-      <UniqueIdentifier>{e4d52bf0-c3de-4dd5-b4fc-82783ec3e5c7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Renderer\Types">
-      <UniqueIdentifier>{1bf69720-40a7-4c6e-9611-27432a46b700}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Utils">
-      <UniqueIdentifier>{d82e9c09-e324-48fd-8a71-f5948c27d56c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\VK_abstraction">
-      <UniqueIdentifier>{b2f1c610-ce38-476b-962c-1ffa9aeb0363}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\VK_abstraction">
-      <UniqueIdentifier>{23434622-709f-45a1-9c27-e686fd3f199b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

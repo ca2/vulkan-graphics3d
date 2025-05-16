@@ -738,44 +738,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='StaticRelease|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="impact.cpp" />
-    <ClCompile Include="vulkan\application.cpp" />
-    <ClCompile Include="vulkan\offscreen_application.cpp" />
-    <ClInclude Include="vulkan\benchmark.h" />
-    <ClInclude Include="vulkan\camera.h" />
-    <ClInclude Include="vulkan\command_line_parser.h" />
-    <ClInclude Include="vulkan\frustum.h" />
-    <ClInclude Include="vulkan\keycodes.h" />
-    <ClInclude Include="vulkan\application.h" />
-    <ClInclude Include="vulkan\headless_rendering_application.h" />
-    <ClInclude Include="vulkan\shared.h" />
-    <ClInclude Include="vulkan\threadpool.h" />
-    <ClInclude Include="vulkan\vk_container.h" />
-    <ClInclude Include="vulkan\android.h" />
-    <ClInclude Include="vulkan\buffer.h" />
-    <ClInclude Include="vulkan\debug.h" />
-    <ClInclude Include="Vulkan\device.h" />
-    <ClInclude Include="vulkan\frame_buffer.h" />
-    <ClInclude Include="vulkan\gltf_model.h" />
-    <ClInclude Include="vulkan\raytracing_application.h" />
-    <ClInclude Include="vulkan\swap_chain.h" />
-    <ClInclude Include="vulkan\texture.h" />
-    <ClInclude Include="vulkan\tools.h" />
-    <ClInclude Include="Vulkan\ui_overlay.h" />
-    <ClInclude Include="vulkan\initializers.h" />
-    <ClCompile Include="vulkan\headless_rendering_application.cpp" />
-    <ClCompile Include="vulkan\vk_container.cpp" />
-    <ClCompile Include="vulkan\android.cpp" />
-    <ClCompile Include="vulkan\buffer.cpp" />
-    <ClCompile Include="vulkan\debug.cpp" />
-    <ClCompile Include="vulkan\device.cpp" />
-    <ClCompile Include="vulkan\gltf_model.cpp" />
-    <ClCompile Include="vulkan\raytracing_application.cpp" />
-    <ClCompile Include="vulkan\swap_chain.cpp" />
-    <ClCompile Include="vulkan\texture.cpp" />
-    <ClCompile Include="vulkan\tools.cpp" />
-    <ClCompile Include="vulkan\ui_overlay.cpp" />
-    <ClCompile Include="vulkan\base_application_no_swap_chain.cpp" />
-    <ClCompile Include="vulkan\base_application_with_swap_chain.cpp" />
     <ClCompile Include="_.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -783,9 +745,6 @@
     <ClInclude Include="document.h" />
     <ClInclude Include="frame.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="vulkan\offscreen_application.h" />
-    <ClInclude Include="vulkan\base_application_no_swap_chain.h" />
-    <ClInclude Include="vulkan\base_application_with_swap_chain.h" />
     <ClInclude Include="_.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="impact.h" />
@@ -815,6 +774,9 @@
     </ProjectReference>
     <ProjectReference Include="..\..\app\core\core.vcxproj">
       <Project>{29c1eb5b-060e-4021-ae12-d1bcfb1b1359}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\graphics3d_vulkan\graphics3d_vulkan.vcxproj">
+      <Project>{928e4e5f-e062-43d3-8073-f3826381a2e1}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
