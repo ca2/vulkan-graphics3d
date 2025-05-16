@@ -8,7 +8,7 @@ namespace vulkan_land_landen
 {
 
 
-   class CLASS_DECL_vulkan_land_LANDEN document :
+   class CLASS_DECL_VULKAN_LAND_LANDEN document :
       virtual public ::user::document
    {
    public:

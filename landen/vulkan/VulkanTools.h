@@ -71,16 +71,16 @@ namespace vks
 		extern bool errorModeSilent;
 
 		/** @brief Returns an error code as a string */
-		CLASS_DECL_vulkan_land_LANDEN std::string errorString(VkResult errorCode);
+		CLASS_DECL_VULKAN_LAND_LANDEN std::string errorString(VkResult errorCode);
 
 		/** @brief Returns the device type as a string */
 		std::string physicalDeviceTypeString(VkPhysicalDeviceType type);
 
 		// Selected a suitable supported depth format starting with 32 bit down to 16 bit
 		// Returns false if none of the depth formats in the list is supported by the device
-		CLASS_DECL_vulkan_land_LANDEN VkBool32 getSupportedDepthFormat(VkPhysicalDevice physicalDevice, VkFormat *depthFormat);
+		CLASS_DECL_VULKAN_LAND_LANDEN VkBool32 getSupportedDepthFormat(VkPhysicalDevice physicalDevice, VkFormat *depthFormat);
 		// Same as getSupportedDepthFormat but will only select formats that also have stencil
-		CLASS_DECL_vulkan_land_LANDEN VkBool32 getSupportedDepthStencilFormat(VkPhysicalDevice physicalDevice, VkFormat* depthStencilFormat);
+		CLASS_DECL_VULKAN_LAND_LANDEN VkBool32 getSupportedDepthStencilFormat(VkPhysicalDevice physicalDevice, VkFormat* depthStencilFormat);
 
 		// Returns tru a given format support LINEAR filtering
 		VkBool32 formatIsFilterable(VkPhysicalDevice physicalDevice, VkFormat format, VkImageTiling tiling);
@@ -107,7 +107,7 @@ namespace vks
 			VkPipelineStageFlags dstStageMask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
 
 		/** @brief Insert an image memory barrier into the command buffer */
-		CLASS_DECL_vulkan_land_LANDEN void insertImageMemoryBarrier(
+		CLASS_DECL_VULKAN_LAND_LANDEN void insertImageMemoryBarrier(
 			VkCommandBuffer cmdbuffer,
 			VkImage image,
 			VkAccessFlags srcAccessMask,

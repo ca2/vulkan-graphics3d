@@ -6,7 +6,8 @@
 * This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)
 */
 #include "framework.h"
-#include "vulkan_example_base_no_swap_chain.h"
+#include "VulkanBaseApplicationNoSwapChain.h"
+
 
 #if defined(VK_EXAMPLE_XCODE_GENERATED)
 #if (defined(VK_USE_PLATFORM_MACOS_MVK) || defined(VK_USE_PLATFORM_METAL_EXT))

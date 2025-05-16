@@ -6,7 +6,8 @@
 * This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)
 */
 #include "framework.h"
-#include "vulkan_example_base_with_swap_chain.h"
+#include "VulkanBaseApplicationWithSwapChain.h"
+
 
 #if defined(VK_EXAMPLE_XCODE_GENERATED)
 #if (defined(VK_USE_PLATFORM_MACOS_MVK) || defined(VK_USE_PLATFORM_METAL_EXT))
@@ -21,9 +22,9 @@ extern CAMetalLayer* layer;
 #endif
 #endif
 
-std::vector<const char*> VulkanExampleBase::args;
+std::vector<const char*> VulkanBaseApplicationWithSwapChain::args;
 
-VkResult VulkanExampleBase::createInstance()
+VkResult VulkanBaseApplicationWithSwapChain::createInstance()
 {
 	std::vector<const char*> instanceExtensions = { VK_KHR_SURFACE_EXTENSION_NAME };
 
@@ -158,16 +159,16 @@ VkResult VulkanExampleBase::createInstance()
 	return result;
 }
 
-void VulkanExampleBase::renderFrame()
+void VulkanBaseApplicationWithSwapChain::renderFrame()
 {
-	VulkanExampleBase::prepareFrame();
+	VulkanBaseApplicationWithSwapChain::prepareFrame();
 	submitInfo.commandBufferCount = 1;
 	submitInfo.pCommandBuffers = &m_drawCmdBuffers[currentBuffer];
 	VK_CHECK_RESULT(vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE));
-	VulkanExampleBase::submitFrame();
+	VulkanBaseApplicationWithSwapChain::submitFrame();
 }
 
-std::string VulkanExampleBase::getWindowTitle()
+std::string VulkanBaseApplicationWithSwapChain::getWindowTitle()
 {
 	std::string windowTitle{ m_strTitle + " - " + deviceProperties.deviceName };
 	if (!settings.overlay) {
@@ -176,7 +177,7 @@ std::string VulkanExampleBase::getWindowTitle()
 	return windowTitle;
 }
 
-void VulkanExampleBase::createCommandBuffers()
+void VulkanBaseApplicationWithSwapChain::createCommandBuffers()
 {
 	// Create one command buffer for each swap chain image
 	m_drawCmdBuffers.resize(swapChain.imageCount);
@@ -184,24 +185,24 @@ void VulkanExampleBase::createCommandBuffers()
 	VK_CHECK_RESULT(vkAllocateCommandBuffers(device, &cmdBufAllocateInfo, m_drawCmdBuffers.data()));
 }
 
-void VulkanExampleBase::destroyCommandBuffers()
+void VulkanBaseApplicationWithSwapChain::destroyCommandBuffers()
 {
 	vkFreeCommandBuffers(device, cmdPool, static_cast<uint32_t>(m_drawCmdBuffers.size()), m_drawCmdBuffers.data());
 }
 
-std::string VulkanExampleBase::getShadersPath() const
+std::string VulkanBaseApplicationWithSwapChain::getShadersPath() const
 {
    return "M:/Vulkan-Assets-main/shaders/glsl/";
 }
 
-void VulkanExampleBase::createPipelineCache()
+void VulkanBaseApplicationWithSwapChain::createPipelineCache()
 {
 	VkPipelineCacheCreateInfo pipelineCacheCreateInfo = {};
 	pipelineCacheCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
 	VK_CHECK_RESULT(vkCreatePipelineCache(device, &pipelineCacheCreateInfo, nullptr, &pipelineCache));
 }
 
-void VulkanExampleBase::prepare()
+void VulkanBaseApplicationWithSwapChain::prepare()
 {
 	initSwapchain();
 	createCommandPool();
@@ -225,7 +226,7 @@ void VulkanExampleBase::prepare()
 	}
 }
 
-VkPipelineShaderStageCreateInfo VulkanExampleBase::loadShader(std::string fileName, VkShaderStageFlagBits stage)
+VkPipelineShaderStageCreateInfo VulkanBaseApplicationWithSwapChain::loadShader(std::string fileName, VkShaderStageFlagBits stage)
 {
 	VkPipelineShaderStageCreateInfo shaderStage = {};
 	shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -241,7 +242,7 @@ VkPipelineShaderStageCreateInfo VulkanExampleBase::loadShader(std::string fileNa
 	return shaderStage;
 }
 
-void VulkanExampleBase::nextFrame()
+void VulkanBaseApplicationWithSwapChain::nextFrame()
 {
 	auto tStart = std::chrono::high_resolution_clock::now();
 	if (viewUpdated)
@@ -291,9 +292,9 @@ void VulkanExampleBase::nextFrame()
 	updateOverlay();
 }
 
-void VulkanExampleBase::renderLoop()
+void VulkanBaseApplicationWithSwapChain::renderLoop()
 {
-// SRS - for non-apple plaforms, handle benchmarking here within VulkanExampleBase::renderLoop()
+// SRS - for non-apple plaforms, handle benchmarking here within VulkanBaseApplicationWithSwapChain::renderLoop()
 //     - for macOS, handle benchmarking within NSApp rendering loop via displayLinkOutputCb()
 #if !(defined(VK_USE_PLATFORM_IOS_MVK) || defined(VK_USE_PLATFORM_MACOS_MVK) || defined(VK_USE_PLATFORM_METAL_EXT))
 	if (benchmark.active) {
@@ -662,7 +663,7 @@ void VulkanExampleBase::renderLoop()
 	}
 }
 
-void VulkanExampleBase::updateOverlay()
+void VulkanBaseApplicationWithSwapChain::updateOverlay()
 {
 	if (!settings.overlay)
 		return;
@@ -722,7 +723,7 @@ void VulkanExampleBase::updateOverlay()
 #endif
 }
 
-void VulkanExampleBase::drawUI(const VkCommandBuffer commandBuffer)
+void VulkanBaseApplicationWithSwapChain::drawUI(const VkCommandBuffer commandBuffer)
 {
 	if (settings.overlay && ui.visible) {
 		const VkViewport viewport = vks::initializers::viewport((float)width, (float)height, 0.0f, 1.0f);
@@ -734,7 +735,7 @@ void VulkanExampleBase::drawUI(const VkCommandBuffer commandBuffer)
 	}
 }
 
-void VulkanExampleBase::prepareFrame()
+void VulkanBaseApplicationWithSwapChain::prepareFrame()
 {
 	// Acquire the next image from the swap chain
 	VkResult result = swapChain.acquireNextImage(semaphores.presentComplete, &currentBuffer);
@@ -751,7 +752,7 @@ void VulkanExampleBase::prepareFrame()
 	}
 }
 
-void VulkanExampleBase::submitFrame()
+void VulkanBaseApplicationWithSwapChain::submitFrame()
 {
 	VkResult result = swapChain.queuePresent(queue, currentBuffer, semaphores.renderComplete);
 	// Recreate the swapchain if it's no longer compatible with the surface (OUT_OF_DATE) or no longer optimal for presentation (SUBOPTIMAL)
@@ -767,7 +768,7 @@ void VulkanExampleBase::submitFrame()
 	VK_CHECK_RESULT(vkQueueWaitIdle(queue));
 }
 
-VulkanExampleBase::VulkanExampleBase()
+VulkanBaseApplicationWithSwapChain::VulkanBaseApplicationWithSwapChain()
 {
 #if !defined(VK_USE_PLATFORM_ANDROID_KHR)
 	// Check for a valid asset path
@@ -881,7 +882,7 @@ VulkanExampleBase::VulkanExampleBase()
 #endif
 }
 
-VulkanExampleBase::~VulkanExampleBase()
+VulkanBaseApplicationWithSwapChain::~VulkanBaseApplicationWithSwapChain()
 {
 	// Clean up Vulkan resources
 	swapChain.cleanup();
@@ -967,7 +968,7 @@ VulkanExampleBase::~VulkanExampleBase()
 #endif
 }
 
-bool VulkanExampleBase::initVulkan()
+bool VulkanBaseApplicationWithSwapChain::initVulkan()
 {
 	// Instead of checking for the command line switch, validation can be forced via a define
 #if defined(_VALIDATION)
@@ -1099,7 +1100,7 @@ bool VulkanExampleBase::initVulkan()
 
 #if defined(_WIN32)
 // Win32 : Sets up a console window and redirects standard output to it
-void VulkanExampleBase::setupConsole(std::string title)
+void VulkanBaseApplicationWithSwapChain::setupConsole(std::string title)
 {
 	AllocConsole();
 	AttachConsole(GetCurrentProcessId());
@@ -1116,7 +1117,7 @@ void VulkanExampleBase::setupConsole(std::string title)
 	SetConsoleTitle(::wstring(title.c_str()));
 }
 
-void VulkanExampleBase::setupDPIAwareness()
+void VulkanBaseApplicationWithSwapChain::setupDPIAwareness()
 {
 	typedef HRESULT *(__stdcall *SetProcessDpiAwarenessFunc)(PROCESS_DPI_AWARENESS);
 
@@ -1135,7 +1136,7 @@ void VulkanExampleBase::setupDPIAwareness()
 	}
 }
 
-HWND VulkanExampleBase::setupWindow(HINSTANCE hinstance, WNDPROC wndproc)
+HWND VulkanBaseApplicationWithSwapChain::setupWindow(HINSTANCE hinstance, WNDPROC wndproc)
 {
 	this->windowInstance = hinstance;
 
@@ -1253,7 +1254,7 @@ HWND VulkanExampleBase::setupWindow(HINSTANCE hinstance, WNDPROC wndproc)
 	return window;
 }
 
-void VulkanExampleBase::handleMessages(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+void VulkanBaseApplicationWithSwapChain::handleMessages(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMsg)
 	{
@@ -1390,9 +1391,9 @@ void VulkanExampleBase::handleMessages(HWND hWnd, UINT uMsg, WPARAM wParam, LPAR
 	OnHandleMessage(hWnd, uMsg, wParam, lParam);
 }
 #elif defined(VK_USE_PLATFORM_ANDROID_KHR)
-int32_t VulkanExampleBase::handleAppInput(struct android_app* app, AInputEvent* happening)
+int32_t VulkanBaseApplicationWithSwapChain::handleAppInput(struct android_app* app, AInputEvent* happening)
 {
-	VulkanExampleBase* vulkanExample = reinterpret_cast<VulkanExampleBase*>(app->userData);
+	VulkanBaseApplicationWithSwapChain* vulkanExample = reinterpret_cast<VulkanBaseApplicationWithSwapChain*>(app->userData);
 	if (AInputEvent_getType(happening) == AINPUT_EVENT_TYPE_MOTION)
 	{
 		int32_t eventSource = AInputEvent_getSource(happening);
@@ -1533,10 +1534,10 @@ int32_t VulkanExampleBase::handleAppInput(struct android_app* app, AInputEvent* 
 	return 0;
 }
 
-void VulkanExampleBase::handleAppCommand(android_app * app, int32_t cmd)
+void VulkanBaseApplicationWithSwapChain::handleAppCommand(android_app * app, int32_t cmd)
 {
 	assert(app->userData != NULL);
-	VulkanExampleBase* vulkanExample = reinterpret_cast<VulkanExampleBase*>(app->userData);
+	VulkanBaseApplicationWithSwapChain* vulkanExample = reinterpret_cast<VulkanBaseApplicationWithSwapChain*>(app->userData);
 	switch (cmd)
 	{
 	case APP_CMD_SAVE_STATE:
@@ -1587,7 +1588,7 @@ void VulkanExampleBase::handleAppCommand(android_app * app, int32_t cmd)
 @interface AppDelegate : NSObject<NSApplicationDelegate>
 {
 @public
-	VulkanExampleBase *vulkanExample;
+	VulkanBaseApplicationWithSwapChain *vulkanExample;
 }
 
 @end
@@ -1658,7 +1659,7 @@ static CVReturn displayLinkOutputCallback(CVDisplayLinkRef displayLink, const CV
 {
 	@autoreleasepool
 	{
-		auto vulkanExample = static_cast<VulkanExampleBase*>(displayLinkContext);
+		auto vulkanExample = static_cast<VulkanBaseApplicationWithSwapChain*>(displayLinkContext);
 			vulkanExample->displayLinkOutputCb();
 	}
 	return kCVReturnSuccess;
@@ -1667,7 +1668,7 @@ static CVReturn displayLinkOutputCallback(CVDisplayLinkRef displayLink, const CV
 @interface View : NSView<NSWindowDelegate>
 {
 @public
-	VulkanExampleBase *vulkanExample;
+	VulkanBaseApplicationWithSwapChain *vulkanExample;
 }
 
 @end
@@ -1838,7 +1839,7 @@ static CVReturn displayLinkOutputCallback(CVDisplayLinkRef displayLink, const CV
 	vulkanExample->viewUpdated = true;
 }
 
-// SRS - Window resizing already handled by windowResize() in VulkanExampleBase::submitFrame()
+// SRS - Window resizing already handled by windowResize() in VulkanBaseApplicationWithSwapChain::submitFrame()
 //	   - handling window resize happenings here is redundant and can cause thread interaction problems
 /*
 - (NSSize)windowWillResize:(NSWindow *)sender toSize:(NSSize)frameSize
@@ -1879,7 +1880,7 @@ static CVReturn displayLinkOutputCallback(CVDisplayLinkRef displayLink, const CV
 @end
 #endif
 
-void* VulkanExampleBase::setupWindow(void* view)
+void* VulkanBaseApplicationWithSwapChain::setupWindow(void* view)
 {
 #if defined(VK_EXAMPLE_XCODE_GENERATED)
 	NSApp = [NSApplication sharedApplication];
@@ -1920,7 +1921,7 @@ void* VulkanExampleBase::setupWindow(void* view)
 	return view;
 }
 
-void VulkanExampleBase::displayLinkOutputCb()
+void VulkanBaseApplicationWithSwapChain::displayLinkOutputCb()
 {
 #if defined(VK_EXAMPLE_XCODE_GENERATED)
 	if (benchmark.active) {
@@ -1937,12 +1938,12 @@ void VulkanExampleBase::displayLinkOutputCb()
 		nextFrame();
 }
 
-void VulkanExampleBase::mouseDragged(float x, float y)
+void VulkanBaseApplicationWithSwapChain::mouseDragged(float x, float y)
 {
 	handleMouseMove(static_cast<uint32_t>(x), static_cast<uint32_t>(y));
 }
 
-void VulkanExampleBase::windowWillResize(float x, float y)
+void VulkanBaseApplicationWithSwapChain::windowWillResize(float x, float y)
 {
 	resizing = true;
 	if (prepared)
@@ -1953,13 +1954,13 @@ void VulkanExampleBase::windowWillResize(float x, float y)
 	}
 }
 
-void VulkanExampleBase::windowDidResize()
+void VulkanBaseApplicationWithSwapChain::windowDidResize()
 {
 	resizing = false;
 }
 #elif defined(_DIRECT2DISPLAY)
 #elif defined(VK_USE_PLATFORM_DIRECTFB_EXT)
-IDirectFBSurface *VulkanExampleBase::setupWindow()
+IDirectFBSurface *VulkanBaseApplicationWithSwapChain::setupWindow()
 {
 	DFBResult ret;
 	int posx = 0, posy = 0;
@@ -2051,7 +2052,7 @@ IDirectFBSurface *VulkanExampleBase::setupWindow()
 	return surface;
 }
 
-void VulkanExampleBase::handleEvent(const DFBWindowEvent *happening)
+void VulkanBaseApplicationWithSwapChain::handleEvent(const DFBWindowEvent *happening)
 {
 	switch (happening->type)
 	{
@@ -2152,52 +2153,52 @@ void VulkanExampleBase::handleEvent(const DFBWindowEvent *happening)
 	}
 }
 #elif defined(VK_USE_PLATFORM_WAYLAND_KHR)
-/*static*/void VulkanExampleBase::registryGlobalCb(void *data,
+/*static*/void VulkanBaseApplicationWithSwapChain::registryGlobalCb(void *data,
 		wl_registry *registry, uint32_t name, const char *interface,
 		uint32_t version)
 {
-	VulkanExampleBase *self = reinterpret_cast<VulkanExampleBase *>(data);
+	VulkanBaseApplicationWithSwapChain *self = reinterpret_cast<VulkanBaseApplicationWithSwapChain *>(data);
 	self->registryGlobal(registry, name, interface, version);
 }
 
-/*static*/void VulkanExampleBase::seatCapabilitiesCb(void *data, wl_seat *seat,
+/*static*/void VulkanBaseApplicationWithSwapChain::seatCapabilitiesCb(void *data, wl_seat *seat,
 		uint32_t caps)
 {
-	VulkanExampleBase *self = reinterpret_cast<VulkanExampleBase *>(data);
+	VulkanBaseApplicationWithSwapChain *self = reinterpret_cast<VulkanBaseApplicationWithSwapChain *>(data);
 	self->seatCapabilities(seat, caps);
 }
 
-/*static*/void VulkanExampleBase::pointerEnterCb(void *data,
+/*static*/void VulkanBaseApplicationWithSwapChain::pointerEnterCb(void *data,
 		wl_pointer *pointer, uint32_t serial, wl_surface *surface,
 		wl_fixed_t sx, wl_fixed_t sy)
 {
 }
 
-/*static*/void VulkanExampleBase::pointerLeaveCb(void *data,
+/*static*/void VulkanBaseApplicationWithSwapChain::pointerLeaveCb(void *data,
 		wl_pointer *pointer, uint32_t serial, wl_surface *surface)
 {
 }
 
-/*static*/void VulkanExampleBase::pointerMotionCb(void *data,
+/*static*/void VulkanBaseApplicationWithSwapChain::pointerMotionCb(void *data,
 		wl_pointer *pointer, uint32_t time, wl_fixed_t sx, wl_fixed_t sy)
 {
-	VulkanExampleBase *self = reinterpret_cast<VulkanExampleBase *>(data);
+	VulkanBaseApplicationWithSwapChain *self = reinterpret_cast<VulkanBaseApplicationWithSwapChain *>(data);
 	self->pointerMotion(pointer, time, sx, sy);
 }
-void VulkanExampleBase::pointerMotion(wl_pointer *pointer, uint32_t time, wl_fixed_t sx, wl_fixed_t sy)
+void VulkanBaseApplicationWithSwapChain::pointerMotion(wl_pointer *pointer, uint32_t time, wl_fixed_t sx, wl_fixed_t sy)
 {
 	handleMouseMove(wl_fixed_to_int(sx), wl_fixed_to_int(sy));
 }
 
-/*static*/void VulkanExampleBase::pointerButtonCb(void *data,
+/*static*/void VulkanBaseApplicationWithSwapChain::pointerButtonCb(void *data,
 		wl_pointer *pointer, uint32_t serial, uint32_t time, uint32_t button,
 		uint32_t state)
 {
-	VulkanExampleBase *self = reinterpret_cast<VulkanExampleBase *>(data);
+	VulkanBaseApplicationWithSwapChain *self = reinterpret_cast<VulkanBaseApplicationWithSwapChain *>(data);
 	self->pointerButton(pointer, serial, time, button, state);
 }
 
-void VulkanExampleBase::pointerButton(struct wl_pointer *pointer,
+void VulkanBaseApplicationWithSwapChain::pointerButton(struct wl_pointer *pointer,
 		uint32_t serial, uint32_t time, uint32_t button, uint32_t state)
 {
 	switch (button)
@@ -2216,15 +2217,15 @@ void VulkanExampleBase::pointerButton(struct wl_pointer *pointer,
 	}
 }
 
-/*static*/void VulkanExampleBase::pointerAxisCb(void *data,
+/*static*/void VulkanBaseApplicationWithSwapChain::pointerAxisCb(void *data,
 		wl_pointer *pointer, uint32_t time, uint32_t axis,
 		wl_fixed_t value)
 {
-	VulkanExampleBase *self = reinterpret_cast<VulkanExampleBase *>(data);
+	VulkanBaseApplicationWithSwapChain *self = reinterpret_cast<VulkanBaseApplicationWithSwapChain *>(data);
 	self->pointerAxis(pointer, time, axis, value);
 }
 
-void VulkanExampleBase::pointerAxis(wl_pointer *pointer, uint32_t time,
+void VulkanBaseApplicationWithSwapChain::pointerAxis(wl_pointer *pointer, uint32_t time,
 		uint32_t axis, wl_fixed_t value)
 {
 	double d = wl_fixed_to_double(value);
@@ -2239,32 +2240,32 @@ void VulkanExampleBase::pointerAxis(wl_pointer *pointer, uint32_t time,
 	}
 }
 
-/*static*/void VulkanExampleBase::keyboardKeymapCb(void *data,
+/*static*/void VulkanBaseApplicationWithSwapChain::keyboardKeymapCb(void *data,
 		struct wl_keyboard *keyboard, uint32_t format, int fd, uint32_t size)
 {
 }
 
-/*static*/void VulkanExampleBase::keyboardEnterCb(void *data,
+/*static*/void VulkanBaseApplicationWithSwapChain::keyboardEnterCb(void *data,
 		struct wl_keyboard *keyboard, uint32_t serial,
 		struct wl_surface *surface, struct wl_array *keys)
 {
 }
 
-/*static*/void VulkanExampleBase::keyboardLeaveCb(void *data,
+/*static*/void VulkanBaseApplicationWithSwapChain::keyboardLeaveCb(void *data,
 		struct wl_keyboard *keyboard, uint32_t serial,
 		struct wl_surface *surface)
 {
 }
 
-/*static*/void VulkanExampleBase::keyboardKeyCb(void *data,
+/*static*/void VulkanBaseApplicationWithSwapChain::keyboardKeyCb(void *data,
 		struct wl_keyboard *keyboard, uint32_t serial, uint32_t time,
 		uint32_t key, uint32_t state)
 {
-	VulkanExampleBase *self = reinterpret_cast<VulkanExampleBase *>(data);
+	VulkanBaseApplicationWithSwapChain *self = reinterpret_cast<VulkanBaseApplicationWithSwapChain *>(data);
 	self->keyboardKey(keyboard, serial, time, key, state);
 }
 
-void VulkanExampleBase::keyboardKey(struct wl_keyboard *keyboard,
+void VulkanBaseApplicationWithSwapChain::keyboardKey(struct wl_keyboard *keyboard,
 		uint32_t serial, uint32_t time, uint32_t key, uint32_t state)
 {
 	switch (key)
@@ -2300,13 +2301,13 @@ void VulkanExampleBase::keyboardKey(struct wl_keyboard *keyboard,
 		keyPressed(key);
 }
 
-/*static*/void VulkanExampleBase::keyboardModifiersCb(void *data,
+/*static*/void VulkanBaseApplicationWithSwapChain::keyboardModifiersCb(void *data,
 		struct wl_keyboard *keyboard, uint32_t serial, uint32_t mods_depressed,
 		uint32_t mods_latched, uint32_t mods_locked, uint32_t group)
 {
 }
 
-void VulkanExampleBase::seatCapabilities(wl_seat *seat, uint32_t caps)
+void VulkanBaseApplicationWithSwapChain::seatCapabilities(wl_seat *seat, uint32_t caps)
 {
 	if ((caps & WL_SEAT_CAPABILITY_POINTER) && !pointer)
 	{
@@ -2346,7 +2347,7 @@ static const struct xdg_wm_base_listener xdg_wm_base_listener = {
 	xdg_wm_base_ping,
 };
 
-void VulkanExampleBase::registryGlobal(wl_registry *registry, uint32_t name,
+void VulkanBaseApplicationWithSwapChain::registryGlobal(wl_registry *registry, uint32_t name,
 		const char *interface, uint32_t version)
 {
 	if (strcmp(interface, "wl_compositor"_ansi) == 0)
@@ -2371,12 +2372,12 @@ void VulkanExampleBase::registryGlobal(wl_registry *registry, uint32_t name,
 	}
 }
 
-/*static*/void VulkanExampleBase::registryGlobalRemoveCb(void *data,
+/*static*/void VulkanBaseApplicationWithSwapChain::registryGlobalRemoveCb(void *data,
 		struct wl_registry *registry, uint32_t name)
 {
 }
 
-void VulkanExampleBase::initWaylandConnection()
+void VulkanBaseApplicationWithSwapChain::initWaylandConnection()
 {
 	display = wl_display_connect(NULL);
 	if (!display)
@@ -2412,7 +2413,7 @@ void VulkanExampleBase::initWaylandConnection()
 	}
 }
 
-void VulkanExampleBase::setSize(int width, int height)
+void VulkanBaseApplicationWithSwapChain::setSize(int width, int height)
 {
 	if (width <= 0 || height <= 0)
 		return;
@@ -2427,7 +2428,7 @@ static void
 xdg_surface_handle_configure(void *data, struct xdg_surface *surface,
 			     uint32_t serial)
 {
-	VulkanExampleBase *base = (VulkanExampleBase *) data;
+	VulkanBaseApplicationWithSwapChain *base = (VulkanBaseApplicationWithSwapChain *) data;
 
 	xdg_surface_ack_configure(surface, serial);
 	base->configured = true;
@@ -2443,7 +2444,7 @@ xdg_toplevel_handle_configure(void *data, struct xdg_toplevel *toplevel,
 			      int32_t width, int32_t height,
 			      struct wl_array *states)
 {
-	VulkanExampleBase *base = (VulkanExampleBase *) data;
+	VulkanBaseApplicationWithSwapChain *base = (VulkanBaseApplicationWithSwapChain *) data;
 
 	base->setSize(width, height);
 }
@@ -2451,7 +2452,7 @@ xdg_toplevel_handle_configure(void *data, struct xdg_toplevel *toplevel,
 static void
 xdg_toplevel_handle_close(void *data, struct xdg_toplevel *xdg_toplevel)
 {
-	VulkanExampleBase *base = (VulkanExampleBase *) data;
+	VulkanBaseApplicationWithSwapChain *base = (VulkanBaseApplicationWithSwapChain *) data;
 
 	base->quit = true;
 }
@@ -2463,7 +2464,7 @@ static const struct xdg_toplevel_listener xdg_toplevel_listener = {
 };
 
 
-struct xdg_surface *VulkanExampleBase::setupWindow()
+struct xdg_surface *VulkanBaseApplicationWithSwapChain::setupWindow()
 {
 	surface = wl_compositor_create_surface(compositor);
 	xdg_surface = xdg_wm_base_get_xdg_surface(shell, surface);
@@ -2487,7 +2488,7 @@ static inline xcb_intern_atom_reply_t* intern_atom_helper(xcb_connection_t *conn
 }
 
 // Set up a window using XCB and request happening types
-xcb_window_t VulkanExampleBase::setupWindow()
+xcb_window_t VulkanBaseApplicationWithSwapChain::setupWindow()
 {
 	uint32_t value_mask, value_list[32];
 
@@ -2564,7 +2565,7 @@ xcb_window_t VulkanExampleBase::setupWindow()
 }
 
 // Initialize XCB connection
-void VulkanExampleBase::initxcbConnection()
+void VulkanBaseApplicationWithSwapChain::initxcbConnection()
 {
 	const xcb_setup_t *setup;
 	xcb_screen_iterator_t iter;
@@ -2589,7 +2590,7 @@ void VulkanExampleBase::initxcbConnection()
 	screen = iter.data;
 }
 
-void VulkanExampleBase::handleEvent(const xcb_generic_event_t *happening)
+void VulkanBaseApplicationWithSwapChain::handleEvent(const xcb_generic_event_t *happening)
 {
 	switch (happening->response_type & 0x7f)
 	{
@@ -2701,7 +2702,7 @@ void VulkanExampleBase::handleEvent(const xcb_generic_event_t *happening)
 	}
 }
 #elif defined(VK_USE_PLATFORM_SCREEN_QNX)
-void VulkanExampleBase::handleEvent()
+void VulkanBaseApplicationWithSwapChain::handleEvent()
 {
 	int size[2] = { 0, 0 };
 	screen_window_t win;
@@ -2889,7 +2890,7 @@ void VulkanExampleBase::handleEvent()
 	}
 }
 
-void VulkanExampleBase::setupWindow()
+void VulkanBaseApplicationWithSwapChain::setupWindow()
 {
 	const char *idstr = name.c_str();
 	int size[2];
@@ -2978,18 +2979,18 @@ void VulkanExampleBase::setupWindow()
 	}
 }
 #else
-void VulkanExampleBase::setupWindow()
+void VulkanBaseApplicationWithSwapChain::setupWindow()
 {
 }
 #endif
 
-void VulkanExampleBase::keyPressed(uint32_t) {}
+void VulkanBaseApplicationWithSwapChain::keyPressed(uint32_t) {}
 
-void VulkanExampleBase::mouseMoved(double x, double y, bool & handled) {}
+void VulkanBaseApplicationWithSwapChain::mouseMoved(double x, double y, bool & handled) {}
 
-void VulkanExampleBase::buildCommandBuffers() {}
+void VulkanBaseApplicationWithSwapChain::buildCommandBuffers() {}
 
-void VulkanExampleBase::createSynchronizationPrimitives()
+void VulkanBaseApplicationWithSwapChain::createSynchronizationPrimitives()
 {
 	// Wait fences to sync command buffer access
 	VkFenceCreateInfo fenceCreateInfo = vks::initializers::fenceCreateInfo(VK_FENCE_CREATE_SIGNALED_BIT);
@@ -2999,7 +3000,7 @@ void VulkanExampleBase::createSynchronizationPrimitives()
 	}
 }
 
-void VulkanExampleBase::createCommandPool()
+void VulkanBaseApplicationWithSwapChain::createCommandPool()
 {
 	VkCommandPoolCreateInfo cmdPoolInfo = {};
 	cmdPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -3008,7 +3009,7 @@ void VulkanExampleBase::createCommandPool()
 	VK_CHECK_RESULT(vkCreateCommandPool(device, &cmdPoolInfo, nullptr, &cmdPool));
 }
 
-void VulkanExampleBase::setupDepthStencil()
+void VulkanBaseApplicationWithSwapChain::setupDepthStencil()
 {
 	VkImageCreateInfo imageCI{};
 	imageCI.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -3049,7 +3050,7 @@ void VulkanExampleBase::setupDepthStencil()
 	VK_CHECK_RESULT(vkCreateImageView(device, &imageViewCI, nullptr, &depthStencil.view));
 }
 
-void VulkanExampleBase::setupFrameBuffer()
+void VulkanBaseApplicationWithSwapChain::setupFrameBuffer()
 {
 	VkImageView attachments[2];
 
@@ -3075,7 +3076,7 @@ void VulkanExampleBase::setupFrameBuffer()
 	}
 }
 
-void VulkanExampleBase::setupRenderPass()
+void VulkanBaseApplicationWithSwapChain::setupRenderPass()
 {
 	std::array<VkAttachmentDescription, 2> attachments = {};
 	// Color attachment
@@ -3147,11 +3148,11 @@ void VulkanExampleBase::setupRenderPass()
 	VK_CHECK_RESULT(vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass));
 }
 
-void VulkanExampleBase::getEnabledFeatures() {}
+void VulkanBaseApplicationWithSwapChain::getEnabledFeatures() {}
 
-void VulkanExampleBase::getEnabledExtensions() {}
+void VulkanBaseApplicationWithSwapChain::getEnabledExtensions() {}
 
-void VulkanExampleBase::windowResize()
+void VulkanBaseApplicationWithSwapChain::windowResize()
 {
 	if (!prepared)
 	{
@@ -3208,7 +3209,7 @@ void VulkanExampleBase::windowResize()
 	prepared = true;
 }
 
-void VulkanExampleBase::handleMouseMove(int32_t x, int32_t y)
+void VulkanBaseApplicationWithSwapChain::handleMouseMove(int32_t x, int32_t y)
 {
 	int32_t dx = (int32_t)mouseState.position.x - x;
 	int32_t dy = (int32_t)mouseState.position.y - y;
@@ -3241,9 +3242,9 @@ void VulkanExampleBase::handleMouseMove(int32_t x, int32_t y)
 	mouseState.position = glm::vec2((float)x, (float)y);
 }
 
-void VulkanExampleBase::windowResized() {}
+void VulkanBaseApplicationWithSwapChain::windowResized() {}
 
-void VulkanExampleBase::initSwapchain()
+void VulkanBaseApplicationWithSwapChain::initSwapchain()
 {
 #if defined(_WIN32)
 	swapChain.initSurface(windowInstance, window);
@@ -3266,13 +3267,13 @@ void VulkanExampleBase::initSwapchain()
 #endif
 }
 
-void VulkanExampleBase::setupSwapChain()
+void VulkanBaseApplicationWithSwapChain::setupSwapChain()
 {
 	swapChain.create(&width, &height, settings.vsync, settings.fullscreen);
 }
 
-void VulkanExampleBase::OnUpdateUIOverlay(vks::UIOverlay *overlay) {}
+void VulkanBaseApplicationWithSwapChain::OnUpdateUIOverlay(vks::UIOverlay *overlay) {}
 
 #if defined(_WIN32)
-void VulkanExampleBase::OnHandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {};
+void VulkanBaseApplicationWithSwapChain::OnHandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {};
 #endif

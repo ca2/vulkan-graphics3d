@@ -8,7 +8,7 @@ namespace vulkan_land_landen
 {
 
 
-   class CLASS_DECL_vulkan_land_LANDEN frame :
+   class CLASS_DECL_VULKAN_LAND_LANDEN frame :
       virtual public simple_frame_window
    {
    public:

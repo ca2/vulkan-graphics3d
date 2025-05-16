@@ -289,7 +289,7 @@ void VulkanRaytracingSample::deleteStorageImage()
 
 void VulkanRaytracingSample::prepare()
 {
-	VulkanExampleBase::prepare();
+	VulkanBaseApplicationWithSwapChain::prepare();
 	// Get properties and features
 	rayTracingPipelineProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_PROPERTIES_KHR;
 	VkPhysicalDeviceProperties2 deviceProperties2{};
@@ -355,6 +355,6 @@ void VulkanRaytracingSample::drawUI(VkCommandBuffer commandBuffer, VkFramebuffer
 	renderPassBeginInfo.framebuffer = framebuffer;
 
 	vkCmdBeginRenderPass(commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-	VulkanExampleBase::drawUI(commandBuffer);
+	VulkanBaseApplicationWithSwapChain::drawUI(commandBuffer);
 	vkCmdEndRenderPass(commandBuffer);
 }

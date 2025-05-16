@@ -155,7 +155,7 @@ namespace vulkan_land_landen
 {
 
 
-   class CLASS_DECL_vulkan_land_LANDEN impact :
+   class CLASS_DECL_VULKAN_LAND_LANDEN impact :
       virtual public ::app_consumer < application, ::user::impact, ::vkc::VkContainer>
    {
    public:

@@ -8,7 +8,7 @@ namespace vulkan_land_landen
 {
 
 
-   class CLASS_DECL_vulkan_land_LANDEN application :
+   class CLASS_DECL_VULKAN_LAND_LANDEN application :
       virtual public ::core::application
    {
    public:

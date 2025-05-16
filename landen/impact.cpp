@@ -13,10 +13,17 @@
 #include "aura/graphics/image/drawing.h"
 #include "aura/message/user.h"
 #include "vulkan/vk_container.h"
+
+
 int run_vulkan_example();
-int run_vulkan_example2(const ::function < void(void *, int, int, int)> & callback);
-int run_vulkan_example5(mouseState * pmousestate, const ::function < void(void *, int, int, int)> & callback);
-::pointer<::vulkan::application > start_vulkan_example_20(vkc::VkContainer * pvkcontainer, mouseState * pmousestate);
+
+int run_vulkan_example2(const ::function < void(void*, int, int, int)>& callback);
+
+int run_vulkan_example5(mouseState* pmousestate, const ::function < void(void*, int, int, int)>& callback);
+
+::pointer<::vulkan::application > start_VulkanOffscreenApplication(vkc::VkContainer* pvkcontainer, mouseState* pmousestate);
+
+
 //#include "aura/update.h"
 //#include <math.h>
 // http://stackoverflow.com/questions/4052940/how-to-make-an-opengl-rendering-context-with-transparent-background
@@ -90,27 +97,19 @@ namespace vulkan_land_landen
 
    impact::impact()
    {
+
+
    }
 
-      impact::~impact()
+
+   impact::~impact()
    {
+
    }
 
-   //void impact::assert_ok() const
-   //{
-   //   user::box::assert_ok();
-   //}
 
-   //void impact::dump(dump_context & dumpcontext) const
-   //{
-   //   user::box::dump(dumpcontext);
-   //}
-
-
-   void impact::install_message_routing(::channel * pchannel)
+   void impact::install_message_routing(::channel* pchannel)
    {
-
-//      ::backimpact::user::impact::install_message_routing(pchannel);
 
       ::user::impact::install_message_routing(pchannel);
 
@@ -133,8 +132,8 @@ namespace vulkan_land_landen
 
    }
 
-   
-   void impact::on_message_key_down(::message::message * pmessage)
+
+   void impact::on_message_key_down(::message::message* pmessage)
    {
 
       auto pkey = pmessage->m_union.m_pkey;
@@ -144,7 +143,7 @@ namespace vulkan_land_landen
    }
 
 
-   void impact::on_message_key_up(::message::message * pmessage)
+   void impact::on_message_key_up(::message::message* pmessage)
    {
 
       auto pkey = pmessage->m_union.m_pkey;
@@ -154,7 +153,7 @@ namespace vulkan_land_landen
    }
 
 
-   void impact::on_message_mouse_move(::message::message * pmessage)
+   void impact::on_message_mouse_move(::message::message* pmessage)
    {
 
       auto pmouse = pmessage->m_union.m_pmouse;
@@ -213,16 +212,11 @@ namespace vulkan_land_landen
 
    }
 
+
    void impact::on_message_mouse_leave(::message::message* pmessage)
    {
 
-      //if (is_absolute_mouse_position())
-      {
-         reset_mouse_last_position();
-
-      }
-
-
+      reset_mouse_last_position();
 
    }
 
@@ -232,7 +226,7 @@ namespace vulkan_land_landen
 
       if (is_absolute_mouse_position())
       {
-         
+
          m_dCursorX = 0.;
          m_dCursorY = 0.;
 
@@ -243,7 +237,7 @@ namespace vulkan_land_landen
    }
 
 
-   void impact::on_message_left_button_down(::message::message * pmessage)
+   void impact::on_message_left_button_down(::message::message* pmessage)
    {
 
       auto pmouse = pmessage->m_union.m_pmouse;
@@ -258,11 +252,10 @@ namespace vulkan_land_landen
       m_mousestate.position.y = point.y();
       m_mousestate.buttons.left = true;
 
-
    }
 
 
-   void impact::on_message_left_button_up(::message::message * pmessage)
+   void impact::on_message_left_button_up(::message::message* pmessage)
    {
 
       auto pmouse = pmessage->m_union.m_pmouse;
@@ -295,7 +288,8 @@ namespace vulkan_land_landen
 
    }
 
-   void impact::on_message_create(::message::message * pmessage)
+
+   void impact::on_message_create(::message::message* pmessage)
    {
 
       ::pointer<::message::create>pcreate(pmessage);
@@ -309,48 +303,33 @@ namespace vulkan_land_landen
 
       }
 
-
       get_app()->m_pimpact = this;
 
       m_pparticleImageSynchronization = node()->create_mutex();
 
       m_pimage = image()->create_image(int_size{ 1920, 1080 });
 
-      //if (0)
-      //{
-      //   application()->fork([this]()
-      //      {
-
-      //            run_vulkan_example();
-
-      //                    });
-
-      //   return;
-
-      //}
-
-
-
-
    }
 
-   void impact::on_message_destroy(::message::message * pmessage)
-   {
 
-   }
-
-   void impact::on_timer(timer * ptimer)
+   void impact::on_message_destroy(::message::message* pmessage)
    {
 
    }
 
 
+   void impact::on_timer(timer* ptimer)
+   {
 
-   void impact::handle(::topic * ptopic, ::handler_context * phandlercontext)
+   }
+
+
+   void impact::handle(::topic* ptopic, ::handler_context* phandlercontext)
    {
 
       if (ptopic->id() == id_initial_update)
       {
+         
          //::pointer<::userex::pane_tab_impact>ppaneimpact = get_typed_parent < ::userex::pane_tab_impact >();
          ////if(ppaneimpact.is_set())
          ////{
@@ -358,11 +337,13 @@ namespace vulkan_land_landen
          ////}
 
       }
+
       __UNREFERENCED_PARAMETER(ptopic);
+
    }
 
 
-   void impact::_001OnNcClip(::draw2d::graphics_pointer & pgraphics)
+   void impact::_001OnNcClip(::draw2d::graphics_pointer& pgraphics)
    {
 
       ::user::impact::_001OnNcClip(pgraphics);
@@ -370,7 +351,7 @@ namespace vulkan_land_landen
    }
 
 
-   void impact::_001OnClip(::draw2d::graphics_pointer & pgraphics)
+   void impact::_001OnClip(::draw2d::graphics_pointer& pgraphics)
    {
 
       ::user::impact::_001OnClip(pgraphics);
@@ -378,7 +359,7 @@ namespace vulkan_land_landen
    }
 
 
-   void impact::_001OnNcDraw(::draw2d::graphics_pointer & pgraphics)
+   void impact::_001OnNcDraw(::draw2d::graphics_pointer& pgraphics)
    {
 
       ::user::impact::_001OnNcDraw(pgraphics);
@@ -386,7 +367,7 @@ namespace vulkan_land_landen
    }
 
 
-   void impact::_001OnDraw(::draw2d::graphics_pointer & pgraphics)
+   void impact::_001OnDraw(::draw2d::graphics_pointer& pgraphics)
    {
 
       ////return;
@@ -418,7 +399,8 @@ namespace vulkan_land_landen
       //pgraphics->draw_line(::double_point(300.0, 0.0), ::double_point(100.0, 300.0));
 
       //pgraphics->set_alpha_mode(::draw2d::e_alpha_mode_set);
-      if(::is_ok(m_pimage))
+
+      if (::is_ok(m_pimage))
       {
 
          pgraphics->set_alpha_mode(::draw2d::e_alpha_mode_blend);
@@ -435,18 +417,17 @@ namespace vulkan_land_landen
 
       }
 
-
    }
 
 
-   void impact::_001OnNcPostDraw(::draw2d::graphics_pointer & pgraphics)
+   void impact::_001OnNcPostDraw(::draw2d::graphics_pointer& pgraphics)
    {
 
 
    }
 
 
-   ::user::document * impact::get_document()
+   ::user::document* impact::get_document()
    {
 
       return  (::user::impact::get_document());
@@ -460,7 +441,6 @@ namespace vulkan_land_landen
       if (session()->is_key_pressed(ekey))
       {
 
-
          return ::user::e_key_state_pressed;
 
       }
@@ -470,13 +450,17 @@ namespace vulkan_land_landen
    }
 
 
-   void impact::on_layout(::draw2d::graphics_pointer & pgraphics)
+   void impact::on_layout(::draw2d::graphics_pointer& pgraphics)
    {
 
       auto rectangleX = this->rectangle();
 
       if (rectangleX.area() <= 0)
+      {
+
          return;
+
+      }
 
       m_width = rectangleX.width();
       m_height = rectangleX.height();
@@ -486,9 +470,6 @@ namespace vulkan_land_landen
       reset_mouse_last_position();
 
    }
-
-
-
 
 
 } // namespace app_core_vulken

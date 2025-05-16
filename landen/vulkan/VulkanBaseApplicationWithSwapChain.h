@@ -73,7 +73,7 @@
 #include "camera.hpp"
 #include "benchmark.hpp"
 
-class VulkanExampleBase
+class VulkanBaseApplicationWithSwapChain
 {
 public:
    std::string getWindowTitle();
@@ -286,8 +286,8 @@ public:
 #endif
 
    /** @brief Default base class constructor */
-   VulkanExampleBase();
-   virtual ~VulkanExampleBase();
+   VulkanBaseApplicationWithSwapChain();
+   virtual ~VulkanBaseApplicationWithSwapChain();
    /** @brief Setup the vulkan instance, enable required extensions and connect to the physical device (GPU) */
    bool initVulkan();
 

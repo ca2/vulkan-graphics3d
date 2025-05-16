@@ -13,7 +13,7 @@
 #include "VulkanTools.h"
 #include "VulkanDevice.h"
 
-class VulkanRaytracingSample : public VulkanExampleBase
+class VulkanRaytracingSample : public VulkanBaseApplicationWithSwapChain
 {
 protected:
 	// Update the default render pass with different color attachment load ops
