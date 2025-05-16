@@ -1031,7 +1031,7 @@ VulkanExample5::~VulkanExample5()
 
    void VulkanExampleRenderHeadless::renderLoop2(const ::function < void(void *, int, int, int)> & callback)
    {
-      // SRS - for non-apple plaforms, handle benchmarking here within VulkanBaseApplicationWithSwapChain::renderLoop()
+      // SRS - for non-apple plaforms, handle benchmarking here within base_application_with_swap_chain::renderLoop()
       //     - for macOS, handle benchmarking within NSApp rendering loop via displayLinkOutputCb()
 #if !(defined(VK_USE_PLATFORM_IOS_MVK) || defined(VK_USE_PLATFORM_MACOS_MVK) || defined(VK_USE_PLATFORM_METAL_EXT))
       if (m_benchmark.active) {

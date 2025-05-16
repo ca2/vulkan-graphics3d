@@ -7,11 +7,15 @@
 */
 #include "framework.h"
 #include "acme/_operating_system.h"
-#include "VulkanOffscreenApplication.h"
+#include "offscreen_application.h"
 #include "vulkan/vk_container.h"
 
 
-VulkanOffscreenApplication::VulkanOffscreenApplication()
+namespace vulkan
+{
+
+
+offscreen_application::offscreen_application()
 {
    m_colorformatFB = FB_COLOR_FORMAT;
    m_strTitle = "Offscreen rendering"_ansi;
@@ -25,7 +29,7 @@ VulkanOffscreenApplication::VulkanOffscreenApplication()
    enabledFeatures.shaderClipDistance = VK_TRUE;
 }
 
-VulkanOffscreenApplication::~VulkanOffscreenApplication()
+offscreen_application::~offscreen_application()
 {
    if (device) {
       // Frame buffer
@@ -64,7 +68,7 @@ VulkanOffscreenApplication::~VulkanOffscreenApplication()
 
 // Setup the offscreen framebuffer for rendering the mirrored scene
 // The color attachment of this framebuffer will then be used to sample from in the fragment shader of the final pass
-void VulkanOffscreenApplication::prepareOffscreen()
+void offscreen_application::prepareOffscreen()
 {
    offscreenPass.width = FB_DIM;
    offscreenPass.height = FB_DIM;
@@ -234,7 +238,7 @@ void VulkanOffscreenApplication::prepareOffscreen()
    offscreenPass.descriptor.sampler = offscreenPass.sampler;
 }
 
-void VulkanOffscreenApplication::buildCommandBuffers()
+void offscreen_application::buildCommandBuffers()
 {
    VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
 
@@ -330,7 +334,7 @@ void VulkanOffscreenApplication::buildCommandBuffers()
    }
 }
 
-void VulkanOffscreenApplication::loadAssets()
+void offscreen_application::loadAssets()
 {
    const uint32_t glTFLoadingFlags = vkglTF::FileLoadingFlags::PreTransformVertices | vkglTF::FileLoadingFlags::PreMultiplyVertexColors | vkglTF::FileLoadingFlags::FlipY;
 
@@ -344,7 +348,7 @@ void VulkanOffscreenApplication::loadAssets()
    models.example.loadFromFile(pathDragonGltf, pdevice, queue, glTFLoadingFlags);
 }
 
-void VulkanOffscreenApplication::setupDescriptors()
+void offscreen_application::setupDescriptors()
 {
    // Pool
    std::vector<VkDescriptorPoolSize> poolSizes = {
@@ -408,7 +412,7 @@ void VulkanOffscreenApplication::setupDescriptors()
 
 }
 
-void VulkanOffscreenApplication::preparePipelines()
+void offscreen_application::preparePipelines()
 {
    // Layouts
    VkPipelineLayoutCreateInfo pipelineLayoutInfo = vks::initializers::pipelineLayoutCreateInfo(&descriptorSetLayouts.shaded, 1);
@@ -470,7 +474,7 @@ void VulkanOffscreenApplication::preparePipelines()
 }
 
 // Prepare and initialize uniform buffer containing shader uniforms
-void VulkanOffscreenApplication::prepareUniformBuffers()
+void offscreen_application::prepareUniformBuffers()
 {
    // Mesh vertex shader uniform buffer block
    VK_CHECK_RESULT(m_pvulkandevice->createBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &uniformBuffers.vsShared, sizeof(UniformData)));
@@ -487,7 +491,7 @@ void VulkanOffscreenApplication::prepareUniformBuffers()
    updateUniformBufferOffscreen();
 }
 
-void VulkanOffscreenApplication::updateUniformBuffers()
+void offscreen_application::updateUniformBuffers()
 {
    uniformData.projection = camera.matrices.perspective;
    uniformData.view = camera.matrices.view;
@@ -503,7 +507,7 @@ void VulkanOffscreenApplication::updateUniformBuffers()
    memcpy(uniformBuffers.vsMirror.mapped, &uniformData, sizeof(UniformData));
 }
 
-void VulkanOffscreenApplication::updateUniformBufferOffscreen()
+void offscreen_application::updateUniformBufferOffscreen()
 {
    uniformData.projection = camera.matrices.perspective;
    uniformData.view = camera.matrices.view;
@@ -514,9 +518,9 @@ void VulkanOffscreenApplication::updateUniformBufferOffscreen()
    memcpy(uniformBuffers.vsOffScreen.mapped, &uniformData, sizeof(UniformData));
 }
 
-void VulkanOffscreenApplication::prepare()
+void offscreen_application::prepare()
 {
-   VulkanBaseApplicationNoSwapChain::prepare();
+   base_application_no_swap_chain::prepare();
    loadAssets();
    prepareOffscreen();
    prepareUniformBuffers();
@@ -526,21 +530,21 @@ void VulkanOffscreenApplication::prepare()
    prepared = true;
 }
 
-void VulkanOffscreenApplication::draw(const ::function < void(void *, int, int, int)> & callback)
+void offscreen_application::draw(const ::function < void(void *, int, int, int)> & callback)
 {
-   //VulkanBaseApplicationNoSwapChain::prepareFrame();
+   //base_application_no_swap_chain::prepareFrame();
    //submitInfo.commandBufferCount = 1;
    //submitInfo.pCommandBuffers = &m_drawCmdBuffers[currentBuffer];
    //VK_CHECK_RESULT(vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE));
 
    submitWork(m_drawCmdBuffers[currentBuffer], queue);
-   //VulkanBaseApplicationNoSwapChain::submitFrame();
+   //base_application_no_swap_chain::submitFrame();
    vkQueueWaitIdle(queue);
    sample(callback);
 }
 
 
-void VulkanOffscreenApplication::submitWork(VkCommandBuffer cmdBuffer, VkQueue queue)
+void offscreen_application::submitWork(VkCommandBuffer cmdBuffer, VkQueue queue)
 {
    VkSubmitInfo submitInfo = vks::initializers::submitInfo();
    submitInfo.commandBufferCount = 1;
@@ -556,7 +560,7 @@ void VulkanOffscreenApplication::submitWork(VkCommandBuffer cmdBuffer, VkQueue q
 }
 
 
-void VulkanOffscreenApplication::render(const ::function < void(void *, int, int, int)> & callback)
+void offscreen_application::render(const ::function < void(void *, int, int, int)> & callback)
 {
    if (!prepared)
       return;
@@ -571,7 +575,7 @@ void VulkanOffscreenApplication::render(const ::function < void(void *, int, int
    }
 }
 
-void VulkanOffscreenApplication::OnUpdateUIOverlay(vks::UIOverlay * overlay)
+void offscreen_application::OnUpdateUIOverlay(vks::UIOverlay * overlay)
 {
    if (overlay->header("Settings"_ansi)) {
       if (overlay->checkBox("Display render target"_ansi, &debugDisplay)) {
@@ -581,7 +585,7 @@ void VulkanOffscreenApplication::OnUpdateUIOverlay(vks::UIOverlay * overlay)
 }
 ///};
 
-void VulkanOffscreenApplication::sample(const ::function < void(void *, int, int, int)> & callback)
+void offscreen_application::sample(const ::function < void(void *, int, int, int)> & callback)
 {
 
 
@@ -770,7 +774,7 @@ void VulkanOffscreenApplication::sample(const ::function < void(void *, int, int
 
 
 
-void VulkanOffscreenApplication::render_loop(const ::function < void(void *, int, int, int)> & callback)
+void offscreen_application::render_loop(const ::function < void(void *, int, int, int)> & callback)
 {
 
 
@@ -795,7 +799,7 @@ void VulkanOffscreenApplication::render_loop(const ::function < void(void *, int
       //vkUnmapMemory(m_pvulkandevice->logicalDevice, offscreenPass.color.mem);
       preempt(20_ms);
    }
-//    // SRS - for non-apple plaforms, handle benchmarking here within VulkanBaseApplicationWithSwapChain::renderLoop()
+//    // SRS - for non-apple plaforms, handle benchmarking here within base_application_with_swap_chain::renderLoop()
 //    //     - for macOS, handle benchmarking within NSApp rendering loop via displayLinkOutputCb()
 // #if !(defined(VK_USE_PLATFORM_IOS_MVK) || defined(VK_USE_PLATFORM_MACOS_MVK) || defined(VK_USE_PLATFORM_METAL_EXT))
 //    if (benchmark.active) {
@@ -1171,21 +1175,21 @@ void VulkanOffscreenApplication::render_loop(const ::function < void(void *, int
 }
 
 
-//VulkanOffscreenApplication * VulkanExample;
+//offscreen_application * VulkanExample;
 //LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 //{
 //   if (VulkanExample != NULL)
 //   {
-//      VulkanOffscreenApplication->handleMessages(hWnd, uMsg, wParam, lParam);
+//      offscreen_application->handleMessages(hWnd, uMsg, wParam, lParam);
 //   }
 //   return (DefWindowProc(hWnd, uMsg, wParam, lParam));
 //}
 
 
-::pointer<::vulkan::application > start_VulkanOffscreenApplication(::vkc::VkContainer * pvkcontainer, mouseState * pmousestate)
+::pointer<::vulkan::application > start_offscreen_application(::vkc::VkContainer * pvkcontainer, mouseState * pmousestate)
 {
 
-   auto pvulkanoffscreenapplication = pvkcontainer->__create_new < VulkanOffscreenApplication >();
+   auto pvulkanoffscreenapplication = pvkcontainer->__create_new < offscreen_application >();
 
    pvulkanoffscreenapplication->m_pmousestate = pmousestate;
 
@@ -1203,6 +1207,9 @@ void VulkanOffscreenApplication::render_loop(const ::function < void(void *, int
 }
 
 
+} // namespace vulkan
+
+
 ///*
 // * Vulkan entry points
 // *
@@ -1218,24 +1225,24 @@ void VulkanOffscreenApplication::render_loop(const ::function < void(void *, int
 //  * Windows
 //  */
 //#define VULKAN_EXAMPLE_MAIN()																		\
-//VulkanOffscreenApplication *VulkanOffscreenApplication;																		\
+//offscreen_application *offscreen_application;																		\
 //LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)						\
 //{																									\
-//	if (VulkanOffscreenApplication != NULL)																		\
+//	if (offscreen_application != NULL)																		\
 //	{																								\
-//		VulkanOffscreenApplication->handleMessages(hWnd, uMsg, wParam, lParam);									\
+//		offscreen_application->handleMessages(hWnd, uMsg, wParam, lParam);									\
 //	}																								\
 //	return (DefWindowProc(hWnd, uMsg, wParam, lParam));												\
 //}																									\
 //int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)									\
 //{																									\
-//	for (int32_t i = 0; i < __argc; i++) { VulkanOffscreenApplication::args.push_back(__argv[i]); };  			\
-//	VulkanOffscreenApplication = ___new VulkanOffscreenApplication();															\
-//	VulkanOffscreenApplication->initVulkan();																	\
-//	VulkanOffscreenApplication->setupWindow(hInstance, WndProc);													\
-//	VulkanOffscreenApplication->prepare();																		\
-//	VulkanOffscreenApplication->renderLoop();																	\
-//	delete(VulkanOffscreenApplication);																			\
+//	for (int32_t i = 0; i < __argc; i++) { offscreen_application::args.push_back(__argv[i]); };  			\
+//	offscreen_application = ___new offscreen_application();															\
+//	offscreen_application->initVulkan();																	\
+//	offscreen_application->setupWindow(hInstance, WndProc);													\
+//	offscreen_application->prepare();																		\
+//	offscreen_application->renderLoop();																	\
+//	delete(offscreen_application);																			\
 //	return 0;																						\
 //}
 //
@@ -1244,17 +1251,17 @@ void VulkanOffscreenApplication::render_loop(const ::function < void(void *, int
 //  * Android
 //  */
 //#define VULKAN_EXAMPLE_MAIN()																		\
-//VulkanOffscreenApplication *VulkanOffscreenApplication;																		\
+//offscreen_application *offscreen_application;																		\
 //void android_main(android_app* state)																\
 //{																									\
-//	VulkanOffscreenApplication = ___new VulkanOffscreenApplication();															\
-//	state->userData = VulkanOffscreenApplication;																\
-//	state->onAppCmd = VulkanOffscreenApplication::handleAppCommand;												\
-//	state->onInputEvent = VulkanOffscreenApplication::handleAppInput;											\
+//	offscreen_application = ___new offscreen_application();															\
+//	state->userData = offscreen_application;																\
+//	state->onAppCmd = offscreen_application::handleAppCommand;												\
+//	state->onInputEvent = offscreen_application::handleAppInput;											\
 //	androidApp = state;																				\
 //	vks::android::getDeviceConfig();																\
-//	VulkanOffscreenApplication->renderLoop();																	\
-//	delete(VulkanOffscreenApplication);																			\
+//	offscreen_application->renderLoop();																	\
+//	delete(offscreen_application);																			\
 //}
 
 //#elif defined(_DIRECT2DISPLAY)
@@ -1262,18 +1269,18 @@ void VulkanOffscreenApplication::render_loop(const ::function < void(void *, int
 //  * Direct-to-display
 //  */
 //#define VULKAN_EXAMPLE_MAIN()																		\
-//VulkanOffscreenApplication *VulkanOffscreenApplication;																		\
+//offscreen_application *offscreen_application;																		\
 //static void handleEvent()                                											\
 //{																									\
 //}																									\
 //int main(const int argc, const char *argv[])													    \
 //{																									\
-//	for (size_t i = 0; i < argc; i++) { VulkanOffscreenApplication::args.push_back(argv[i]); };  				\
-//	VulkanOffscreenApplication = ___new VulkanOffscreenApplication();															\
-//	VulkanOffscreenApplication->initVulkan();																	\
-//	VulkanOffscreenApplication->prepare();																		\
-//	VulkanOffscreenApplication->renderLoop();																	\
-//	delete(VulkanOffscreenApplication);																			\
+//	for (size_t i = 0; i < argc; i++) { offscreen_application::args.push_back(argv[i]); };  				\
+//	offscreen_application = ___new offscreen_application();															\
+//	offscreen_application->initVulkan();																	\
+//	offscreen_application->prepare();																		\
+//	offscreen_application->renderLoop();																	\
+//	delete(offscreen_application);																			\
 //	return 0;																						\
 //}
 
@@ -1282,23 +1289,23 @@ void VulkanOffscreenApplication::render_loop(const ::function < void(void *, int
 //  * Direct FB
 //  */
 //#define VULKAN_EXAMPLE_MAIN()																		\
-//VulkanOffscreenApplication *VulkanOffscreenApplication;																		\
+//offscreen_application *offscreen_application;																		\
 //static void handleEvent(const DFBWindowEvent *happening)												\
 //{																									\
-//	if (VulkanOffscreenApplication != NULL)																		\
+//	if (offscreen_application != NULL)																		\
 //	{																								\
-//		VulkanOffscreenApplication->handleEvent(happening);															\
+//		offscreen_application->handleEvent(happening);															\
 //	}																								\
 //}																									\
 //int main(const int argc, const char *argv[])													    \
 //{																									\
-//	for (size_t i = 0; i < argc; i++) { VulkanOffscreenApplication::args.push_back(argv[i]); };  				\
-//	VulkanOffscreenApplication = ___new VulkanOffscreenApplication();															\
-//	VulkanOffscreenApplication->initVulkan();																	\
-//	VulkanOffscreenApplication->setupWindow();					 												\
-//	VulkanOffscreenApplication->prepare();																		\
-//	VulkanOffscreenApplication->renderLoop();																	\
-//	delete(VulkanOffscreenApplication);																			\
+//	for (size_t i = 0; i < argc; i++) { offscreen_application::args.push_back(argv[i]); };  				\
+//	offscreen_application = ___new offscreen_application();															\
+//	offscreen_application->initVulkan();																	\
+//	offscreen_application->setupWindow();					 												\
+//	offscreen_application->prepare();																		\
+//	offscreen_application->renderLoop();																	\
+//	delete(offscreen_application);																			\
 //	return 0;																						\
 //}
 
@@ -1307,16 +1314,16 @@ void VulkanOffscreenApplication::render_loop(const ::function < void(void *, int
 //  * Wayland / headless
 //  */
 //#define VULKAN_EXAMPLE_MAIN()																		\
-//VulkanOffscreenApplication *VulkanOffscreenApplication;																		\
+//offscreen_application *offscreen_application;																		\
 //int main(const int argc, const char *argv[])													    \
 //{																									\
-//	for (size_t i = 0; i < argc; i++) { VulkanOffscreenApplication::args.push_back(argv[i]); };  				\
-//	VulkanOffscreenApplication = ___new VulkanOffscreenApplication();															\
-//	VulkanOffscreenApplication->initVulkan();																	\
-//	VulkanOffscreenApplication->setupWindow();					 												\
-//	VulkanOffscreenApplication->prepare();																		\
-//	VulkanOffscreenApplication->renderLoop();																	\
-//	delete(VulkanOffscreenApplication);																			\
+//	for (size_t i = 0; i < argc; i++) { offscreen_application::args.push_back(argv[i]); };  				\
+//	offscreen_application = ___new offscreen_application();															\
+//	offscreen_application->initVulkan();																	\
+//	offscreen_application->setupWindow();					 												\
+//	offscreen_application->prepare();																		\
+//	offscreen_application->renderLoop();																	\
+//	delete(offscreen_application);																			\
 //	return 0;																						\
 //}
 
@@ -1325,23 +1332,23 @@ void VulkanOffscreenApplication::render_loop(const ::function < void(void *, int
 //  * X11 Xcb
 //  */
 //#define VULKAN_EXAMPLE_MAIN()																		\
-//VulkanOffscreenApplication *VulkanOffscreenApplication;																		\
+//offscreen_application *offscreen_application;																		\
 //static void handleEvent(const xcb_generic_event_t *happening)											\
 //{																									\
-//	if (VulkanOffscreenApplication != NULL)																		\
+//	if (offscreen_application != NULL)																		\
 //	{																								\
-//		VulkanOffscreenApplication->handleEvent(happening);															\
+//		offscreen_application->handleEvent(happening);															\
 //	}																								\
 //}																									\
 //int main(const int argc, const char *argv[])													    \
 //{																									\
-//	for (size_t i = 0; i < argc; i++) { VulkanOffscreenApplication::args.push_back(argv[i]); };  				\
-//	VulkanOffscreenApplication = ___new VulkanOffscreenApplication();															\
-//	VulkanOffscreenApplication->initVulkan();																	\
-//	VulkanOffscreenApplication->setupWindow();					 												\
-//	VulkanOffscreenApplication->prepare();																		\
-//	VulkanOffscreenApplication->renderLoop();																	\
-//	delete(VulkanOffscreenApplication);																			\
+//	for (size_t i = 0; i < argc; i++) { offscreen_application::args.push_back(argv[i]); };  				\
+//	offscreen_application = ___new offscreen_application();															\
+//	offscreen_application->initVulkan();																	\
+//	offscreen_application->setupWindow();					 												\
+//	offscreen_application->prepare();																		\
+//	offscreen_application->renderLoop();																	\
+//	delete(offscreen_application);																			\
 //	return 0;																						\
 //}
 
@@ -1351,18 +1358,18 @@ void VulkanOffscreenApplication::render_loop(const ::function < void(void *, int
 //  */
 //#if defined(VK_EXAMPLE_XCODE_GENERATED)
 //#define VULKAN_EXAMPLE_MAIN()																		\
-//VulkanOffscreenApplication *VulkanOffscreenApplication;																		\
+//offscreen_application *offscreen_application;																		\
 //int main(const int argc, const char *argv[])														\
 //{																									\
 //	@autoreleasepool																				\
 //	{																								\
-//		for (size_t i = 0; i < argc; i++) { VulkanOffscreenApplication::args.push_back(argv[i]); };				\
-//		VulkanOffscreenApplication = ___new VulkanOffscreenApplication();														\
-//		VulkanOffscreenApplication->initVulkan();																\
-//		VulkanOffscreenApplication->setupWindow(nullptr);														\
-//		VulkanOffscreenApplication->prepare();																	\
-//		VulkanOffscreenApplication->renderLoop();																\
-//		delete(VulkanOffscreenApplication);																		\
+//		for (size_t i = 0; i < argc; i++) { offscreen_application::args.push_back(argv[i]); };				\
+//		offscreen_application = ___new offscreen_application();														\
+//		offscreen_application->initVulkan();																\
+//		offscreen_application->setupWindow(nullptr);														\
+//		offscreen_application->prepare();																	\
+//		offscreen_application->renderLoop();																\
+//		delete(offscreen_application);																		\
 //	}																								\
 //	return 0;																						\
 //}
@@ -1375,18 +1382,19 @@ void VulkanOffscreenApplication::render_loop(const ::function < void(void *, int
 //  * QNX Screen
 //  */
 //#define VULKAN_EXAMPLE_MAIN()																		
-//VulkanOffscreenApplication *VulkanOffscreenApplication;																		
+//offscreen_application *offscreen_application;																		
 //int main(const int argc, const char *argv[])														
 //{																									
-//	for (int i = 0; i < argc; i++) { VulkanOffscreenApplication::args.push_back(argv[i]); };						
-//	VulkanOffscreenApplication = ___new VulkanOffscreenApplication();															
-//	VulkanOffscreenApplication->initVulkan();																	
-//	VulkanOffscreenApplication->setupWindow();																	
-//	VulkanOffscreenApplication->prepare();																		
-//	VulkanOffscreenApplication->renderLoop();																	
-//	delete(VulkanOffscreenApplication);																			
+//	for (int i = 0; i < argc; i++) { offscreen_application::args.push_back(argv[i]); };						
+//	offscreen_application = ___new offscreen_application();															
+//	offscreen_application->initVulkan();																	
+//	offscreen_application->setupWindow();																	
+//	offscreen_application->prepare();																		
+//	offscreen_application->renderLoop();																	
+//	delete(offscreen_application);																			
 //	return 0;																						
 //}
 //
 //
 //
+

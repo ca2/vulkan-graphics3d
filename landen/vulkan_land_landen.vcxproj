@@ -739,7 +739,7 @@
     </ClCompile>
     <ClCompile Include="impact.cpp" />
     <ClCompile Include="vulkan\application.cpp" />
-    <ClCompile Include="vulkan\VulkanOffscreenApplication.cpp" />
+    <ClCompile Include="vulkan\offscreen_application.cpp" />
     <ClInclude Include="vulkan\benchmark.hpp" />
     <ClInclude Include="vulkan\camera.hpp" />
     <ClInclude Include="vulkan\CommandLineParser.hpp" />
@@ -777,8 +777,8 @@
     <ClCompile Include="vulkan\VulkanTexture.cpp" />
     <ClCompile Include="vulkan\VulkanTools.cpp" />
     <ClCompile Include="vulkan\VulkanUIOverlay.cpp" />
-    <ClCompile Include="vulkan\VulkanBaseApplicationNoSwapChain.cpp" />
-    <ClCompile Include="vulkan\VulkanBaseApplicationWithSwapChain.cpp" />
+    <ClCompile Include="vulkan\base_application_no_swap_chain.cpp" />
+    <ClCompile Include="vulkan\base_application_with_swap_chain.cpp" />
     <ClCompile Include="_.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -786,9 +786,9 @@
     <ClInclude Include="document.h" />
     <ClInclude Include="frame.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="vulkan\VulkanOffscreenApplication.h" />
-    <ClInclude Include="vulkan\VulkanBaseApplicationNoSwapChain.h" />
-    <ClInclude Include="vulkan\VulkanBaseApplicationWithSwapChain.h" />
+    <ClInclude Include="vulkan\offscreen_application.h" />
+    <ClInclude Include="vulkan\base_application_no_swap_chain.h" />
+    <ClInclude Include="vulkan\base_application_with_swap_chain.h" />
     <ClInclude Include="_.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="impact.h" />

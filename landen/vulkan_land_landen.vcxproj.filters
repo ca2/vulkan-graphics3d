@@ -34,7 +34,7 @@
     <ClCompile Include="_.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="vulkan\VulkanOffscreenApplication.cpp">
+    <ClCompile Include="vulkan\offscreen_application.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
     <ClCompile Include="vulkan\VulkanBuffer.cpp">
@@ -64,7 +64,7 @@
     <ClCompile Include="vulkan\VulkanExampleRenderHeadless.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
-    <ClCompile Include="vulkan\VulkanBaseApplicationNoSwapChain.cpp">
+    <ClCompile Include="vulkan\base_application_no_swap_chain.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
     <ClCompile Include="vulkan\application.cpp">
@@ -73,7 +73,7 @@
     <ClCompile Include="vulkan\vk_container.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
-    <ClCompile Include="vulkan\VulkanBaseApplicationWithSwapChain.cpp">
+    <ClCompile Include="vulkan\base_application_with_swap_chain.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
     <ClCompile Include="vulkan\VulkanAndroid.cpp">
@@ -108,7 +108,7 @@
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="vulkan\VulkanOffscreenApplication.h">
+    <ClInclude Include="vulkan\offscreen_application.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
     <ClInclude Include="vulkan\keycodes.h">
@@ -180,7 +180,7 @@
     <ClInclude Include="vulkan\VulkanExampleRenderHeadless.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="vulkan\VulkanBaseApplicationNoSwapChain.h">
+    <ClInclude Include="vulkan\base_application_no_swap_chain.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
     <ClInclude Include="vulkan\application.h">
@@ -189,7 +189,7 @@
     <ClInclude Include="vulkan\vk_container.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="vulkan\VulkanBaseApplicationWithSwapChain.h">
+    <ClInclude Include="vulkan\base_application_with_swap_chain.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
   </ItemGroup>

@@ -9,11 +9,12 @@
 #pragma once
 
 #include "vulkan/vulkan.h"
-#include "VulkanBaseApplicationWithSwapChain.h"
+#include "base_application_with_swap_chain.h"
 #include "VulkanTools.h"
 #include "VulkanDevice.h"
 
-class VulkanRaytracingSample : public VulkanBaseApplicationWithSwapChain
+class VulkanRaytracingSample :
+	public ::vulkan::base_application_with_swap_chain
 {
 protected:
 	// Update the default render pass with different color attachment load ops

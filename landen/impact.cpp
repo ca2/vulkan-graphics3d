@@ -21,7 +21,18 @@ int run_vulkan_example2(const ::function < void(void*, int, int, int)>& callback
 
 int run_vulkan_example5(mouseState* pmousestate, const ::function < void(void*, int, int, int)>& callback);
 
-::pointer<::vulkan::application > start_VulkanOffscreenApplication(vkc::VkContainer* pvkcontainer, mouseState* pmousestate);
+
+namespace vulkan
+{
+
+
+   ::pointer<::vulkan::application > start_offscreen_application(vkc::VkContainer* pvkcontainer, mouseState* pmousestate);
+
+
+} // namespace vulkan
+
+
+
 
 
 //#include "aura/update.h"
@@ -276,7 +287,7 @@ namespace vulkan_land_landen
    ::pointer < ::vulkan::application > impact::start_vulkan_application()
    {
 
-      return start_VulkanOffscreenApplication(this, &m_mousestate);
+      return ::vulkan::start_offscreen_application(this, &m_mousestate);
 
    }
 
