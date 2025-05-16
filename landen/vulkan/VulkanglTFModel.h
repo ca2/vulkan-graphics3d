@@ -21,7 +21,7 @@
 #include <vector>
 
 #include "vulkan/vulkan.h"
-#include "VulkanDevice.h"
+#include "device.h"
 #ifdef HAS_KTX
 #include <ktx.h>
 #include <ktxvulkan.h>
@@ -61,7 +61,7 @@ namespace vkglTF
 		glTF texture loading class
 	*/
 	struct Texture {
-		vks::VulkanDevice* m_pvulkandevice = nullptr;
+		vulkan::device* m_pvulkandevice = nullptr;
 		VkImage image;
 		VkImageLayout imageLayout;
 		VkDeviceMemory deviceMemory;
@@ -74,14 +74,14 @@ namespace vkglTF
 		uint32_t index;
 		void updateDescriptor();
 		void destroy();
-		void fromglTfImage(tinygltf::Image& gltfimage, const ::file::path & pathFolder, vks::VulkanDevice* pdevice, VkQueue copyQueue);
+		void fromglTfImage(tinygltf::Image& gltfimage, const ::file::path & pathFolder, vulkan::device* pdevice, VkQueue copyQueue);
 	};
 
 	/*
 		glTF material class
 	*/
 	struct Material {
-		vks::VulkanDevice* m_pvulkandevice = nullptr;
+		vulkan::device* m_pvulkandevice = nullptr;
 		enum AlphaMode { ALPHAMODE_OPAQUE, ALPHAMODE_MASK, ALPHAMODE_BLEND };
 		AlphaMode alphaMode = ALPHAMODE_OPAQUE;
 		float alphaCutoff = 1.0f;
@@ -99,7 +99,7 @@ namespace vkglTF
 
 		VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
 
-		Material(vks::VulkanDevice* pdevice) : m_pvulkandevice(pdevice) {};
+		Material(vulkan::device* pdevice) : m_pvulkandevice(pdevice) {};
 		void createDescriptorSet(VkDescriptorPool descriptorPool, VkDescriptorSetLayout descriptorSetLayout, uint32_t descriptorBindingFlags);
 	};
 
@@ -129,7 +129,7 @@ namespace vkglTF
 		glTF mesh
 	*/
 	struct Mesh {
-		vks::VulkanDevice* m_pvulkandevice;
+		vulkan::device* m_pvulkandevice;
 
 		std::vector<Primitive*> primitives;
 		std::string name;
@@ -148,7 +148,7 @@ namespace vkglTF
 			float jointcount{ 0 };
 		} uniformBlock;
 
-		Mesh(vks::VulkanDevice* pdevice, glm::mat4 matrix);
+		Mesh(vulkan::device* pdevice, glm::mat4 matrix);
 		~Mesh();
 	};
 
@@ -261,17 +261,17 @@ namespace vkglTF
 		vkglTF::Texture emptyTexture;
 		void createEmptyTexture(VkQueue transferQueue);
 	public:
-		::vks::VulkanDevice* m_pvulkandevice = nullptr;
+		::vulkan::device* m_pvulkandevice = nullptr;
 		VkDescriptorPool descriptorPool;
 
 		struct Vertices {
 			int count;
-			VkBuffer buffer;
+			VkBuffer m_vkbuffer;
 			VkDeviceMemory memory;
 		} vertices;
 		struct Indices {
 			int count;
-			VkBuffer buffer;
+			VkBuffer m_vkbuffer;
 			VkDeviceMemory memory;
 		} indices;
 
@@ -300,10 +300,10 @@ namespace vkglTF
 		~Model();
 		void loadNode(vkglTF::Node* parent, const tinygltf::Node& node, uint32_t nodeIndex, const tinygltf::Model& model, std::vector<uint32_t>& indexBuffer, std::vector<Vertex>& vertexBuffer, float globalscale);
 		void loadSkins(tinygltf::Model& gltfModel);
-		void loadImages(tinygltf::Model& gltfModel, ::vks::VulkanDevice* pdevice, VkQueue transferQueue);
+		void loadImages(tinygltf::Model& gltfModel, ::vulkan::device* pdevice, VkQueue transferQueue);
 		void loadMaterials(tinygltf::Model& gltfModel);
 		void loadAnimations(tinygltf::Model& gltfModel);
-		void loadFromFile(const ::file::path & path, ::vks::VulkanDevice* pdevice, VkQueue transferQueue, uint32_t fileLoadingFlags = vkglTF::FileLoadingFlags::None, float scale = 1.0f);
+		void loadFromFile(const ::file::path & path, ::vulkan::device* pdevice, VkQueue transferQueue, uint32_t fileLoadingFlags = vkglTF::FileLoadingFlags::None, float scale = 1.0f);
 		void bindBuffers(VkCommandBuffer commandBuffer);
 		void drawNode(Node* node, VkCommandBuffer commandBuffer, uint32_t renderFlags = 0, VkPipelineLayout pipelineLayout = VK_NULL_HANDLE, uint32_t bindImageSet = 1);
 		void draw(VkCommandBuffer commandBuffer, uint32_t renderFlags = 0, VkPipelineLayout pipelineLayout = VK_NULL_HANDLE, uint32_t bindImageSet = 1);

@@ -1,6 +1,8 @@
 #include "framework.h"
 #include "vk_device.h"
 #include "vulkan-land/landen/vulkan/vk_container.h"
+#include "vulkan-land/landen/vulkan/VulkanInitializers.h"
+#include "vulkan-land/landen/vulkan/VulkanTools.h"
 // std headers
 #include <cstring>
 #include <iostream>

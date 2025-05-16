@@ -1,766 +1,587 @@
 /*
-* Vulkan Example - Offscreen rendering using a separate framebuffer
+* Class wrapping access to the swap chain
+* 
+* A swap chain is a collection of framebuffers used for rendering and presentation to the windowing system
 *
-* Copyright (C) 2016-2024 Sascha Willems - www.saschawillems.de
+* Copyright (C) 2016-2024 by Sascha Willems - www.saschawillems.de
 *
 * This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)
 */
 #include "framework.h"
-#include "acme/_operating_system.h"
-#include "offscreen.h"
-
-
-VulkanExample::VulkanExample()
-   {
-      m_strTitle = "Offscreen rendering"_ansi;
-      timerSpeed *= 0.25f;
-      camera.type = Camera::CameraType::lookat;
-      camera.setPosition(glm::vec3(0.0f, 1.0f, -6.0f));
-      camera.setRotation(glm::vec3(-2.5f, 0.0f, 0.0f));
-      camera.setRotationSpeed(0.5f);
-      camera.setPerspective(60.0f, (float)width / (float)height, 0.1f, 256.0f);
-      // The scene shader uses a clipping plane, so this feature has to be enabled
-      enabledFeatures.shaderClipDistance = VK_TRUE;
-   }
-
-VulkanExample::~VulkanExample()
-   {
-      if (device) {
-         // Frame buffer
-
-         // Color attachment
-         vkDestroyImageView(device, offscreenPass.color.view, nullptr);
-         vkDestroyImage(device, offscreenPass.color.image, nullptr);
-         vkFreeMemory(device, offscreenPass.color.mem, nullptr);
-
-         // Depth attachment
-         vkDestroyImageView(device, offscreenPass.depth.view, nullptr);
-         vkDestroyImage(device, offscreenPass.depth.image, nullptr);
-         vkFreeMemory(device, offscreenPass.depth.mem, nullptr);
-
-         vkDestroyRenderPass(device, offscreenPass.renderPass, nullptr);
-         vkDestroySampler(device, offscreenPass.sampler, nullptr);
-         vkDestroyFramebuffer(device, offscreenPass.frameBuffer, nullptr);
-
-         vkDestroyPipeline(device, pipelines.debug, nullptr);
-         vkDestroyPipeline(device, pipelines.shaded, nullptr);
-         vkDestroyPipeline(device, pipelines.shadedOffscreen, nullptr);
-         vkDestroyPipeline(device, pipelines.mirror, nullptr);
-
-         vkDestroyPipelineLayout(device, pipelineLayouts.textured, nullptr);
-         vkDestroyPipelineLayout(device, pipelineLayouts.shaded, nullptr);
-
-         vkDestroyDescriptorSetLayout(device, descriptorSetLayouts.shaded, nullptr);
-         vkDestroyDescriptorSetLayout(device, descriptorSetLayouts.textured, nullptr);
-
-         // Uniform buffers
-         uniformBuffers.vsShared.destroy();
-         uniformBuffers.vsMirror.destroy();
-         uniformBuffers.vsOffScreen.destroy();
-      }
-   }
-
-   // Setup the offscreen framebuffer for rendering the mirrored scene
-   // The color attachment of this framebuffer will then be used to sample from in the fragment shader of the final pass
-   void VulkanExample::prepareOffscreen()
-   {
-      offscreenPass.width = FB_DIM;
-      offscreenPass.height = FB_DIM;
-
-      // Find a suitable depth format
-      VkFormat fbDepthFormat;
-      VkBool32 validDepthFormat = vks::tools::getSupportedDepthFormat(physicalDevice, &fbDepthFormat);
-      assert(validDepthFormat);
-
-      // Color attachment
-      VkImageCreateInfo image = vks::initializers::imageCreateInfo();
-      image.imageType = VK_IMAGE_TYPE_2D;
-      image.format = FB_COLOR_FORMAT;
-      image.extent.width = offscreenPass.width;
-      image.extent.height = offscreenPass.height;
-      image.extent.depth = 1;
-      image.mipLevels = 1;
-      image.arrayLayers = 1;
-      image.samples = VK_SAMPLE_COUNT_1_BIT;
-      image.tiling = VK_IMAGE_TILING_OPTIMAL;
-      // We will sample directly from the color attachment
-      image.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-
-      VkMemoryAllocateInfo memAlloc = vks::initializers::memoryAllocateInfo();
-      VkMemoryRequirements memReqs;
-
-      VK_CHECK_RESULT(vkCreateImage(device, &image, nullptr, &offscreenPass.color.image));
-      vkGetImageMemoryRequirements(device, offscreenPass.color.image, &memReqs);
-      memAlloc.allocationSize = memReqs.size;
-      memAlloc.memoryTypeIndex = m_pvulkandevice->getMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-      VK_CHECK_RESULT(vkAllocateMemory(device, &memAlloc, nullptr, &offscreenPass.color.mem));
-      VK_CHECK_RESULT(vkBindImageMemory(device, offscreenPass.color.image, offscreenPass.color.mem, 0));
-
-      VkImageViewCreateInfo colorImageView = vks::initializers::imageViewCreateInfo();
-      colorImageView.viewType = VK_IMAGE_VIEW_TYPE_2D;
-      colorImageView.format = FB_COLOR_FORMAT;
-      colorImageView.subresourceRange = {};
-      colorImageView.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-      colorImageView.subresourceRange.baseMipLevel = 0;
-      colorImageView.subresourceRange.levelCount = 1;
-      colorImageView.subresourceRange.baseArrayLayer = 0;
-      colorImageView.subresourceRange.layerCount = 1;
-      colorImageView.image = offscreenPass.color.image;
-      VK_CHECK_RESULT(vkCreateImageView(device, &colorImageView, nullptr, &offscreenPass.color.view));
-
-      // Create sampler to sample from the attachment in the fragment shader
-      VkSamplerCreateInfo samplerInfo = vks::initializers::samplerCreateInfo();
-      samplerInfo.magFilter = VK_FILTER_LINEAR;
-      samplerInfo.minFilter = VK_FILTER_LINEAR;
-      samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-      samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-      samplerInfo.addressModeV = samplerInfo.addressModeU;
-      samplerInfo.addressModeW = samplerInfo.addressModeU;
-      samplerInfo.mipLodBias = 0.0f;
-      samplerInfo.maxAnisotropy = 1.0f;
-      samplerInfo.minLod = 0.0f;
-      samplerInfo.maxLod = 1.0f;
-      samplerInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
-      VK_CHECK_RESULT(vkCreateSampler(device, &samplerInfo, nullptr, &offscreenPass.sampler));
-
-      // Depth stencil attachment
-      image.format = fbDepthFormat;
-      image.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
-
-      VK_CHECK_RESULT(vkCreateImage(device, &image, nullptr, &offscreenPass.depth.image));
-      vkGetImageMemoryRequirements(device, offscreenPass.depth.image, &memReqs);
-      memAlloc.allocationSize = memReqs.size;
-      memAlloc.memoryTypeIndex = m_pvulkandevice->getMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-      VK_CHECK_RESULT(vkAllocateMemory(device, &memAlloc, nullptr, &offscreenPass.depth.mem));
-      VK_CHECK_RESULT(vkBindImageMemory(device, offscreenPass.depth.image, offscreenPass.depth.mem, 0));
-
-      VkImageViewCreateInfo depthStencilView = vks::initializers::imageViewCreateInfo();
-      depthStencilView.viewType = VK_IMAGE_VIEW_TYPE_2D;
-      depthStencilView.format = fbDepthFormat;
-      depthStencilView.flags = 0;
-      depthStencilView.subresourceRange = {};
-      depthStencilView.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-      if (fbDepthFormat >= VK_FORMAT_D16_UNORM_S8_UINT) {
-         depthStencilView.subresourceRange.aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
-      }
-      depthStencilView.subresourceRange.baseMipLevel = 0;
-      depthStencilView.subresourceRange.levelCount = 1;
-      depthStencilView.subresourceRange.baseArrayLayer = 0;
-      depthStencilView.subresourceRange.layerCount = 1;
-      depthStencilView.image = offscreenPass.depth.image;
-      VK_CHECK_RESULT(vkCreateImageView(device, &depthStencilView, nullptr, &offscreenPass.depth.view));
-
-      // Create a separate render pass for the offscreen rendering as it may differ from the one used for scene rendering
-
-      std::array<VkAttachmentDescription, 2> attchmentDescriptions = {};
-      // Color attachment
-      attchmentDescriptions[0].format = FB_COLOR_FORMAT;
-      attchmentDescriptions[0].samples = VK_SAMPLE_COUNT_1_BIT;
-      attchmentDescriptions[0].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-      attchmentDescriptions[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-      attchmentDescriptions[0].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-      attchmentDescriptions[0].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-      attchmentDescriptions[0].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-      attchmentDescriptions[0].finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-      // Depth attachment
-      attchmentDescriptions[1].format = fbDepthFormat;
-      attchmentDescriptions[1].samples = VK_SAMPLE_COUNT_1_BIT;
-      attchmentDescriptions[1].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-      attchmentDescriptions[1].storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-      attchmentDescriptions[1].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-      attchmentDescriptions[1].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-      attchmentDescriptions[1].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-      attchmentDescriptions[1].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-      VkAttachmentReference colorReference = { 0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL };
-      VkAttachmentReference depthReference = { 1, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL };
-
-      VkSubpassDescription subpassDescription = {};
-      subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-      subpassDescription.colorAttachmentCount = 1;
-      subpassDescription.pColorAttachments = &colorReference;
-      subpassDescription.pDepthStencilAttachment = &depthReference;
-
-      // Use subpass dependencies for layout transitions
-      std::array<VkSubpassDependency, 2> dependencies;
-
-      dependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
-      dependencies[0].dstSubpass = 0;
-      dependencies[0].srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-      dependencies[0].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
-      dependencies[0].srcAccessMask = VK_ACCESS_NONE_KHR;
-      dependencies[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-      dependencies[0].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
-
-      dependencies[1].srcSubpass = 0;
-      dependencies[1].dstSubpass = VK_SUBPASS_EXTERNAL;
-      dependencies[1].srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
-      dependencies[1].dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-      dependencies[1].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-      dependencies[1].dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
-      dependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
-
-      // Create the actual renderpass
-      VkRenderPassCreateInfo renderPassInfo = {};
-      renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-      renderPassInfo.attachmentCount = static_cast<uint32_t>(attchmentDescriptions.size());
-      renderPassInfo.pAttachments = attchmentDescriptions.data();
-      renderPassInfo.subpassCount = 1;
-      renderPassInfo.pSubpasses = &subpassDescription;
-      renderPassInfo.dependencyCount = static_cast<uint32_t>(dependencies.size());
-      renderPassInfo.pDependencies = dependencies.data();
-
-      VK_CHECK_RESULT(vkCreateRenderPass(device, &renderPassInfo, nullptr, &offscreenPass.renderPass));
-
-      VkImageView attachments[2];
-      attachments[0] = offscreenPass.color.view;
-      attachments[1] = offscreenPass.depth.view;
-
-      VkFramebufferCreateInfo fbufCreateInfo = vks::initializers::framebufferCreateInfo();
-      fbufCreateInfo.renderPass = offscreenPass.renderPass;
-      fbufCreateInfo.attachmentCount = 2;
-      fbufCreateInfo.pAttachments = attachments;
-      fbufCreateInfo.width = offscreenPass.width;
-      fbufCreateInfo.height = offscreenPass.height;
-      fbufCreateInfo.layers = 1;
-
-      VK_CHECK_RESULT(vkCreateFramebuffer(device, &fbufCreateInfo, nullptr, &offscreenPass.frameBuffer));
-
-      // Fill a descriptor for later use in a descriptor set
-      offscreenPass.descriptor.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-      offscreenPass.descriptor.imageView = offscreenPass.color.view;
-      offscreenPass.descriptor.sampler = offscreenPass.sampler;
-   }
-
-   void VulkanExample::buildCommandBuffers()
-   {
-      VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
-
-      for (int32_t i = 0; i < m_drawCmdBuffers.size(); ++i)
-      {
-         VK_CHECK_RESULT(vkBeginCommandBuffer(m_drawCmdBuffers[i], &cmdBufInfo));
-
-         /*
-            First render pass: Offscreen rendering
-         */
-         {
-            VkClearValue clearValues[2];
-            clearValues[0].color = { { 0.0f, 0.0f, 0.0f, 0.0f } };
-            clearValues[1].depthStencil = { 1.0f, 0 };
-
-            VkRenderPassBeginInfo renderPassBeginInfo = vks::initializers::renderPassBeginInfo();
-            renderPassBeginInfo.renderPass = offscreenPass.renderPass;
-            renderPassBeginInfo.framebuffer = offscreenPass.frameBuffer;
-            renderPassBeginInfo.renderArea.extent.width = offscreenPass.width;
-            renderPassBeginInfo.renderArea.extent.height = offscreenPass.height;
-            renderPassBeginInfo.clearValueCount = 2;
-            renderPassBeginInfo.pClearValues = clearValues;
-
-            vkCmdBeginRenderPass(m_drawCmdBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-            VkViewport viewport = vks::initializers::viewport((float)offscreenPass.width, (float)offscreenPass.height, 0.0f, 1.0f);
-            vkCmdSetViewport(m_drawCmdBuffers[i], 0, 1, &viewport);
-
-            VkRect2D scissor = vks::initializers::rect2D(offscreenPass.width, offscreenPass.height, 0, 0);
-            vkCmdSetScissor(m_drawCmdBuffers[i], 0, 1, &scissor);
-
-            // Mirrored scene
-            vkCmdBindDescriptorSets(m_drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.shaded, 0, 1, &descriptorSets.offscreen, 0, NULL);
-            vkCmdBindPipeline(m_drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.shadedOffscreen);
-            models.example.draw(m_drawCmdBuffers[i]);
-
-            vkCmdEndRenderPass(m_drawCmdBuffers[i]);
-         }
-
-         /*
-            Note: Explicit synchronization is not required between the render pass, as this is done implicit via sub pass dependencies
-         */
-
-         /*
-            Second render pass: Scene rendering with applied radial blur
-         */
-         {
-            VkClearValue clearValues[2];
-            clearValues[0].color = defaultClearColor;
-            clearValues[1].depthStencil = { 1.0f, 0 };
-
-            VkRenderPassBeginInfo renderPassBeginInfo = vks::initializers::renderPassBeginInfo();
-            renderPassBeginInfo.renderPass = renderPass;
-            renderPassBeginInfo.framebuffer = frameBuffers[i];
-            renderPassBeginInfo.renderArea.extent.width = width;
-            renderPassBeginInfo.renderArea.extent.height = height;
-            renderPassBeginInfo.clearValueCount = 2;
-            renderPassBeginInfo.pClearValues = clearValues;
-
-            vkCmdBeginRenderPass(m_drawCmdBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-            VkViewport viewport = vks::initializers::viewport((float)width, (float)height, 0.0f, 1.0f);
-            vkCmdSetViewport(m_drawCmdBuffers[i], 0, 1, &viewport);
-
-            VkRect2D scissor = vks::initializers::rect2D(width, height, 0, 0);
-            vkCmdSetScissor(m_drawCmdBuffers[i], 0, 1, &scissor);
-
-            if (debugDisplay)
-            {
-               // Display the offscreen render target
-               vkCmdBindDescriptorSets(m_drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.textured, 0, 1, &descriptorSets.mirror, 0, nullptr);
-               vkCmdBindPipeline(m_drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.debug);
-               vkCmdDraw(m_drawCmdBuffers[i], 3, 1, 0, 0);
-            }
-            else {
-               // Render the scene
-               // Reflection plane
-               vkCmdBindDescriptorSets(m_drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.textured, 0, 1, &descriptorSets.mirror, 0, nullptr);
-               vkCmdBindPipeline(m_drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.mirror);
-               models.plane.draw(m_drawCmdBuffers[i]);
-               // Model
-               vkCmdBindDescriptorSets(m_drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.shaded, 0, 1, &descriptorSets.model, 0, nullptr);
-               vkCmdBindPipeline(m_drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.shaded);
-               models.example.draw(m_drawCmdBuffers[i]);
-            }
-
-            drawUI(m_drawCmdBuffers[i]);
-
-            vkCmdEndRenderPass(m_drawCmdBuffers[i]);
-         }
-
-         VK_CHECK_RESULT(vkEndCommandBuffer(m_drawCmdBuffers[i]));
-      }
-   }
-
-   void VulkanExample::loadAssets()
-   {
-      const uint32_t glTFLoadingFlags = vkglTF::FileLoadingFlags::PreTransformVertices | vkglTF::FileLoadingFlags::PreMultiplyVertexColors | vkglTF::FileLoadingFlags::FlipY;
-
-      ::vks::VulkanDevice * pdevice = m_pvulkandevice;
-      ::file::path pathFolder(getAssetPath().c_str());
-      auto pathPlaneGltf = pathFolder / "models/plane.gltf"_ansi;
-      auto pathDragonGltf = pathFolder / "models/chinesedragon.gltf"_ansi;
-      models.plane.loadFromFile(pathPlaneGltf, pdevice, queue, glTFLoadingFlags);
-      models.example.loadFromFile(pathDragonGltf, pdevice, queue, glTFLoadingFlags);
-   }
-
-   void VulkanExample::setupDescriptors()
-   {
-      // Pool
-      std::vector<VkDescriptorPoolSize> poolSizes = {
-         vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 6),
-         vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 8)
-      };
-      VkDescriptorPoolCreateInfo descriptorPoolInfo = vks::initializers::descriptorPoolCreateInfo(poolSizes, 5);
-      VK_CHECK_RESULT(vkCreateDescriptorPool(device, &descriptorPoolInfo, nullptr, &descriptorPool));
-
-      // Layout
-      std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings;
-      VkDescriptorSetLayoutCreateInfo descriptorLayoutInfo;
-
-      // Shaded layout
-      setLayoutBindings = {
-         // Binding 0 : Vertex shader uniform buffer
-         vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 0),
-      };
-      descriptorLayoutInfo = vks::initializers::descriptorSetLayoutCreateInfo(setLayoutBindings);
-      VK_CHECK_RESULT(vkCreateDescriptorSetLayout(device, &descriptorLayoutInfo, nullptr, &descriptorSetLayouts.shaded));
-
-      // Textured layouts
-      setLayoutBindings = {
-         // Binding 0 : Vertex shader uniform buffer
-         vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 0),
-         // Binding 1 : Fragment shader image sampler
-         vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1)
-      };
-      descriptorLayoutInfo = vks::initializers::descriptorSetLayoutCreateInfo(setLayoutBindings);
-      VK_CHECK_RESULT(vkCreateDescriptorSetLayout(device, &descriptorLayoutInfo, nullptr, &descriptorSetLayouts.textured));
-
-      // Sets
-      // Mirror plane descriptor set
-      VkDescriptorSetAllocateInfo allocInfo = vks::initializers::descriptorSetAllocateInfo(descriptorPool, &descriptorSetLayouts.textured, 1);
-      VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &allocInfo, &descriptorSets.mirror));
-      std::vector<VkWriteDescriptorSet> writeDescriptorSets = {
-         // Binding 0 : Vertex shader uniform buffer
-         vks::initializers::writeDescriptorSet(descriptorSets.mirror, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 0, &uniformBuffers.vsMirror.descriptor),
-         // Binding 1 : Fragment shader texture sampler
-         vks::initializers::writeDescriptorSet(descriptorSets.mirror, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, &offscreenPass.descriptor),
-      };
-      vkUpdateDescriptorSets(device, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
-
-      // Shaded descriptor sets
-      allocInfo = vks::initializers::descriptorSetAllocateInfo(descriptorPool, &descriptorSetLayouts.shaded, 1);
-      // Model
-      VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &allocInfo, &descriptorSets.model));
-      std::vector<VkWriteDescriptorSet> modelWriteDescriptorSets = {
-         // Binding 0 : Vertex shader uniform buffer
-         vks::initializers::writeDescriptorSet(descriptorSets.model, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 0, &uniformBuffers.vsShared.descriptor)
-      };
-      vkUpdateDescriptorSets(device, static_cast<uint32_t>(modelWriteDescriptorSets.size()), modelWriteDescriptorSets.data(), 0, nullptr);
-
-      // Offscreen
-      VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &allocInfo, &descriptorSets.offscreen));
-      std::vector<VkWriteDescriptorSet> offScreenWriteDescriptorSets = {
-         // Binding 0 : Vertex shader uniform buffer
-         vks::initializers::writeDescriptorSet(descriptorSets.offscreen, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 0, &uniformBuffers.vsOffScreen.descriptor)
-      };
-      vkUpdateDescriptorSets(device, static_cast<uint32_t>(offScreenWriteDescriptorSets.size()), offScreenWriteDescriptorSets.data(), 0, nullptr);
-
-   }
-
-   void VulkanExample::preparePipelines()
-   {
-      // Layouts
-      VkPipelineLayoutCreateInfo pipelineLayoutInfo = vks::initializers::pipelineLayoutCreateInfo(&descriptorSetLayouts.shaded, 1);
-      VK_CHECK_RESULT(vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayouts.shaded));
-
-      pipelineLayoutInfo = vks::initializers::pipelineLayoutCreateInfo(&descriptorSetLayouts.textured, 1);
-      VK_CHECK_RESULT(vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayouts.textured));
-
-      // Pipelines
-      VkPipelineInputAssemblyStateCreateInfo inputAssemblyState = vks::initializers::pipelineInputAssemblyStateCreateInfo(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 0, VK_FALSE);
-      VkPipelineRasterizationStateCreateInfo rasterizationState = vks::initializers::pipelineRasterizationStateCreateInfo(VK_POLYGON_MODE_FILL, VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_COUNTER_CLOCKWISE, 0);
-      VkPipelineColorBlendAttachmentState blendAttachmentState = vks::initializers::pipelineColorBlendAttachmentState(0xf, VK_FALSE);
-      VkPipelineColorBlendStateCreateInfo colorBlendState = vks::initializers::pipelineColorBlendStateCreateInfo(1, &blendAttachmentState);
-      VkPipelineDepthStencilStateCreateInfo depthStencilState = vks::initializers::pipelineDepthStencilStateCreateInfo(VK_TRUE, VK_TRUE, VK_COMPARE_OP_LESS_OR_EQUAL);
-      VkPipelineViewportStateCreateInfo viewportState = vks::initializers::pipelineViewportStateCreateInfo(1, 1, 0);
-      VkPipelineMultisampleStateCreateInfo multisampleState = vks::initializers::pipelineMultisampleStateCreateInfo(VK_SAMPLE_COUNT_1_BIT, 0);
-      std::vector<VkDynamicState> dynamicStateEnables = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
-      VkPipelineDynamicStateCreateInfo dynamicState = vks::initializers::pipelineDynamicStateCreateInfo(dynamicStateEnables);
-      std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages;
-
-      VkGraphicsPipelineCreateInfo pipelineCI = vks::initializers::pipelineCreateInfo(pipelineLayouts.textured, renderPass, 0);
-      pipelineCI.pInputAssemblyState = &inputAssemblyState;
-      pipelineCI.pRasterizationState = &rasterizationState;
-      pipelineCI.pColorBlendState = &colorBlendState;
-      pipelineCI.pMultisampleState = &multisampleState;
-      pipelineCI.pViewportState = &viewportState;
-      pipelineCI.pDepthStencilState = &depthStencilState;
-      pipelineCI.pDynamicState = &dynamicState;
-      pipelineCI.stageCount = static_cast<uint32_t>(shaderStages.size());
-      pipelineCI.pStages = shaderStages.data();
-      pipelineCI.pVertexInputState = vkglTF::Vertex::getPipelineVertexInputState({ vkglTF::VertexComponent::Position, vkglTF::VertexComponent::Color, vkglTF::VertexComponent::Normal });
-
-      rasterizationState.cullMode = VK_CULL_MODE_NONE;
-
-      // Render-target debug display
-      shaderStages[0] = loadShader(getShadersPath() + "offscreen/quad.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
-      shaderStages[1] = loadShader(getShadersPath() + "offscreen/quad.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
-      VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, pipelineCache, 1, &pipelineCI, nullptr, &pipelines.debug));
-
-      // Mirror
-      shaderStages[0] = loadShader(getShadersPath() + "offscreen/mirror.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
-      shaderStages[1] = loadShader(getShadersPath() + "offscreen/mirror.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
-      VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, pipelineCache, 1, &pipelineCI, nullptr, &pipelines.mirror));
-
-      rasterizationState.cullMode = VK_CULL_MODE_BACK_BIT;
-
-      // Phong shading pipelines
-      pipelineCI.layout = pipelineLayouts.shaded;
-      // Scene
-      shaderStages[0] = loadShader(getShadersPath() + "offscreen/phong.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
-      shaderStages[1] = loadShader(getShadersPath() + "offscreen/phong.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
-      VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, pipelineCache, 1, &pipelineCI, nullptr, &pipelines.shaded));
-      // Offscreen
-      // Flip cull mode
-      rasterizationState.cullMode = VK_CULL_MODE_FRONT_BIT;
-      pipelineCI.renderPass = offscreenPass.renderPass;
-      VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, pipelineCache, 1, &pipelineCI, nullptr, &pipelines.shadedOffscreen));
-
-   }
-
-   // Prepare and initialize uniform buffer containing shader uniforms
-   void VulkanExample::prepareUniformBuffers()
-   {
-      // Mesh vertex shader uniform buffer block
-      VK_CHECK_RESULT(m_pvulkandevice->createBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &uniformBuffers.vsShared, sizeof(UniformData)));
-      // Mirror plane vertex shader uniform buffer block
-      VK_CHECK_RESULT(m_pvulkandevice->createBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &uniformBuffers.vsMirror, sizeof(UniformData)));
-      // Offscreen vertex shader uniform buffer block
-      VK_CHECK_RESULT(m_pvulkandevice->createBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &uniformBuffers.vsOffScreen, sizeof(UniformData)));
-      // Map persistent
-      VK_CHECK_RESULT(uniformBuffers.vsShared.map());
-      VK_CHECK_RESULT(uniformBuffers.vsMirror.map());
-      VK_CHECK_RESULT(uniformBuffers.vsOffScreen.map());
-
-      updateUniformBuffers();
-      updateUniformBufferOffscreen();
-   }
-
-   void VulkanExample::updateUniformBuffers()
-   {
-      uniformData.projection = camera.matrices.perspective;
-      uniformData.view = camera.matrices.view;
-
-      // Model
-      uniformData.model = glm::mat4(1.0f);
-      uniformData.model = glm::rotate(uniformData.model, glm::radians(modelRotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
-      uniformData.model = glm::translate(uniformData.model, modelPosition);
-      memcpy(uniformBuffers.vsShared.mapped, &uniformData, sizeof(UniformData));
-
-      // Mirror
-      uniformData.model = glm::mat4(1.0f);
-      memcpy(uniformBuffers.vsMirror.mapped, &uniformData, sizeof(UniformData));
-   }
-
-   void VulkanExample::updateUniformBufferOffscreen()
-   {
-      uniformData.projection = camera.matrices.perspective;
-      uniformData.view = camera.matrices.view;
-      uniformData.model = glm::mat4(1.0f);
-      uniformData.model = glm::rotate(uniformData.model, glm::radians(modelRotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
-      uniformData.model = glm::scale(uniformData.model, glm::vec3(1.0f, -1.0f, 1.0f));
-      uniformData.model = glm::translate(uniformData.model, modelPosition);
-      memcpy(uniformBuffers.vsOffScreen.mapped, &uniformData, sizeof(UniformData));
-   }
-
-   void VulkanExample::prepare()
-   {
-      VulkanExampleBase::prepare();
-      loadAssets();
-      prepareOffscreen();
-      prepareUniformBuffers();
-      setupDescriptors();
-      preparePipelines();
-      buildCommandBuffers();
-      prepared = true;
-   }
-
-   void VulkanExample::draw()
-   {
-      VulkanExampleBase::prepareFrame();
-      submitInfo.commandBufferCount = 1;
-      submitInfo.pCommandBuffers = &m_drawCmdBuffers[currentBuffer];
-      VK_CHECK_RESULT(vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE));
-      VulkanExampleBase::submitFrame();
-   }
-
-   void VulkanExample::render()
-   {
-      if (!prepared)
-         return;
-      draw();
-      if (!paused || camera.updated)
-      {
-         if (!paused) {
-            modelRotation.y += frameTimer * 10.0f;
-         }
-         updateUniformBuffers();
-         updateUniformBufferOffscreen();
-      }
-   }
-
-   void VulkanExample::OnUpdateUIOverlay(vks::UIOverlay * overlay)
-   {
-      if (overlay->header("Settings"_ansi)) {
-         if (overlay->checkBox("Display render target"_ansi, &debugDisplay)) {
-            buildCommandBuffers();
-         }
-      }
-   }
-///};
-
-VulkanExample *vulkanExample;																		
-LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)						
-{																									
-	if (vulkanExample != NULL)																		
-	{																								
-		vulkanExample->handleMessages(hWnd, uMsg, wParam, lParam);									
-	}																								
-	return (DefWindowProc(hWnd, uMsg, wParam, lParam));												
-}																									
-int run_vulkan_example()									
-{																									
-	vulkanExample = ___new VulkanExample();															
-	vulkanExample->initVulkan();																	
-	vulkanExample->setupWindow(::GetModuleHandleW(L"app_core_vulken.dll"), WndProc);
-	vulkanExample->prepare();																		
-	vulkanExample->renderLoop();																	
-	delete(vulkanExample);																			
-	return 0;																						
-}
-
-
-///*
-// * Vulkan entry points
-// *
-// * Platform specific macros for the example main entry points
-// *
-// * Copyright (C) 2024 by Sascha Willems - www.saschawillems.de
-// *
-// * This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)
-// */
-//
-//#if defined(_WIN32)
-// /*
-//  * Windows
-//  */
-//#define VULKAN_EXAMPLE_MAIN()																		\
-//VulkanExample *vulkanExample;																		\
-//LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)						\
-//{																									\
-//	if (vulkanExample != NULL)																		\
-//	{																								\
-//		vulkanExample->handleMessages(hWnd, uMsg, wParam, lParam);									\
-//	}																								\
-//	return (DefWindowProc(hWnd, uMsg, wParam, lParam));												\
-//}																									\
-//int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)									\
-//{																									\
-//	for (int32_t i = 0; i < __argc; i++) { VulkanExample::args.push_back(__argv[i]); };  			\
-//	vulkanExample = ___new VulkanExample();															\
-//	vulkanExample->initVulkan();																	\
-//	vulkanExample->setupWindow(hInstance, WndProc);													\
-//	vulkanExample->prepare();																		\
-//	vulkanExample->renderLoop();																	\
-//	delete(vulkanExample);																			\
-//	return 0;																						\
-//}
-//
-//#elif defined(VK_USE_PLATFORM_ANDROID_KHR)
-// /*
-//  * Android
-//  */
-//#define VULKAN_EXAMPLE_MAIN()																		\
-//VulkanExample *vulkanExample;																		\
-//void android_main(android_app* state)																\
-//{																									\
-//	vulkanExample = ___new VulkanExample();															\
-//	state->userData = vulkanExample;																\
-//	state->onAppCmd = VulkanExample::handleAppCommand;												\
-//	state->onInputEvent = VulkanExample::handleAppInput;											\
-//	androidApp = state;																				\
-//	vks::android::getDeviceConfig();																\
-//	vulkanExample->renderLoop();																	\
-//	delete(vulkanExample);																			\
-//}
-
-//#elif defined(_DIRECT2DISPLAY)
-// /*
-//  * Direct-to-display
-//  */
-//#define VULKAN_EXAMPLE_MAIN()																		\
-//VulkanExample *vulkanExample;																		\
-//static void handleEvent()                                											\
-//{																									\
-//}																									\
-//int main(const int argc, const char *argv[])													    \
-//{																									\
-//	for (size_t i = 0; i < argc; i++) { VulkanExample::args.push_back(argv[i]); };  				\
-//	vulkanExample = ___new VulkanExample();															\
-//	vulkanExample->initVulkan();																	\
-//	vulkanExample->prepare();																		\
-//	vulkanExample->renderLoop();																	\
-//	delete(vulkanExample);																			\
-//	return 0;																						\
-//}
-
-//#elif defined(VK_USE_PLATFORM_DIRECTFB_EXT)
-// /*
-//  * Direct FB
-//  */
-//#define VULKAN_EXAMPLE_MAIN()																		\
-//VulkanExample *vulkanExample;																		\
-//static void handleEvent(const DFBWindowEvent *happening)												\
-//{																									\
-//	if (vulkanExample != NULL)																		\
-//	{																								\
-//		vulkanExample->handleEvent(happening);															\
-//	}																								\
-//}																									\
-//int main(const int argc, const char *argv[])													    \
-//{																									\
-//	for (size_t i = 0; i < argc; i++) { VulkanExample::args.push_back(argv[i]); };  				\
-//	vulkanExample = ___new VulkanExample();															\
-//	vulkanExample->initVulkan();																	\
-//	vulkanExample->setupWindow();					 												\
-//	vulkanExample->prepare();																		\
-//	vulkanExample->renderLoop();																	\
-//	delete(vulkanExample);																			\
-//	return 0;																						\
-//}
-
-//#elif (defined(VK_USE_PLATFORM_WAYLAND_KHR) || defined(VK_USE_PLATFORM_HEADLESS_EXT))
-// /*
-//  * Wayland / headless
-//  */
-//#define VULKAN_EXAMPLE_MAIN()																		\
-//VulkanExample *vulkanExample;																		\
-//int main(const int argc, const char *argv[])													    \
-//{																									\
-//	for (size_t i = 0; i < argc; i++) { VulkanExample::args.push_back(argv[i]); };  				\
-//	vulkanExample = ___new VulkanExample();															\
-//	vulkanExample->initVulkan();																	\
-//	vulkanExample->setupWindow();					 												\
-//	vulkanExample->prepare();																		\
-//	vulkanExample->renderLoop();																	\
-//	delete(vulkanExample);																			\
-//	return 0;																						\
-//}
-
-//#elif defined(VK_USE_PLATFORM_XCB_KHR)
-// /*
-//  * X11 Xcb
-//  */
-//#define VULKAN_EXAMPLE_MAIN()																		\
-//VulkanExample *vulkanExample;																		\
-//static void handleEvent(const xcb_generic_event_t *happening)											\
-//{																									\
-//	if (vulkanExample != NULL)																		\
-//	{																								\
-//		vulkanExample->handleEvent(happening);															\
-//	}																								\
-//}																									\
-//int main(const int argc, const char *argv[])													    \
-//{																									\
-//	for (size_t i = 0; i < argc; i++) { VulkanExample::args.push_back(argv[i]); };  				\
-//	vulkanExample = ___new VulkanExample();															\
-//	vulkanExample->initVulkan();																	\
-//	vulkanExample->setupWindow();					 												\
-//	vulkanExample->prepare();																		\
-//	vulkanExample->renderLoop();																	\
-//	delete(vulkanExample);																			\
-//	return 0;																						\
-//}
-
-//#elif (defined(VK_USE_PLATFORM_IOS_MVK) || defined(VK_USE_PLATFORM_MACOS_MVK) || defined(VK_USE_PLATFORM_METAL_EXT))
-// /*
-//  * iOS and macOS (using MoltenVK)
-//  */
-//#if defined(VK_EXAMPLE_XCODE_GENERATED)
-//#define VULKAN_EXAMPLE_MAIN()																		\
-//VulkanExample *vulkanExample;																		\
-//int main(const int argc, const char *argv[])														\
-//{																									\
-//	@autoreleasepool																				\
-//	{																								\
-//		for (size_t i = 0; i < argc; i++) { VulkanExample::args.push_back(argv[i]); };				\
-//		vulkanExample = ___new VulkanExample();														\
-//		vulkanExample->initVulkan();																\
-//		vulkanExample->setupWindow(nullptr);														\
-//		vulkanExample->prepare();																	\
-//		vulkanExample->renderLoop();																\
-//		delete(vulkanExample);																		\
-//	}																								\
-//	return 0;																						\
-//}
-//#else
-//#define VULKAN_EXAMPLE_MAIN()
-//#endif
-//
-//#elif defined(VK_USE_PLATFORM_SCREEN_QNX)
-// /*
-//  * QNX Screen
-//  */
-//#define VULKAN_EXAMPLE_MAIN()																		
-//VulkanExample *vulkanExample;																		
-//int main(const int argc, const char *argv[])														
-//{																									
-//	for (int i = 0; i < argc; i++) { VulkanExample::args.push_back(argv[i]); };						
-//	vulkanExample = ___new VulkanExample();															
-//	vulkanExample->initVulkan();																	
-//	vulkanExample->setupWindow();																	
-//	vulkanExample->prepare();																		
-//	vulkanExample->renderLoop();																	
-//	delete(vulkanExample);																			
-//	return 0;																						
-//}
-//
-//
-//
+#include "swap_chain.h"
+
+
+namespace vulkan
+{
+
+	/** @brief Creates the platform specific surface abstraction of the native platform window used for presentation */
+#if defined(VK_USE_PLATFORM_WIN32_KHR)
+	void swap_chain::initSurface(void* platformHandle, void* platformWindow)
+#elif defined(VK_USE_PLATFORM_ANDROID_KHR)
+	void swap_chain::initSurface(ANativeWindow* window)
+#elif defined(VK_USE_PLATFORM_DIRECTFB_EXT)
+	void swap_chain::initSurface(IDirectFB* dfb, IDirectFBSurface* window)
+#elif defined(VK_USE_PLATFORM_WAYLAND_KHR)
+	void swap_chain::initSurface(wl_display* display, wl_surface* window)
+#elif defined(VK_USE_PLATFORM_XCB_KHR)
+	void swap_chain::initSurface(xcb_connection_t* connection, xcb_window_t window)
+#elif (defined(VK_USE_PLATFORM_IOS_MVK) || defined(VK_USE_PLATFORM_MACOS_MVK))
+	void swap_chain::initSurface(void* view)
+#elif defined(VK_USE_PLATFORM_METAL_EXT)
+	void swap_chain::initSurface(CAMetalLayer* metalLayer)
+#elif (defined(_DIRECT2DISPLAY) || defined(VK_USE_PLATFORM_HEADLESS_EXT))
+	void swap_chain::initSurface(uint32_t width, uint32_t height)
+#elif defined(VK_USE_PLATFORM_SCREEN_QNX)
+	void swap_chain::initSurface(screen_context_t screen_context, screen_window_t screen_window)
+#endif
+	{
+		VkResult err = VK_SUCCESS;
+
+		// Create the os-specific surface
+#if defined(VK_USE_PLATFORM_WIN32_KHR)
+		VkWin32SurfaceCreateInfoKHR surfaceCreateInfo = {};
+		surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
+		surfaceCreateInfo.hinstance = (HINSTANCE)platformHandle;
+		surfaceCreateInfo.hwnd = (HWND)platformWindow;
+		err = vkCreateWin32SurfaceKHR(instance, &surfaceCreateInfo, nullptr, &surface);
+#elif defined(VK_USE_PLATFORM_ANDROID_KHR)
+		VkAndroidSurfaceCreateInfoKHR surfaceCreateInfo = {};
+		surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR;
+		surfaceCreateInfo.window = window;
+		err = vkCreateAndroidSurfaceKHR(instance, &surfaceCreateInfo, NULL, &surface);
+#elif defined(VK_USE_PLATFORM_IOS_MVK)
+		VkIOSSurfaceCreateInfoMVK surfaceCreateInfo = {};
+		surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_IOS_SURFACE_CREATE_INFO_MVK;
+		surfaceCreateInfo.pNext = NULL;
+		surfaceCreateInfo.flags = 0;
+		surfaceCreateInfo.pView = view;
+		err = vkCreateIOSSurfaceMVK(instance, &surfaceCreateInfo, nullptr, &surface);
+#elif defined(VK_USE_PLATFORM_MACOS_MVK)
+		VkMacOSSurfaceCreateInfoMVK surfaceCreateInfo = {};
+		surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_MACOS_SURFACE_CREATE_INFO_MVK;
+		surfaceCreateInfo.pNext = NULL;
+		surfaceCreateInfo.flags = 0;
+		surfaceCreateInfo.pView = view;
+		err = vkCreateMacOSSurfaceMVK(instance, &surfaceCreateInfo, NULL, &surface);
+#elif defined(VK_USE_PLATFORM_METAL_EXT)
+		VkMetalSurfaceCreateInfoEXT surfaceCreateInfo = {};
+		surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_METAL_SURFACE_CREATE_INFO_EXT;
+		surfaceCreateInfo.pNext = NULL;
+		surfaceCreateInfo.flags = 0;
+		surfaceCreateInfo.pLayer = metalLayer;
+		err = vkCreateMetalSurfaceEXT(instance, &surfaceCreateInfo, NULL, &surface);
+#elif defined(_DIRECT2DISPLAY)
+		createDirect2DisplaySurface(width, height);
+#elif defined(VK_USE_PLATFORM_DIRECTFB_EXT)
+		VkDirectFBSurfaceCreateInfoEXT surfaceCreateInfo = {};
+		surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_DIRECTFB_SURFACE_CREATE_INFO_EXT;
+		surfaceCreateInfo.dfb = dfb;
+		surfaceCreateInfo.surface = window;
+		err = vkCreateDirectFBSurfaceEXT(instance, &surfaceCreateInfo, nullptr, &surface);
+#elif defined(VK_USE_PLATFORM_WAYLAND_KHR)
+		VkWaylandSurfaceCreateInfoKHR surfaceCreateInfo = {};
+		surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_WAYLAND_SURFACE_CREATE_INFO_KHR;
+		surfaceCreateInfo.display = display;
+		surfaceCreateInfo.surface = window;
+		err = vkCreateWaylandSurfaceKHR(instance, &surfaceCreateInfo, nullptr, &surface);
+#elif defined(VK_USE_PLATFORM_XCB_KHR)
+		VkXcbSurfaceCreateInfoKHR surfaceCreateInfo = {};
+		surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR;
+		surfaceCreateInfo.connection = connection;
+		surfaceCreateInfo.window = window;
+		err = vkCreateXcbSurfaceKHR(instance, &surfaceCreateInfo, nullptr, &surface);
+#elif defined(VK_USE_PLATFORM_HEADLESS_EXT)
+		VkHeadlessSurfaceCreateInfoEXT surfaceCreateInfo = {};
+		surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_HEADLESS_SURFACE_CREATE_INFO_EXT;
+		PFN_vkCreateHeadlessSurfaceEXT fpCreateHeadlessSurfaceEXT = (PFN_vkCreateHeadlessSurfaceEXT)vkGetInstanceProcAddr(instance, "vkCreateHeadlessSurfaceEXT"_ansi);
+		if (!fpCreateHeadlessSurfaceEXT) {
+			vks::tools::exitFatal("Could not fetch function pointer for the headless extension!"_ansi, -1);
+		}
+		err = fpCreateHeadlessSurfaceEXT(instance, &surfaceCreateInfo, nullptr, &surface);
+#elif defined(VK_USE_PLATFORM_SCREEN_QNX)
+		VkScreenSurfaceCreateInfoQNX surfaceCreateInfo = {};
+		surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_SCREEN_SURFACE_CREATE_INFO_QNX;
+		surfaceCreateInfo.pNext = NULL;
+		surfaceCreateInfo.flags = 0;
+		surfaceCreateInfo.context = screen_context;
+		surfaceCreateInfo.window = screen_window;
+		err = vkCreateScreenSurfaceQNX(instance, &surfaceCreateInfo, NULL, &surface);
+#endif
+
+		if (err != VK_SUCCESS) {
+			vks::tools::exitFatal("Could not create surface!", err);
+		}
+
+		// Get available queue family properties
+		uint32_t queueCount;
+		vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueCount, NULL);
+		assert(queueCount >= 1);
+
+		std::vector<VkQueueFamilyProperties> queueProps(queueCount);
+		vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueCount, queueProps.data());
+
+		// Iterate over each queue to learn whether it supports presenting:
+		// Find a queue with present support
+		// Will be used to present the swap chain images to the windowing system
+		std::vector<VkBool32> supportsPresent(queueCount);
+		for (uint32_t i = 0; i < queueCount; i++)
+		{
+			vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, surface, &supportsPresent[i]);
+		}
+
+		// Search for a graphics and a present queue in the array of queue
+		// families, try to find one that supports both
+		uint32_t graphicsQueueNodeIndex = UINT32_MAX;
+		uint32_t presentQueueNodeIndex = UINT32_MAX;
+		for (uint32_t i = 0; i < queueCount; i++)
+		{
+			if ((queueProps[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) != 0)
+			{
+				if (graphicsQueueNodeIndex == UINT32_MAX)
+				{
+					graphicsQueueNodeIndex = i;
+				}
+
+				if (supportsPresent[i] == VK_TRUE)
+				{
+					graphicsQueueNodeIndex = i;
+					presentQueueNodeIndex = i;
+					break;
+				}
+			}
+		}
+		if (presentQueueNodeIndex == UINT32_MAX)
+		{
+			// If there's no queue that supports both present and graphics
+			// try to find a separate present queue
+			for (uint32_t i = 0; i < queueCount; ++i)
+			{
+				if (supportsPresent[i] == VK_TRUE)
+				{
+					presentQueueNodeIndex = i;
+					break;
+				}
+			}
+		}
+
+		// Exit if either a graphics or a presenting queue hasn't been found
+		if (graphicsQueueNodeIndex == UINT32_MAX || presentQueueNodeIndex == UINT32_MAX)
+		{
+			vks::tools::exitFatal("Could not find a graphics and/or presenting queue!", -1);
+		}
+
+		if (graphicsQueueNodeIndex != presentQueueNodeIndex)
+		{
+			vks::tools::exitFatal("Separate graphics and presenting queues are not supported yet!", -1);
+		}
+
+		queueNodeIndex = graphicsQueueNodeIndex;
+
+		// Get list of supported surface formats
+		uint32_t formatCount;
+		VK_CHECK_RESULT(vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, NULL));
+		assert(formatCount > 0);
+
+		std::vector<VkSurfaceFormatKHR> surfaceFormats(formatCount);
+		VK_CHECK_RESULT(vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, surfaceFormats.data()));
+
+		// We want to get a format that best suits our needs, so we try to get one from a set of preferred formats
+		// Initialize the format to the first one returned by the implementation in case we can't find one of the preffered formats
+		VkSurfaceFormatKHR selectedFormat = surfaceFormats[0];
+		std::vector<VkFormat> preferredImageFormats = {
+			VK_FORMAT_B8G8R8A8_UNORM,
+			VK_FORMAT_R8G8B8A8_UNORM,
+			VK_FORMAT_A8B8G8R8_UNORM_PACK32
+		};
+
+		for (auto& availableFormat : surfaceFormats) {
+			if (std::find(preferredImageFormats.begin(), preferredImageFormats.end(), availableFormat.format) != preferredImageFormats.end()) {
+				selectedFormat = availableFormat;
+				break;
+			}
+		}
+
+		colorFormat = selectedFormat.format;
+		colorSpace = selectedFormat.colorSpace;
+	}
+
+	void swap_chain::setContext(VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device)
+	{
+		this->instance = instance;
+		this->physicalDevice = physicalDevice;
+		this->device = device;
+	}
+
+	void swap_chain::create(uint32_t* width, uint32_t* height, bool vsync, bool fullscreen)
+	{
+		assert(physicalDevice);
+		assert(device);
+		assert(instance);
+
+		// Store the current swap chain handle so we can use it later on to ease up recreation
+		VkSwapchainKHR oldSwapchain = swapChain;
+
+		// Get physical device surface properties and formats
+		VkSurfaceCapabilitiesKHR surfCaps;
+		VK_CHECK_RESULT(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &surfCaps));
+
+		// Get available present modes
+		uint32_t presentModeCount;
+		VK_CHECK_RESULT(vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, NULL));
+		assert(presentModeCount > 0);
+
+		std::vector<VkPresentModeKHR> presentModes(presentModeCount);
+		VK_CHECK_RESULT(vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, presentModes.data()));
+
+		VkExtent2D swapchainExtent = {};
+		// If width (and height) equals the special value 0xFFFFFFFF, the size of the surface will be set by the swapchain
+		if (surfCaps.currentExtent.width == (uint32_t)-1)
+		{
+			// If the surface size is undefined, the size is set to
+			// the size of the images requested.
+			swapchainExtent.width = *width;
+			swapchainExtent.height = *height;
+		}
+		else
+		{
+			// If the surface size is defined, the swap chain size must match
+			swapchainExtent = surfCaps.currentExtent;
+			*width = surfCaps.currentExtent.width;
+			*height = surfCaps.currentExtent.height;
+		}
+
+
+		// Select a present mode for the swapchain
+
+		// The VK_PRESENT_MODE_FIFO_KHR mode must always be present as per spec
+		// This mode waits for the vertical blank ("v-sync"_ansi)
+		VkPresentModeKHR swapchainPresentMode = VK_PRESENT_MODE_FIFO_KHR;
+
+		// If v-sync is not requested, try to find a mailbox mode
+		// It's the lowest latency non-tearing present mode available
+		if (!vsync)
+		{
+			for (size_t i = 0; i < presentModeCount; i++)
+			{
+				if (presentModes[i] == VK_PRESENT_MODE_MAILBOX_KHR)
+				{
+					swapchainPresentMode = VK_PRESENT_MODE_MAILBOX_KHR;
+					break;
+				}
+				if (presentModes[i] == VK_PRESENT_MODE_IMMEDIATE_KHR)
+				{
+					swapchainPresentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+				}
+			}
+		}
+
+		// Determine the number of images
+		uint32_t desiredNumberOfSwapchainImages = surfCaps.minImageCount + 1;
+#if (defined(VK_USE_PLATFORM_MACOS_MVK) || defined(VK_USE_PLATFORM_METAL_EXT)) && defined(VK_EXAMPLE_XCODE_GENERATED)
+		// SRS - Work around known MoltenVK issue re 2x frame rate when vsync (VK_PRESENT_MODE_FIFO_KHR) enabled
+		struct utsname sysInfo;
+		uname(&sysInfo);
+		// SRS - When vsync is on, use minImageCount when not in fullscreen or when running on Apple Silcon
+		// This forces swapchain image acquire frame rate to match display vsync frame rate
+		if (vsync && (!fullscreen || strcmp(sysInfo.machine, "arm64"_ansi) == 0))
+		{
+			desiredNumberOfSwapchainImages = surfCaps.minImageCount;
+		}
+#endif
+		if ((surfCaps.maxImageCount > 0) && (desiredNumberOfSwapchainImages > surfCaps.maxImageCount))
+		{
+			desiredNumberOfSwapchainImages = surfCaps.maxImageCount;
+		}
+
+		// Find the transformation of the surface
+		VkSurfaceTransformFlagsKHR preTransform;
+		if (surfCaps.supportedTransforms & VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR)
+		{
+			// We prefer a non-rotated transform
+			preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
+		}
+		else
+		{
+			preTransform = surfCaps.currentTransform;
+		}
+
+		// Find a supported composite alpha format (not all devices support alpha opaque)
+		VkCompositeAlphaFlagBitsKHR compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+		// Simply select the first composite alpha format available
+		std::vector<VkCompositeAlphaFlagBitsKHR> compositeAlphaFlags = {
+			VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
+			VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR,
+			VK_COMPOSITE_ALPHA_POST_MULTIPLIED_BIT_KHR,
+			VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR,
+		};
+		for (auto& compositeAlphaFlag : compositeAlphaFlags) {
+			if (surfCaps.supportedCompositeAlpha & compositeAlphaFlag) {
+				compositeAlpha = compositeAlphaFlag;
+				break;
+			};
+		}
+
+		VkSwapchainCreateInfoKHR swapchainCI = {};
+		swapchainCI.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+		swapchainCI.surface = surface;
+		swapchainCI.minImageCount = desiredNumberOfSwapchainImages;
+		swapchainCI.imageFormat = colorFormat;
+		swapchainCI.imageColorSpace = colorSpace;
+		swapchainCI.imageExtent = { swapchainExtent.width, swapchainExtent.height };
+		swapchainCI.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+		swapchainCI.preTransform = (VkSurfaceTransformFlagBitsKHR)preTransform;
+		swapchainCI.imageArrayLayers = 1;
+		swapchainCI.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+		swapchainCI.queueFamilyIndexCount = 0;
+		swapchainCI.presentMode = swapchainPresentMode;
+		// Setting oldSwapChain to the saved handle of the previous swapchain aids in resource reuse and makes sure that we can still present already acquired images
+		swapchainCI.oldSwapchain = oldSwapchain;
+		// Setting clipped to VK_TRUE allows the implementation to discard rendering outside of the surface area
+		swapchainCI.clipped = VK_TRUE;
+		swapchainCI.compositeAlpha = compositeAlpha;
+
+		// Enable transfer source on swap chain images if supported
+		if (surfCaps.supportedUsageFlags & VK_IMAGE_USAGE_TRANSFER_SRC_BIT) {
+			swapchainCI.imageUsage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+		}
+
+		// Enable transfer destination on swap chain images if supported
+		if (surfCaps.supportedUsageFlags & VK_IMAGE_USAGE_TRANSFER_DST_BIT) {
+			swapchainCI.imageUsage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+		}
+
+		VK_CHECK_RESULT(vkCreateSwapchainKHR(device, &swapchainCI, nullptr, &swapChain));
+
+		// If an existing swap chain is re-created, destroy the old swap chain
+		// This also cleans up all the presentable images
+		if (oldSwapchain != VK_NULL_HANDLE)
+		{
+			for (uint32_t i = 0; i < imageCount; i++)
+			{
+				vkDestroyImageView(device, buffers[i].view, nullptr);
+			}
+			vkDestroySwapchainKHR(device, oldSwapchain, nullptr);
+		}
+		VK_CHECK_RESULT(vkGetSwapchainImagesKHR(device, swapChain, &imageCount, NULL));
+
+		// Get the swap chain images
+		images.resize(imageCount);
+		VK_CHECK_RESULT(vkGetSwapchainImagesKHR(device, swapChain, &imageCount, images.data()));
+
+		// Get the swap chain buffers containing the image and imageview
+		buffers.resize(imageCount);
+		for (uint32_t i = 0; i < imageCount; i++)
+		{
+			VkImageViewCreateInfo colorAttachmentView = {};
+			colorAttachmentView.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+			colorAttachmentView.pNext = NULL;
+			colorAttachmentView.format = colorFormat;
+			colorAttachmentView.components = {
+				VK_COMPONENT_SWIZZLE_R,
+				VK_COMPONENT_SWIZZLE_G,
+				VK_COMPONENT_SWIZZLE_B,
+				VK_COMPONENT_SWIZZLE_A
+			};
+			colorAttachmentView.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			colorAttachmentView.subresourceRange.baseMipLevel = 0;
+			colorAttachmentView.subresourceRange.levelCount = 1;
+			colorAttachmentView.subresourceRange.baseArrayLayer = 0;
+			colorAttachmentView.subresourceRange.layerCount = 1;
+			colorAttachmentView.viewType = VK_IMAGE_VIEW_TYPE_2D;
+			colorAttachmentView.flags = 0;
+
+			buffers[i].image = images[i];
+
+			colorAttachmentView.image = buffers[i].image;
+
+			VK_CHECK_RESULT(vkCreateImageView(device, &colorAttachmentView, nullptr, &buffers[i].view));
+		}
+	}
+
+	VkResult swap_chain::acquireNextImage(VkSemaphore presentCompleteSemaphore, uint32_t* imageIndex)
+	{
+		// By setting timeout to UINT64_MAX we will always wait until the next image has been acquired or an actual error is thrown
+		// With that we don't have to handle VK_NOT_READY
+		return vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, presentCompleteSemaphore, (VkFence)nullptr, imageIndex);
+	}
+
+	VkResult swap_chain::queuePresent(VkQueue queue, uint32_t imageIndex, VkSemaphore waitSemaphore)
+	{
+		VkPresentInfoKHR presentInfo = {};
+		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+		presentInfo.pNext = NULL;
+		presentInfo.swapchainCount = 1;
+		presentInfo.pSwapchains = &swapChain;
+		presentInfo.pImageIndices = &imageIndex;
+		// Check if a wait semaphore has been specified to wait for before presenting the image
+		if (waitSemaphore != VK_NULL_HANDLE)
+		{
+			presentInfo.pWaitSemaphores = &waitSemaphore;
+			presentInfo.waitSemaphoreCount = 1;
+		}
+		return vkQueuePresentKHR(queue, &presentInfo);
+	}
+
+
+	void swap_chain::cleanup()
+	{
+		if (swapChain != VK_NULL_HANDLE)
+		{
+			for (uint32_t i = 0; i < imageCount; i++)
+			{
+				vkDestroyImageView(device, buffers[i].view, nullptr);
+			}
+		}
+		if (surface != VK_NULL_HANDLE)
+		{
+			vkDestroySwapchainKHR(device, swapChain, nullptr);
+			vkDestroySurfaceKHR(instance, surface, nullptr);
+		}
+		surface = VK_NULL_HANDLE;
+		swapChain = VK_NULL_HANDLE;
+	}
+
+#if defined(_DIRECT2DISPLAY)
+	/**
+	* Create direct to display surface
+	*/
+	void swap_chain::createDirect2DisplaySurface(uint32_t width, uint32_t height)
+	{
+		uint32_t displayPropertyCount;
+
+		// Get display property
+		vkGetPhysicalDeviceDisplayPropertiesKHR(physicalDevice, &displayPropertyCount, NULL);
+		VkDisplayPropertiesKHR* pDisplayProperties = ___new VkDisplayPropertiesKHR[displayPropertyCount];
+		vkGetPhysicalDeviceDisplayPropertiesKHR(physicalDevice, &displayPropertyCount, pDisplayProperties);
+
+		// Get plane property
+		uint32_t planePropertyCount;
+		vkGetPhysicalDeviceDisplayPlanePropertiesKHR(physicalDevice, &planePropertyCount, NULL);
+		VkDisplayPlanePropertiesKHR* pPlaneProperties = ___new VkDisplayPlanePropertiesKHR[planePropertyCount];
+		vkGetPhysicalDeviceDisplayPlanePropertiesKHR(physicalDevice, &planePropertyCount, pPlaneProperties);
+
+		VkDisplayKHR display = VK_NULL_HANDLE;
+		VkDisplayModeKHR displayMode;
+		VkDisplayModePropertiesKHR* pModeProperties;
+		bool foundMode = false;
+
+		for (uint32_t i = 0; i < displayPropertyCount; ++i)
+		{
+			display = pDisplayProperties[i].display;
+			uint32_t modeCount;
+			vkGetDisplayModePropertiesKHR(physicalDevice, display, &modeCount, NULL);
+			pModeProperties = ___new VkDisplayModePropertiesKHR[modeCount];
+			vkGetDisplayModePropertiesKHR(physicalDevice, display, &modeCount, pModeProperties);
+
+			for (uint32_t j = 0; j < modeCount; ++j)
+			{
+				const VkDisplayModePropertiesKHR* mode = &pModeProperties[j];
+
+				if (mode->parameters.visibleRegion.width == width && mode->parameters.visibleRegion.height == height)
+				{
+					displayMode = mode->displayMode;
+					foundMode = true;
+					break;
+				}
+			}
+			if (foundMode)
+			{
+				break;
+			}
+			delete[] pModeProperties;
+		}
+
+		if (!foundMode)
+		{
+			vks::tools::exitFatal("Can't find a display and a display mode!"_ansi, -1);
+			return;
+		}
+
+		// Search for a best plane we can use
+		uint32_t bestPlaneIndex = UINT32_MAX;
+		VkDisplayKHR* pDisplays = NULL;
+		for (uint32_t i = 0; i < planePropertyCount; i++)
+		{
+			uint32_t planeIndex = i;
+			uint32_t displayCount;
+			vkGetDisplayPlaneSupportedDisplaysKHR(physicalDevice, planeIndex, &displayCount, NULL);
+			if (pDisplays)
+			{
+				delete[] pDisplays;
+			}
+			pDisplays = ___new VkDisplayKHR[displayCount];
+			vkGetDisplayPlaneSupportedDisplaysKHR(physicalDevice, planeIndex, &displayCount, pDisplays);
+
+			// Find a display that matches the current plane
+			bestPlaneIndex = UINT32_MAX;
+			for (uint32_t j = 0; j < displayCount; j++)
+			{
+				if (display == pDisplays[j])
+				{
+					bestPlaneIndex = i;
+					break;
+				}
+			}
+			if (bestPlaneIndex != UINT32_MAX)
+			{
+				break;
+			}
+		}
+
+		if (bestPlaneIndex == UINT32_MAX)
+		{
+			vks::tools::exitFatal("Can't find a plane for displaying!"_ansi, -1);
+			return;
+		}
+
+		VkDisplayPlaneCapabilitiesKHR planeCap;
+		vkGetDisplayPlaneCapabilitiesKHR(physicalDevice, displayMode, bestPlaneIndex, &planeCap);
+		VkDisplayPlaneAlphaFlagBitsKHR alphaMode = (VkDisplayPlaneAlphaFlagBitsKHR)0;
+
+		if (planeCap.supportedAlpha & VK_DISPLAY_PLANE_ALPHA_PER_PIXEL_PREMULTIPLIED_BIT_KHR)
+		{
+			alphaMode = VK_DISPLAY_PLANE_ALPHA_PER_PIXEL_PREMULTIPLIED_BIT_KHR;
+		}
+		else if (planeCap.supportedAlpha & VK_DISPLAY_PLANE_ALPHA_PER_PIXEL_BIT_KHR)
+		{
+			alphaMode = VK_DISPLAY_PLANE_ALPHA_PER_PIXEL_BIT_KHR;
+		}
+		else if (planeCap.supportedAlpha & VK_DISPLAY_PLANE_ALPHA_GLOBAL_BIT_KHR)
+		{
+			alphaMode = VK_DISPLAY_PLANE_ALPHA_GLOBAL_BIT_KHR;
+		}
+		else if (planeCap.supportedAlpha & VK_DISPLAY_PLANE_ALPHA_OPAQUE_BIT_KHR)
+		{
+			alphaMode = VK_DISPLAY_PLANE_ALPHA_OPAQUE_BIT_KHR;
+		}
+
+		VkDisplaySurfaceCreateInfoKHR surfaceInfo{};
+		surfaceInfo.sType = VK_STRUCTURE_TYPE_DISPLAY_SURFACE_CREATE_INFO_KHR;
+		surfaceInfo.pNext = NULL;
+		surfaceInfo.flags = 0;
+		surfaceInfo.displayMode = displayMode;
+		surfaceInfo.planeIndex = bestPlaneIndex;
+		surfaceInfo.planeStackIndex = pPlaneProperties[bestPlaneIndex].currentStackIndex;
+		surfaceInfo.transform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
+		surfaceInfo.globalAlpha = 1.0;
+		surfaceInfo.alphaMode = alphaMode;
+		surfaceInfo.imageExtent.width = width;
+		surfaceInfo.imageExtent.height = height;
+
+		VkResult result = vkCreateDisplayPlaneSurfaceKHR(instance, &surfaceInfo, NULL, &surface);
+		if (result != VK_SUCCESS) {
+			vks::tools::exitFatal("Failed to create surface!"_ansi, result);
+		}
+
+		delete[] pDisplays;
+		delete[] pModeProperties;
+		delete[] pDisplayProperties;
+		delete[] pPlaneProperties;
+	}
+#endif 
+
+
+} // namespace vulkan
+
+
+

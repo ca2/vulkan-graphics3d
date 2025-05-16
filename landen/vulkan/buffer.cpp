@@ -8,19 +8,21 @@
 * This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)
 */
 #include "framework.h"
-#include "VulkanBuffer.h"
+#include "buffer.h"
 
-namespace vks
-{	
-	/** 
+
+namespace vulkan
+{
+
+	/**
 	* Map a memory range of this buffer. If successful, mapped points to the specified buffer range.
-	* 
+	*
 	* @param size (Optional) Size of the memory range to map. Pass VK_WHOLE_SIZE to map the complete buffer range.
 	* @param offset (Optional) Byte offset from beginning
-	* 
+	*
 	* @return VkResult of the buffer mapping call
 	*/
-	VkResult Buffer::map(VkDeviceSize size, VkDeviceSize offset)
+	VkResult buffer::map(VkDeviceSize size, VkDeviceSize offset)
 	{
 		return vkMapMemory(device, memory, offset, size, 0, &mapped);
 	}
@@ -30,7 +32,7 @@ namespace vks
 	*
 	* @note Does not return a result as vkUnmapMemory can't fail
 	*/
-	void Buffer::unmap()
+	void buffer::unmap()
 	{
 		if (mapped)
 		{
@@ -39,16 +41,18 @@ namespace vks
 		}
 	}
 
-	/** 
+	/**
 	* Attach the allocated memory block to the buffer
-	* 
+	*
 	* @param offset (Optional) Byte offset (from the beginning) for the memory region to bind
-	* 
+	*
 	* @return VkResult of the bindBufferMemory call
 	*/
-	VkResult Buffer::bind(VkDeviceSize offset)
+	VkResult buffer::bind(VkDeviceSize offset)
 	{
-		return vkBindBufferMemory(device, buffer, memory, offset);
+		
+		return vkBindBufferMemory(device, m_vkbuffer, memory, offset);
+
 	}
 
 	/**
@@ -58,27 +62,27 @@ namespace vks
 	* @param offset (Optional) Byte offset from beginning
 	*
 	*/
-	void Buffer::setupDescriptor(VkDeviceSize size, VkDeviceSize offset)
+	void buffer::setupDescriptor(VkDeviceSize size, VkDeviceSize offset)
 	{
 		descriptor.offset = offset;
-		descriptor.buffer = buffer;
+		descriptor.buffer = m_vkbuffer;
 		descriptor.range = size;
 	}
 
 	/**
 	* Copies the specified data to the mapped buffer
-	* 
+	*
 	* @param data Pointer to the data to copy
 	* @param size Size of the data to copy in machine units
 	*
 	*/
-	void Buffer::copyTo(void* data, VkDeviceSize size)
+	void buffer::copyTo(void* data, VkDeviceSize size)
 	{
 		assert(mapped);
 		memcpy(mapped, data, size);
 	}
 
-	/** 
+	/**
 	* Flush a memory range of the buffer to make it visible to the device
 	*
 	* @note Only required for non-coherent memory
@@ -88,7 +92,7 @@ namespace vks
 	*
 	* @return VkResult of the flush call
 	*/
-	VkResult Buffer::flush(VkDeviceSize size, VkDeviceSize offset)
+	VkResult buffer::flush(VkDeviceSize size, VkDeviceSize offset)
 	{
 		VkMappedMemoryRange mappedRange = {};
 		mappedRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
@@ -108,7 +112,7 @@ namespace vks
 	*
 	* @return VkResult of the invalidate call
 	*/
-	VkResult Buffer::invalidate(VkDeviceSize size, VkDeviceSize offset)
+	VkResult buffer::invalidate(VkDeviceSize size, VkDeviceSize offset)
 	{
 		VkMappedMemoryRange mappedRange = {};
 		mappedRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
@@ -118,18 +122,30 @@ namespace vks
 		return vkInvalidateMappedMemoryRanges(device, 1, &mappedRange);
 	}
 
-	/** 
+	/**
 	* Release all Vulkan resources held by this buffer
 	*/
-	void Buffer::destroy()
+	void buffer::destroy()
 	{
-		if (buffer)
+
+		if (m_vkbuffer)
 		{
-			vkDestroyBuffer(device, buffer, nullptr);
+
+			vkDestroyBuffer(device, m_vkbuffer, nullptr);
+
 		}
+
 		if (memory)
 		{
+
 			vkFreeMemory(device, memory, nullptr);
+
 		}
+
 	}
-};
+
+
+} // namespace vulkan
+
+
+

@@ -72,7 +72,7 @@ void vkglTF::Texture::destroy()
 	}
 }
 
-void vkglTF::Texture::fromglTfImage(tinygltf::Image &gltfimage, const ::file::path & pathFolder, vks::VulkanDevice *pdevice, VkQueue copyQueue)
+void vkglTF::Texture::fromglTfImage(tinygltf::Image &gltfimage, const ::file::path & pathFolder, vulkan::device *pdevice, VkQueue copyQueue)
 {
 	this->m_pvulkandevice = pdevice;
 
@@ -495,7 +495,7 @@ void vkglTF::Primitive::setDimensions(glm::vec3 min, glm::vec3 max) {
 /*
 	glTF mesh
 */
-vkglTF::Mesh::Mesh(vks::VulkanDevice *pdevice, glm::mat4 matrix) {
+vkglTF::Mesh::Mesh(vulkan::device *pdevice, glm::mat4 matrix) {
 	this->m_pvulkandevice = pdevice;
 	this->uniformBlock.matrix = matrix;
 	VK_CHECK_RESULT(m_pvulkandevice->createBuffer(
@@ -741,9 +741,9 @@ void vkglTF::Model::createEmptyTexture(VkQueue transferQueue)
 */
 vkglTF::Model::~Model()
 {
-	vkDestroyBuffer(m_pvulkandevice->logicalDevice, vertices.buffer, nullptr);
+	vkDestroyBuffer(m_pvulkandevice->logicalDevice, vertices.m_vkbuffer, nullptr);
 	vkFreeMemory(m_pvulkandevice->logicalDevice, vertices.memory, nullptr);
-	vkDestroyBuffer(m_pvulkandevice->logicalDevice, indices.buffer, nullptr);
+	vkDestroyBuffer(m_pvulkandevice->logicalDevice, indices.m_vkbuffer, nullptr);
 	vkFreeMemory(m_pvulkandevice->logicalDevice, indices.memory, nullptr);
 	for (auto texture : textures) {
 		texture.destroy();
@@ -999,7 +999,7 @@ void vkglTF::Model::loadSkins(tinygltf::Model &gltfModel)
 	}
 }
 
-void vkglTF::Model::loadImages(tinygltf::Model &gltfModel, vks::VulkanDevice *pdevice, VkQueue transferQueue)
+void vkglTF::Model::loadImages(tinygltf::Model &gltfModel, vulkan::device *pdevice, VkQueue transferQueue)
 {
 	for (tinygltf::Image &image : gltfModel.images) {
 		vkglTF::Texture texture;
@@ -1136,7 +1136,7 @@ void vkglTF::Model::loadAnimations(tinygltf::Model &gltfModel)
                     break;
 				}
 				default: {
-					std::cout << "unknown type"_ansi << std::endl;
+					std::cout << "unknown type" << std::endl;
 					break;
 				}
 				}
@@ -1175,7 +1175,7 @@ void vkglTF::Model::loadAnimations(tinygltf::Model &gltfModel)
 	}
 }
 
-void vkglTF::Model::loadFromFile(const ::file::path & filename, vks::VulkanDevice *pdevice, VkQueue transferQueue, uint32_t fileLoadingFlags, float scale)
+void vkglTF::Model::loadFromFile(const ::file::path & filename, vulkan::device *pdevice, VkQueue transferQueue, uint32_t fileLoadingFlags, float scale)
 {
 	tinygltf::Model gltfModel;
 	tinygltf::TinyGLTF gltfContext;
@@ -1286,7 +1286,7 @@ void vkglTF::Model::loadFromFile(const ::file::path & filename, vks::VulkanDevic
 	assert((vertexBufferSize > 0) && (indexBufferSize > 0));
 
 	struct StagingBuffer {
-		VkBuffer buffer;
+		VkBuffer m_vkbuffer;
 		VkDeviceMemory memory;
 	} vertexStaging, indexStaging;
 
@@ -1296,7 +1296,7 @@ void vkglTF::Model::loadFromFile(const ::file::path & filename, vks::VulkanDevic
 		VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
 		vertexBufferSize,
-		&vertexStaging.buffer,
+		&vertexStaging.m_vkbuffer,
 		&vertexStaging.memory,
 		vertexBuffer.data()));
 	// Index data
@@ -1304,7 +1304,7 @@ void vkglTF::Model::loadFromFile(const ::file::path & filename, vks::VulkanDevic
 		VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
 		indexBufferSize,
-		&indexStaging.buffer,
+		&indexStaging.m_vkbuffer,
 		&indexStaging.memory,
 		indexBuffer.data()));
 
@@ -1314,14 +1314,14 @@ void vkglTF::Model::loadFromFile(const ::file::path & filename, vks::VulkanDevic
 	    VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | memoryPropertyFlags,
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 		vertexBufferSize,
-		&vertices.buffer,
+		&vertices.m_vkbuffer,
 		&vertices.memory));
 	// Index buffer
 	VK_CHECK_RESULT(m_pvulkandevice->createBuffer(
 	    VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | memoryPropertyFlags,
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 		indexBufferSize,
-		&indices.buffer,
+		&indices.m_vkbuffer,
 		&indices.memory));
 
 	// Copy from staging buffers
@@ -1330,16 +1330,16 @@ void vkglTF::Model::loadFromFile(const ::file::path & filename, vks::VulkanDevic
 	VkBufferCopy copyRegion = {};
 
 	copyRegion.size = vertexBufferSize;
-	vkCmdCopyBuffer(copyCmd, vertexStaging.buffer, vertices.buffer, 1, &copyRegion);
+	vkCmdCopyBuffer(copyCmd, vertexStaging.m_vkbuffer, vertices.m_vkbuffer, 1, &copyRegion);
 
 	copyRegion.size = indexBufferSize;
-	vkCmdCopyBuffer(copyCmd, indexStaging.buffer, indices.buffer, 1, &copyRegion);
+	vkCmdCopyBuffer(copyCmd, indexStaging.m_vkbuffer, indices.m_vkbuffer, 1, &copyRegion);
 
 	m_pvulkandevice->flushCommandBuffer(copyCmd, transferQueue, true);
 
-	vkDestroyBuffer(m_pvulkandevice->logicalDevice, vertexStaging.buffer, nullptr);
+	vkDestroyBuffer(m_pvulkandevice->logicalDevice, vertexStaging.m_vkbuffer, nullptr);
 	vkFreeMemory(m_pvulkandevice->logicalDevice, vertexStaging.memory, nullptr);
-	vkDestroyBuffer(m_pvulkandevice->logicalDevice, indexStaging.buffer, nullptr);
+	vkDestroyBuffer(m_pvulkandevice->logicalDevice, indexStaging.m_vkbuffer, nullptr);
 	vkFreeMemory(m_pvulkandevice->logicalDevice, indexStaging.memory, nullptr);
 
 	getSceneDimensions();
@@ -1421,8 +1421,8 @@ void vkglTF::Model::loadFromFile(const ::file::path & filename, vks::VulkanDevic
 void vkglTF::Model::bindBuffers(VkCommandBuffer commandBuffer)
 {
 	const VkDeviceSize offsets[1] = {0};
-	vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertices.buffer, offsets);
-	vkCmdBindIndexBuffer(commandBuffer, indices.buffer, 0, VK_INDEX_TYPE_UINT32);
+	vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertices.m_vkbuffer, offsets);
+	vkCmdBindIndexBuffer(commandBuffer, indices.m_vkbuffer, 0, VK_INDEX_TYPE_UINT32);
 	buffersBound = true;
 }
 
@@ -1458,8 +1458,8 @@ void vkglTF::Model::draw(VkCommandBuffer commandBuffer, uint32_t renderFlags, Vk
 {
 	if (!buffersBound) {
 		const VkDeviceSize offsets[1] = {0};
-		vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertices.buffer, offsets);
-		vkCmdBindIndexBuffer(commandBuffer, indices.buffer, 0, VK_INDEX_TYPE_UINT32);
+		vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertices.m_vkbuffer, offsets);
+		vkCmdBindIndexBuffer(commandBuffer, indices.m_vkbuffer, 0, VK_INDEX_TYPE_UINT32);
 	}
 	for (auto& node : nodes) {
 		drawNode(node, commandBuffer, renderFlags, pipelineLayout, bindImageSet);

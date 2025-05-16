@@ -184,7 +184,7 @@ namespace vulkan
    void base_application_with_swap_chain::createCommandBuffers()
    {
       // Create one command buffer for each swap chain image
-      m_drawCmdBuffers.resize(swapChain.imageCount);
+      m_drawCmdBuffers.resize(m_swapchain.imageCount);
       VkCommandBufferAllocateInfo cmdBufAllocateInfo = vks::initializers::commandBufferAllocateInfo(cmdPool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, static_cast<uint32_t>(m_drawCmdBuffers.size()));
       VK_CHECK_RESULT(vkAllocateCommandBuffers(device, &cmdBufAllocateInfo, m_drawCmdBuffers.data()));
    }
@@ -226,7 +226,7 @@ namespace vulkan
             loadShader(getShadersPath() + "base/uioverlay.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT),
          };
          ui.prepareResources();
-         ui.preparePipeline(pipelineCache, renderPass, swapChain.colorFormat, depthFormat);
+         ui.preparePipeline(pipelineCache, renderPass, m_swapchain.colorFormat, depthFormat);
       }
    }
 
@@ -742,7 +742,7 @@ namespace vulkan
    void base_application_with_swap_chain::prepareFrame()
    {
       // Acquire the next image from the swap chain
-      VkResult result = swapChain.acquireNextImage(semaphores.presentComplete, &currentBuffer);
+      VkResult result = m_swapchain.acquireNextImage(semaphores.presentComplete, &currentBuffer);
       // Recreate the swapchain if it's no longer compatible with the surface (OUT_OF_DATE)
       // SRS - If no longer optimal (VK_SUBOPTIMAL_KHR), wait until submitFrame() in case number of swapchain images will change on resize
       if ((result == VK_ERROR_OUT_OF_DATE_KHR) || (result == VK_SUBOPTIMAL_KHR)) {
@@ -758,7 +758,7 @@ namespace vulkan
 
    void base_application_with_swap_chain::submitFrame()
    {
-      VkResult result = swapChain.queuePresent(queue, currentBuffer, semaphores.renderComplete);
+      VkResult result = m_swapchain.queuePresent(queue, currentBuffer, semaphores.renderComplete);
       // Recreate the swapchain if it's no longer compatible with the surface (OUT_OF_DATE) or no longer optimal for presentation (SUBOPTIMAL)
       if ((result == VK_ERROR_OUT_OF_DATE_KHR) || (result == VK_SUBOPTIMAL_KHR)) {
          windowResize();
@@ -889,7 +889,7 @@ namespace vulkan
    base_application_with_swap_chain::~base_application_with_swap_chain()
    {
       // Clean up Vulkan resources
-      swapChain.cleanup();
+      m_swapchain.cleanup();
       if (descriptorPool != VK_NULL_HANDLE)
       {
          vkDestroyDescriptorPool(device, descriptorPool, nullptr);
@@ -1053,7 +1053,7 @@ namespace vulkan
       // Vulkan device creation
       // This is handled by a separate class that gets a logical device representation
       // and encapsulates functions related to a device
-      m_pvulkandevice = ___new vks::VulkanDevice(physicalDevice);
+      m_pvulkandevice = ___new vulkan::device(physicalDevice);
 
       // Derived examples can enable extensions based on the list of supported extensions read from the physical device
       getEnabledExtensions();
@@ -1079,7 +1079,7 @@ namespace vulkan
       }
       assert(validFormat);
 
-      swapChain.setContext(instance, physicalDevice, device);
+      m_swapchain.setContext(instance, physicalDevice, device);
 
       // Create synchronization objects
       VkSemaphoreCreateInfo semaphoreCreateInfo = vks::initializers::semaphoreCreateInfo();
@@ -1584,7 +1584,7 @@ namespace vulkan
          // Window is hidden or closed, clean up resources
          LOGD("APP_CMD_TERM_WINDOW"_ansi);
          if (vulkanExample->prepared) {
-            vulkanExample->swapChain.cleanup();
+            vulkanExample->m_swapchain.cleanup();
          }
          break;
       }
@@ -3018,7 +3018,7 @@ namespace vulkan
    {
       VkCommandPoolCreateInfo cmdPoolInfo = {};
       cmdPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-      cmdPoolInfo.queueFamilyIndex = swapChain.queueNodeIndex;
+      cmdPoolInfo.queueFamilyIndex = m_swapchain.queueNodeIndex;
       cmdPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
       VK_CHECK_RESULT(vkCreateCommandPool(device, &cmdPoolInfo, nullptr, &cmdPool));
    }
@@ -3082,10 +3082,10 @@ namespace vulkan
       frameBufferCreateInfo.layers = 1;
 
       // Create frame buffers for every swap chain image
-      frameBuffers.resize(swapChain.imageCount);
+      frameBuffers.resize(m_swapchain.imageCount);
       for (uint32_t i = 0; i < frameBuffers.size(); i++)
       {
-         attachments[0] = swapChain.buffers[i].view;
+         attachments[0] = m_swapchain.buffers[i].view;
          VK_CHECK_RESULT(vkCreateFramebuffer(device, &frameBufferCreateInfo, nullptr, &frameBuffers[i]));
       }
    }
@@ -3094,7 +3094,7 @@ namespace vulkan
    {
       std::array<VkAttachmentDescription, 2> attachments = {};
       // Color attachment
-      attachments[0].format = swapChain.colorFormat;
+      attachments[0].format = m_swapchain.colorFormat;
       attachments[0].samples = VK_SAMPLE_COUNT_1_BIT;
       attachments[0].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
       attachments[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -3261,32 +3261,32 @@ namespace vulkan
    void base_application_with_swap_chain::initSwapchain()
    {
 #if defined(_WIN32)
-      swapChain.initSurface(windowInstance, window);
+      m_swapchain.initSurface(windowInstance, window);
 #elif defined(VK_USE_PLATFORM_ANDROID_KHR)
-      swapChain.initSurface(androidApp->window);
+      m_swapchain.initSurface(androidApp->window);
 #elif (defined(VK_USE_PLATFORM_IOS_MVK) || defined(VK_USE_PLATFORM_MACOS_MVK))
-      swapChain.initSurface(view);
+      m_swapchain.initSurface(view);
 #elif defined(VK_USE_PLATFORM_METAL_EXT)
-      swapChain.initSurface(metalLayer);
+      m_swapchain.initSurface(metalLayer);
 #elif defined(VK_USE_PLATFORM_DIRECTFB_EXT)
-      swapChain.initSurface(dfb, surface);
+      m_swapchain.initSurface(dfb, surface);
 #elif defined(VK_USE_PLATFORM_WAYLAND_KHR)
-      swapChain.initSurface(display, surface);
+      m_swapchain.initSurface(display, surface);
 #elif defined(VK_USE_PLATFORM_XCB_KHR)
-      swapChain.initSurface(connection, window);
+      m_swapchain.initSurface(connection, window);
 #elif (defined(_DIRECT2DISPLAY) || defined(VK_USE_PLATFORM_HEADLESS_EXT))
-      swapChain.initSurface(width, height);
+      m_swapchain.initSurface(width, height);
 #elif defined(VK_USE_PLATFORM_SCREEN_QNX)
-      swapChain.initSurface(screen_context, screen_window);
+      m_swapchain.initSurface(screen_context, screen_window);
 #endif
    }
 
    void base_application_with_swap_chain::setupSwapChain()
    {
-      swapChain.create(&width, &height, settings.vsync, settings.fullscreen);
+      m_swapchain.create(&width, &height, settings.vsync, settings.fullscreen);
    }
 
-   void base_application_with_swap_chain::OnUpdateUIOverlay(vks::UIOverlay* overlay) {}
+   void base_application_with_swap_chain::OnUpdateUIOverlay(vulkan::ui_overlay* overlay) {}
 
 #if defined(_WIN32)
    void base_application_with_swap_chain::OnHandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {};

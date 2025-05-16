@@ -7,13 +7,16 @@
 * This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)
 */
 #include "framework.h"
-#include "VulkanUIOverlay.h"
+#include "ui_overlay.h"
 #include "acme/filesystem/filesystem/file_context.h"
 #include "acme/platform/application.h"
 
-namespace vks 
+
+namespace vulkan
 {
-	UIOverlay::UIOverlay()
+
+
+	ui_overlay::ui_overlay()
 	{
 #if defined(__ANDROID__)		
 		if (vks::android::screenDensity >= ACONFIGURATION_DENSITY_XXHIGH) {
@@ -52,14 +55,14 @@ namespace vks
 		io.FontGlobalScale = scale;
 	}
 
-	UIOverlay::~UIOverlay()	{
+	ui_overlay::~ui_overlay()	{
 		if (ImGui::GetCurrentContext()) {
 			ImGui::DestroyContext();
 		}
 	}
 
 	/** Prepare all vulkan resources required to render the UI overlay */
-	void UIOverlay::prepareResources()
+	void ui_overlay::prepareResources()
 	{
 		ImGuiIO& io = ImGui::GetIO();
 
@@ -125,7 +128,7 @@ namespace vks
 		VK_CHECK_RESULT(vkCreateImageView(device->logicalDevice, &viewInfo, nullptr, &fontView));
 
 		// Staging buffers for font data upload
-		vks::Buffer stagingBuffer;
+		vulkan::buffer stagingBuffer;
 
 		VK_CHECK_RESULT(device->createBuffer(
 			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
@@ -160,7 +163,7 @@ namespace vks
 
 		vkCmdCopyBufferToImage(
 			copyCmd,
-			stagingBuffer.buffer,
+			stagingBuffer.m_vkbuffer,
 			fontImage,
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 			1,
@@ -221,7 +224,7 @@ namespace vks
 	}
 
 	/** Prepare a separate pipeline for the UI overlay rendering decoupled from the main application */
-	void UIOverlay::preparePipeline(const VkPipelineCache pipelineCache, const VkRenderPass renderPass, const VkFormat colorFormat, const VkFormat depthFormat)
+	void ui_overlay::preparePipeline(const VkPipelineCache pipelineCache, const VkRenderPass renderPass, const VkFormat colorFormat, const VkFormat depthFormat)
 	{
 		// Pipeline layout
 		// Push constants for UI rendering parameters
@@ -315,7 +318,7 @@ namespace vks
 	}
 
 	/** Update vertex and index buffer containing the imGui elements when required */
-	bool UIOverlay::update()
+	bool ui_overlay::update()
 	{
 		ImDrawData* imDrawData = ImGui::GetDrawData();
 		bool updateCmdBuffers = false;
@@ -332,7 +335,7 @@ namespace vks
 		}
 
 		// Vertex buffer
-		if ((vertexBuffer.buffer == VK_NULL_HANDLE) || (vertexCount != imDrawData->TotalVtxCount)) {
+		if ((vertexBuffer.m_vkbuffer == VK_NULL_HANDLE) || (vertexCount != imDrawData->TotalVtxCount)) {
 			vertexBuffer.unmap();
 			vertexBuffer.destroy();
 			VK_CHECK_RESULT(device->createBuffer(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &vertexBuffer, vertexBufferSize));
@@ -343,7 +346,7 @@ namespace vks
 		}
 
 		// Index buffer
-		if ((indexBuffer.buffer == VK_NULL_HANDLE) || (indexCount < imDrawData->TotalIdxCount)) {
+		if ((indexBuffer.m_vkbuffer == VK_NULL_HANDLE) || (indexCount < imDrawData->TotalIdxCount)) {
 			indexBuffer.unmap();
 			indexBuffer.destroy();
 			VK_CHECK_RESULT(device->createBuffer(VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &indexBuffer, indexBufferSize));
@@ -371,7 +374,7 @@ namespace vks
 		return updateCmdBuffers;
 	}
 
-	void UIOverlay::draw(const VkCommandBuffer commandBuffer)
+	void ui_overlay::draw(const VkCommandBuffer commandBuffer)
 	{
 		ImDrawData* imDrawData = ImGui::GetDrawData();
 		int32_t vertexOffset = 0;
@@ -391,8 +394,8 @@ namespace vks
 		vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(PushConstBlock), &pushConstBlock);
 
 		VkDeviceSize offsets[1] = { 0 };
-		vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer.buffer, offsets);
-		vkCmdBindIndexBuffer(commandBuffer, indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT16);
+		vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer.m_vkbuffer, offsets);
+		vkCmdBindIndexBuffer(commandBuffer, indexBuffer.m_vkbuffer, 0, VK_INDEX_TYPE_UINT16);
 
 		for (int32_t i = 0; i < imDrawData->CmdListsCount; i++)
 		{
@@ -413,13 +416,13 @@ namespace vks
 		}
 	}
 
-	void UIOverlay::resize(uint32_t width, uint32_t height)
+	void ui_overlay::resize(uint32_t width, uint32_t height)
 	{
 		ImGuiIO& io = ImGui::GetIO();
 		io.DisplaySize = ImVec2((float)(width), (float)(height));
 	}
 
-	void UIOverlay::freeResources()
+	void ui_overlay::freeResources()
 	{
 		vertexBuffer.destroy();
 		indexBuffer.destroy();
@@ -433,19 +436,19 @@ namespace vks
 		vkDestroyPipeline(device->logicalDevice, pipeline, nullptr);
 	}
 
-	bool UIOverlay::header(const char *caption)
+	bool ui_overlay::header(const char *caption)
 	{
 		return ImGui::CollapsingHeader(caption, ImGuiTreeNodeFlags_DefaultOpen);
 	}
 
-	bool UIOverlay::checkBox(const char *caption, bool *value)
+	bool ui_overlay::checkBox(const char *caption, bool *value)
 	{
 		bool res = ImGui::Checkbox(caption, value);
 		if (res) { updated = true; };
 		return res;
 	}
 
-	bool UIOverlay::checkBox(const char *caption, int32_t *value)
+	bool ui_overlay::checkBox(const char *caption, int32_t *value)
 	{
 		bool val = (*value == 1);
 		bool res = ImGui::Checkbox(caption, &val);
@@ -454,35 +457,35 @@ namespace vks
 		return res;
 	}
 
-	bool UIOverlay::radioButton(const char* caption, bool value)
+	bool ui_overlay::radioButton(const char* caption, bool value)
 	{
 		bool res = ImGui::RadioButton(caption, value);
 		if (res) { updated = true; };
 		return res;
 	}
 
-	bool UIOverlay::inputFloat(const char *caption, float *value, float step, const char * format)
+	bool ui_overlay::inputFloat(const char *caption, float *value, float step, const char * format)
 	{
 		bool res = ImGui::InputFloat(caption, value, step, step * 10.0f, format);
 		if (res) { updated = true; };
 		return res;
 	}
 
-	bool UIOverlay::sliderFloat(const char* caption, float* value, float min, float max)
+	bool ui_overlay::sliderFloat(const char* caption, float* value, float min, float max)
 	{
 		bool res = ImGui::SliderFloat(caption, value, min, max);
 		if (res) { updated = true; };
 		return res;
 	}
 
-	bool UIOverlay::sliderInt(const char* caption, int32_t* value, int32_t min, int32_t max)
+	bool ui_overlay::sliderInt(const char* caption, int32_t* value, int32_t min, int32_t max)
 	{
 		bool res = ImGui::SliderInt(caption, value, min, max);
 		if (res) { updated = true; };
 		return res;
 	}
 
-	bool UIOverlay::comboBox(const char *caption, int32_t *itemindex, std::vector<std::string> items)
+	bool ui_overlay::comboBox(const char *caption, int32_t *itemindex, std::vector<std::string> items)
 	{
 		if (items.empty()) {
 			return false;
@@ -498,24 +501,29 @@ namespace vks
 		return res;
 	}
 
-	bool UIOverlay::button(const char *caption)
+	bool ui_overlay::button(const char *caption)
 	{
 		bool res = ImGui::Button(caption);
 		if (res) { updated = true; };
 		return res;
 	}
 
-	bool UIOverlay::colorPicker(const char* caption, float* color) {
+	bool ui_overlay::colorPicker(const char* caption, float* color) {
 		bool res = ImGui::ColorEdit4(caption, color, ImGuiColorEditFlags_NoInputs);
 		if (res) { updated = true; };
 		return res;
 	}
 
-	void UIOverlay::text(const char *formatstr, ...)
+	void ui_overlay::text(const char *formatstr, ...)
 	{
 		va_list args;
 		va_start(args, formatstr);
 		ImGui::TextV(formatstr, args);
 		va_end(args);
 	}
-}
+
+
+} // namespace vulkan
+
+
+

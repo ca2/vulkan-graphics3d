@@ -27,12 +27,12 @@
 #	include <android/asset_manager.h>
 #endif
 
-namespace vks
+namespace vulkan
 {
-class Texture
+class texture
 {
   public:
-	vks::VulkanDevice *   device;
+	vulkan::device *   device;
 	VkImage               image;
 	VkImageLayout         imageLayout;
 	VkDeviceMemory        deviceMemory;
@@ -54,7 +54,7 @@ class Texture2D : public Texture
 	void loadFromFile(
 	    std::string        filename,
 	    VkFormat           format,
-	    vks::VulkanDevice *device,
+	    vulkan::device *device,
 	    VkQueue            copyQueue,
 	    VkImageUsageFlags  imageUsageFlags = VK_IMAGE_USAGE_SAMPLED_BIT,
 	    VkImageLayout      imageLayout     = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
@@ -65,7 +65,7 @@ class Texture2D : public Texture
 	    VkFormat           format,
 	    uint32_t           texWidth,
 	    uint32_t           texHeight,
-	    vks::VulkanDevice *device,
+	    vulkan::device *device,
 	    VkQueue            copyQueue,
 	    VkFilter           filter          = VK_FILTER_LINEAR,
 	    VkImageUsageFlags  imageUsageFlags = VK_IMAGE_USAGE_SAMPLED_BIT,
@@ -78,7 +78,7 @@ class Texture2DArray : public Texture
 	void loadFromFile(
 	    std::string        filename,
 	    VkFormat           format,
-	    vks::VulkanDevice *device,
+	    vulkan::device *device,
 	    VkQueue            copyQueue,
 	    VkImageUsageFlags  imageUsageFlags = VK_IMAGE_USAGE_SAMPLED_BIT,
 	    VkImageLayout      imageLayout     = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
@@ -90,12 +90,12 @@ class TextureCubeMap : public Texture
 	void loadFromFile(
 	    std::string        filename,
 	    VkFormat           format,
-	    vks::VulkanDevice *device,
+	    vulkan::device *device,
 	    VkQueue            copyQueue,
 	    VkImageUsageFlags  imageUsageFlags = VK_IMAGE_USAGE_SAMPLED_BIT,
 	    VkImageLayout      imageLayout     = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 };
-}        // namespace vks
+}        // namespace vulkan
 
 
 

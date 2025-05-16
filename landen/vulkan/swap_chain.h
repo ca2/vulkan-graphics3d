@@ -1,102 +1,115 @@
+/*
+* Class wrapping access to the swap chain
+* 
+* A swap chain is a collection of framebuffers used for rendering and presentation to the windowing system
+*
+* Copyright (C) 2016-2024 by Sascha Willems - www.saschawillems.de
+*
+* This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)
+*/
+
 #pragma once
 
+#include <stdlib.h>
+#include <string>
+#include <assert.h>
+#include <stdio.h>
+#include <vector>
 
-#include "vulkan_example_base_no_swap_chain.h"
-#include "VulkanglTFModel.h"
+#include <vulkan/vulkan.h>
+#include "VulkanTools.h"
 
-// Offscreen frame buffer properties
-#define FB_DIM 512
-#define FB_COLOR_FORMAT VK_FORMAT_R8G8B8A8_UNORM
+#ifdef __ANDROID__
+#include "VulkanAndroid.h"
+#endif
 
-class VulkanExample : public VulkanExampleBaseNoSwapChain
+#ifdef __APPLE__
+#include <sys/utsname.h>
+#endif
+
+namespace vulkan
 {
-public:
-   bool debugDisplay = false;
 
-   struct {
-      vkglTF::Model example;
-      vkglTF::Model plane;
-   } models;
+	typedef struct _SwapChainBuffers {
+		VkImage image;
+		VkImageView view;
+	} SwapChainBuffer;
 
-   struct {
-      vks::Buffer vsShared;
-      vks::Buffer vsMirror;
-      vks::Buffer vsOffScreen;
-   } uniformBuffers;
+	class swap_chain
+	{
+	private:
+		VkInstance instance;
+		VkDevice device;
+		VkPhysicalDevice physicalDevice;
+		VkSurfaceKHR surface;
+	public:
+		VkFormat colorFormat;
+		VkColorSpaceKHR colorSpace;
+		VkSwapchainKHR swapChain = VK_NULL_HANDLE;
+		uint32_t imageCount;
+		std::vector<VkImage> images;
+		std::vector<SwapChainBuffer> buffers;
+		uint32_t queueNodeIndex = UINT32_MAX;
 
-   struct UniformData {
-      glm::mat4 projection;
-      glm::mat4 view;
-      glm::mat4 model;
-      glm::vec4 lightPos = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-   } uniformData;
+#if defined(VK_USE_PLATFORM_WIN32_KHR)
+		void initSurface(void* platformHandle, void* platformWindow);
+#elif defined(VK_USE_PLATFORM_ANDROID_KHR)
+		void initSurface(ANativeWindow* window);
+#elif defined(VK_USE_PLATFORM_DIRECTFB_EXT)
+		void initSurface(IDirectFB* dfb, IDirectFBSurface* window);
+#elif defined(VK_USE_PLATFORM_WAYLAND_KHR)
+		void initSurface(wl_display* display, wl_surface* window);
+#elif defined(VK_USE_PLATFORM_XCB_KHR)
+		void initSurface(xcb_connection_t* connection, xcb_window_t window);
+#elif (defined(VK_USE_PLATFORM_IOS_MVK) || defined(VK_USE_PLATFORM_MACOS_MVK))
+		void initSurface(void* view);
+#elif defined(VK_USE_PLATFORM_METAL_EXT)
+		void initSurface(CAMetalLayer* metalLayer);
+#elif (defined(_DIRECT2DISPLAY) || defined(VK_USE_PLATFORM_HEADLESS_EXT))
+		void initSurface(uint32_t width, uint32_t height);
+#if defined(_DIRECT2DISPLAY)
+		void createDirect2DisplaySurface(uint32_t width, uint32_t height);
+#endif
+#elif defined(VK_USE_PLATFORM_SCREEN_QNX)
+		void initSurface(screen_context_t screen_context, screen_window_t screen_window);
+#endif
+		/* Set the Vulkan objects required for swapchain creation and management, must be called before swapchain creation */
+		void setContext(VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device);
+		/**
+		* Create the swapchain and get its images with given width and height
+		*
+		* @param width Pointer to the width of the swapchain (may be adjusted to fit the requirements of the swapchain)
+		* @param height Pointer to the height of the swapchain (may be adjusted to fit the requirements of the swapchain)
+		* @param vsync (Optional, default = false) Can be used to force vsync-ed rendering (by using VK_PRESENT_MODE_FIFO_KHR as presentation mode)
+		*/
+		void create(uint32_t* width, uint32_t* height, bool vsync = false, bool fullscreen = false);
+		/**
+		* Acquires the next image in the swap chain
+		*
+		* @param presentCompleteSemaphore (Optional) Semaphore that is signaled when the image is ready for use
+		* @param imageIndex Pointer to the image index that will be increased if the next image could be acquired
+		*
+		* @note The function will always wait until the next image has been acquired by setting timeout to UINT64_MAX
+		*
+		* @return VkResult of the image acquisition
+		*/
+		VkResult acquireNextImage(VkSemaphore presentCompleteSemaphore, uint32_t* imageIndex);
+		/**
+		* Queue an image for presentation
+		*
+		* @param queue Presentation queue for presenting the image
+		* @param imageIndex Index of the swapchain image to queue for presentation
+		* @param waitSemaphore (Optional) Semaphore that is waited on before the image is presented (only used if != VK_NULL_HANDLE)
+		*
+		* @return VkResult of the queue presentation
+		*/
+		VkResult queuePresent(VkQueue queue, uint32_t imageIndex, VkSemaphore waitSemaphore = VK_NULL_HANDLE);
+		/* Free all Vulkan resources acquired by the swapchain */
+		void cleanup();
+	};
 
-   struct {
-      VkPipeline debug{ VK_NULL_HANDLE };
-      VkPipeline shaded{ VK_NULL_HANDLE };
-      VkPipeline shadedOffscreen{ VK_NULL_HANDLE };
-      VkPipeline mirror{ VK_NULL_HANDLE };
-   } pipelines;
 
-   struct {
-      VkPipelineLayout textured{ VK_NULL_HANDLE };
-      VkPipelineLayout shaded{ VK_NULL_HANDLE };
-   } pipelineLayouts;
+} // namespace vulkan
 
-   struct {
-      VkDescriptorSet offscreen{ VK_NULL_HANDLE };
-      VkDescriptorSet mirror{ VK_NULL_HANDLE };
-      VkDescriptorSet model{ VK_NULL_HANDLE };
-   } descriptorSets;
 
-   struct {
-      VkDescriptorSetLayout textured{ VK_NULL_HANDLE };
-      VkDescriptorSetLayout shaded{ VK_NULL_HANDLE };
-   } descriptorSetLayouts;
 
-   // Framebuffer for offscreen rendering
-   struct FrameBufferAttachment {
-      VkImage image;
-      VkDeviceMemory mem;
-      VkImageView view;
-   };
-   struct OffscreenPass {
-      int32_t width, height;
-      VkFramebuffer frameBuffer;
-      FrameBufferAttachment color, depth;
-      VkRenderPass renderPass;
-      VkSampler sampler;
-      VkDescriptorImageInfo descriptor;
-   } offscreenPass{};
-
-   glm::vec3 modelPosition = glm::vec3(0.0f, -1.0f, 0.0f);
-   glm::vec3 modelRotation = glm::vec3(0.0f);
-
-   VulkanExample();
-   ~VulkanExample();
-
-   // Setup the offscreen framebuffer for rendering the mirrored scene
-   // The color attachment of this framebuffer will then be used to sample from in the fragment shader of the final pass
-   void prepareOffscreen();
-
-   void buildCommandBuffers();
-
-   void loadAssets();
-   
-   void setupDescriptors();
-
-   void preparePipelines();
-   // Prepare and initialize uniform buffer containing shader uniforms
-   void prepareUniformBuffers();
-
-   void updateUniformBuffers();
-   void updateUniformBufferOffscreen();
-   
-   void prepare();
-
-   void draw();
-
-   virtual void render();
-
-   virtual void OnUpdateUIOverlay(vks::UIOverlay * overlay);
-};

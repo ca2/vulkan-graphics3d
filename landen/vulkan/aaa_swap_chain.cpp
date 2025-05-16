@@ -7,18 +7,11 @@
 */
 #include "framework.h"
 #include "acme/_operating_system.h"
-#include "offscreen_application.h"
-#include "vulkan/vk_container.h"
+#include "offscreen.h"
 
 
-namespace vulkan
-{
-
-
-   offscreen_application::offscreen_application()
+VulkanExample::VulkanExample()
    {
-      
-      m_colorformatFB = FB_COLOR_FORMAT;
       m_strTitle = "Offscreen rendering"_ansi;
       timerSpeed *= 0.25f;
       camera.type = Camera::CameraType::lookat;
@@ -28,15 +21,11 @@ namespace vulkan
       camera.setPerspective(60.0f, (float)width / (float)height, 0.1f, 256.0f);
       // The scene shader uses a clipping plane, so this feature has to be enabled
       enabledFeatures.shaderClipDistance = VK_TRUE;
-
    }
 
-
-   offscreen_application::~offscreen_application()
+VulkanExample::~VulkanExample()
    {
-
-      if (device) 
-      {
+      if (device) {
          // Frame buffer
 
          // Color attachment
@@ -68,16 +57,13 @@ namespace vulkan
          uniformBuffers.vsShared.destroy();
          uniformBuffers.vsMirror.destroy();
          uniformBuffers.vsOffScreen.destroy();
-
       }
-
    }
 
    // Setup the offscreen framebuffer for rendering the mirrored scene
    // The color attachment of this framebuffer will then be used to sample from in the fragment shader of the final pass
-   void offscreen_application::prepareOffscreen()
+   void VulkanExample::prepareOffscreen()
    {
-
       offscreenPass.width = FB_DIM;
       offscreenPass.height = FB_DIM;
 
@@ -246,7 +232,7 @@ namespace vulkan
       offscreenPass.descriptor.sampler = offscreenPass.sampler;
    }
 
-   void offscreen_application::buildCommandBuffers()
+   void VulkanExample::buildCommandBuffers()
    {
       VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
 
@@ -342,21 +328,19 @@ namespace vulkan
       }
    }
 
-   void offscreen_application::loadAssets()
+   void VulkanExample::loadAssets()
    {
       const uint32_t glTFLoadingFlags = vkglTF::FileLoadingFlags::PreTransformVertices | vkglTF::FileLoadingFlags::PreMultiplyVertexColors | vkglTF::FileLoadingFlags::FlipY;
 
-      ::vulkan::device* pdevice = m_pvulkandevice;
+      ::vks::VulkanDevice * pdevice = m_pvulkandevice;
       ::file::path pathFolder(getAssetPath().c_str());
       auto pathPlaneGltf = pathFolder / "models/plane.gltf"_ansi;
       auto pathDragonGltf = pathFolder / "models/chinesedragon.gltf"_ansi;
-      //auto pathDragonGltf = pathFolder / "models/plants.gltf"_ansi;
-      //auto pathDragonGltf = pathFolder / "models/cube.gltf"_ansi;
       models.plane.loadFromFile(pathPlaneGltf, pdevice, queue, glTFLoadingFlags);
       models.example.loadFromFile(pathDragonGltf, pdevice, queue, glTFLoadingFlags);
    }
 
-   void offscreen_application::setupDescriptors()
+   void VulkanExample::setupDescriptors()
    {
       // Pool
       std::vector<VkDescriptorPoolSize> poolSizes = {
@@ -420,7 +404,7 @@ namespace vulkan
 
    }
 
-   void offscreen_application::preparePipelines()
+   void VulkanExample::preparePipelines()
    {
       // Layouts
       VkPipelineLayoutCreateInfo pipelineLayoutInfo = vks::initializers::pipelineLayoutCreateInfo(&descriptorSetLayouts.shaded, 1);
@@ -482,7 +466,7 @@ namespace vulkan
    }
 
    // Prepare and initialize uniform buffer containing shader uniforms
-   void offscreen_application::prepareUniformBuffers()
+   void VulkanExample::prepareUniformBuffers()
    {
       // Mesh vertex shader uniform buffer block
       VK_CHECK_RESULT(m_pvulkandevice->createBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &uniformBuffers.vsShared, sizeof(UniformData)));
@@ -499,7 +483,7 @@ namespace vulkan
       updateUniformBufferOffscreen();
    }
 
-   void offscreen_application::updateUniformBuffers()
+   void VulkanExample::updateUniformBuffers()
    {
       uniformData.projection = camera.matrices.perspective;
       uniformData.view = camera.matrices.view;
@@ -515,7 +499,7 @@ namespace vulkan
       memcpy(uniformBuffers.vsMirror.mapped, &uniformData, sizeof(UniformData));
    }
 
-   void offscreen_application::updateUniformBufferOffscreen()
+   void VulkanExample::updateUniformBufferOffscreen()
    {
       uniformData.projection = camera.matrices.perspective;
       uniformData.view = camera.matrices.view;
@@ -526,9 +510,9 @@ namespace vulkan
       memcpy(uniformBuffers.vsOffScreen.mapped, &uniformData, sizeof(UniformData));
    }
 
-   void offscreen_application::prepare()
+   void VulkanExample::prepare()
    {
-      base_application_no_swap_chain::prepare();
+      VulkanExampleBase::prepare();
       loadAssets();
       prepareOffscreen();
       prepareUniformBuffers();
@@ -538,41 +522,20 @@ namespace vulkan
       prepared = true;
    }
 
-   void offscreen_application::draw(const ::function < void(void*, int, int, int)>& callback)
+   void VulkanExample::draw()
    {
-      //base_application_no_swap_chain::prepareFrame();
-      //submitInfo.commandBufferCount = 1;
-      //submitInfo.pCommandBuffers = &m_drawCmdBuffers[currentBuffer];
-      //VK_CHECK_RESULT(vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE));
-
-      submitWork(m_drawCmdBuffers[currentBuffer], queue);
-      //base_application_no_swap_chain::submitFrame();
-      vkQueueWaitIdle(queue);
-      sample(callback);
-   }
-
-
-   void offscreen_application::submitWork(VkCommandBuffer cmdBuffer, VkQueue queue)
-   {
-      VkSubmitInfo submitInfo = vks::initializers::submitInfo();
+      VulkanExampleBase::prepareFrame();
       submitInfo.commandBufferCount = 1;
-      submitInfo.pCommandBuffers = &cmdBuffer;
-      //m_submitInfo.commandBufferCount = 1;
-      //m_submitInfo.pCommandBuffers = &cmdBuffer;
-      VkFenceCreateInfo fenceInfo = vks::initializers::fenceCreateInfo();
-      VkFence fence;
-      VK_CHECK_RESULT(vkCreateFence(m_pvulkandevice->logicalDevice, &fenceInfo, nullptr, &fence));
-      VK_CHECK_RESULT(vkQueueSubmit(queue, 1, &submitInfo, fence));
-      VK_CHECK_RESULT(vkWaitForFences(m_pvulkandevice->logicalDevice, 1, &fence, VK_TRUE, UINT64_MAX));
-      vkDestroyFence(m_pvulkandevice->logicalDevice, fence, nullptr);
+      submitInfo.pCommandBuffers = &m_drawCmdBuffers[currentBuffer];
+      VK_CHECK_RESULT(vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE));
+      VulkanExampleBase::submitFrame();
    }
 
-
-   void offscreen_application::render(const ::function < void(void*, int, int, int)>& callback)
+   void VulkanExample::render()
    {
       if (!prepared)
          return;
-      draw(callback);
+      draw();
       if (!paused || camera.updated)
       {
          if (!paused) {
@@ -583,7 +546,7 @@ namespace vulkan
       }
    }
 
-   void offscreen_application::OnUpdateUIOverlay(vulkan::ui_overlay* overlay)
+   void VulkanExample::OnUpdateUIOverlay(vks::UIOverlay * overlay)
    {
       if (overlay->header("Settings"_ansi)) {
          if (overlay->checkBox("Display render target"_ansi, &debugDisplay)) {
@@ -591,631 +554,27 @@ namespace vulkan
          }
       }
    }
-   ///};
+///};
 
-   void offscreen_application::sample(const ::function < void(void*, int, int, int)>& callback)
-   {
-
-
-      /*
-         Copy framebuffer image to host visible image
-      */
-      const char* imagedata;
-      {
-         // Create the linear tiled destination image to copy to and to read the memory from
-         VkImageCreateInfo imgCreateInfo(vks::initializers::imageCreateInfo());
-         imgCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-         imgCreateInfo.format = VK_FORMAT_R8G8B8A8_UNORM;
-         imgCreateInfo.extent.width = width;
-         imgCreateInfo.extent.height = height;
-         imgCreateInfo.extent.depth = 1;
-         imgCreateInfo.arrayLayers = 1;
-         imgCreateInfo.mipLevels = 1;
-         imgCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-         imgCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-         imgCreateInfo.tiling = VK_IMAGE_TILING_LINEAR;
-         imgCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-         // Create the image
-         VkImage dstImage;
-         VK_CHECK_RESULT(vkCreateImage(device, &imgCreateInfo, nullptr, &dstImage));
-         // Create memory to back up the image
-         VkMemoryRequirements memRequirements;
-         VkMemoryAllocateInfo memAllocInfo(vks::initializers::memoryAllocateInfo());
-         VkDeviceMemory dstImageMemory;
-         vkGetImageMemoryRequirements(device, dstImage, &memRequirements);
-         memAllocInfo.allocationSize = memRequirements.size;
-         // Memory must be host visible to copy from
-         memAllocInfo.memoryTypeIndex = m_pvulkandevice->getMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-         VK_CHECK_RESULT(vkAllocateMemory(device, &memAllocInfo, nullptr, &dstImageMemory));
-         VK_CHECK_RESULT(vkBindImageMemory(device, dstImage, dstImageMemory, 0));
-
-         // Do the actual blit from the offscreen image to our host visible destination image
-         VkCommandBufferAllocateInfo cmdBufAllocateInfo = vks::initializers::commandBufferAllocateInfo(cmdPool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1);
-         VkCommandBuffer copyCmd;
-         VK_CHECK_RESULT(vkAllocateCommandBuffers(device, &cmdBufAllocateInfo, &copyCmd));
-         VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
-         VK_CHECK_RESULT(vkBeginCommandBuffer(copyCmd, &cmdBufInfo));
-
-         // Transition destination image to transfer destination layout
-         vks::tools::insertImageMemoryBarrier(
-            copyCmd,
-            dstImage,
-            0,
-            VK_ACCESS_TRANSFER_WRITE_BIT,
-            VK_IMAGE_LAYOUT_UNDEFINED,
-            VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-            VK_PIPELINE_STAGE_TRANSFER_BIT,
-            VK_PIPELINE_STAGE_TRANSFER_BIT,
-            VkImageSubresourceRange{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 });
-
-         // colorAttachment.image is already in VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, and does not need to be transitioned
-
-         VkImageCopy imageCopyRegion{};
-         imageCopyRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-         imageCopyRegion.srcSubresource.layerCount = 1;
-         imageCopyRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-         imageCopyRegion.dstSubresource.layerCount = 1;
-         imageCopyRegion.extent.width = width;
-         imageCopyRegion.extent.height = height;
-         imageCopyRegion.extent.depth = 1;
-
-         vkCmdCopyImage(
-            copyCmd,
-            //colorAttachment.image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-            m_colorAttachment.image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-            dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-            1,
-            &imageCopyRegion);
-
-         // Transition destination image to general layout, which is the required layout for mapping the image memory later on
-         vks::tools::insertImageMemoryBarrier(
-            copyCmd,
-            dstImage,
-            VK_ACCESS_TRANSFER_WRITE_BIT,
-            VK_ACCESS_MEMORY_READ_BIT,
-            VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-            VK_IMAGE_LAYOUT_GENERAL,
-            VK_PIPELINE_STAGE_TRANSFER_BIT,
-            VK_PIPELINE_STAGE_TRANSFER_BIT,
-            VkImageSubresourceRange{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 });
-
-         VK_CHECK_RESULT(vkEndCommandBuffer(copyCmd));
-
-         submitWork(copyCmd, queue);
-
-         //submitInfo.commandBufferCount = 1;
-         //submitInfo.pCommandBuffers = &copyCmd;
-         //VK_CHECK_RESULT(vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE));
-
-
-         // Get layout of the image (including row pitch)
-         VkImageSubresource subResource{};
-         subResource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-         VkSubresourceLayout subResourceLayout;
-
-         vkGetImageSubresourceLayout(device, dstImage, &subResource, &subResourceLayout);
-
-         // Map image memory so we can start copying from it
-         vkMapMemory(device, dstImageMemory, 0, VK_WHOLE_SIZE, 0, (void**)&imagedata);
-         imagedata += subResourceLayout.offset;
-
-         /*
-            Save host visible framebuffer image to disk (ppm format)
-         */
-
-         //::memory mem;
-
-         //mem.set_size(m_width * m_height * 4);
-
-         //std::vector<VkFormat> formatsBGR = { VK_FORMAT_B8G8R8A8_SRGB, VK_FORMAT_B8G8R8A8_UNORM, VK_FORMAT_B8G8R8A8_SNORM };
-         //const bool colorSwizzle = (std::find(formatsBGR.begin(), formatsBGR.end(), VK_FORMAT_R8G8B8A8_UNORM) != formatsBGR.end());
-         if (callback)
-         {
-            callback((void*)imagedata, width, height, subResourceLayout.rowPitch);
-
-         }
-
-         //// ppm binary pixel data
-         //for (int32_t y = 0; y < m_height; y++) {
-         //   unsigned int * row = (unsigned int *)imagedata;
-         //   for (int32_t x = 0; x < m_width; x++) {
-         //      //               if (colorSwizzle) {
-         //         file.write((char *)row + 2, 1);
-         //         file.write((char *)row + 1, 1);
-         //         file.write((char *)row, 1);
-         //      }
-         //      //else {
-         //      //   file.write((char *)row, 3);
-         //      //}
-         //      row++;
-         //   }
-         //   imagedata += subResourceLayout.rowPitch;
-         //}
-
-
-   //         callback
-
-   //#if defined (VK_USE_PLATFORM_ANDROID_KHR)
-   //         const char * filename = strcat(getenv("EXTERNAL_STORAGE"_ansi), "/headless.ppm"_ansi);
-   //#else
-   //         const char * filename = "headless.ppm"_ansi;
-   //#endif
-   //         std::ofstream file(filename, std::ios::out | std::ios::binary);
-   //
-   //         // ppm header
-   //         file << "P6\n"_ansi << m_width << "\n"_ansi << m_height << "\n"_ansi << 255 << "\n"_ansi;
-
-            //// If source is BGR (destination is always RGB) and we can't use blit (which does automatic conversion), we'hi have to manually swizzle color components
-            //// Check if source is BGR and needs swizzle
-            //std::vector<VkFormat> formatsBGR = { VK_FORMAT_B8G8R8A8_SRGB, VK_FORMAT_B8G8R8A8_UNORM, VK_FORMAT_B8G8R8A8_SNORM };
-            //const bool colorSwizzle = (std::find(formatsBGR.begin(), formatsBGR.end(), VK_FORMAT_R8G8B8A8_UNORM) != formatsBGR.end());
-
-            //// ppm binary pixel data
-            //for (int32_t y = 0; y < m_height; y++) {
-            //   unsigned int * row = (unsigned int *)imagedata;
-            //   for (int32_t x = 0; x < m_width; x++) {
-            //      if (colorSwizzle) {
-            //         file.write((char *)row + 2, 1);
-            //         file.write((char *)row + 1, 1);
-            //         file.write((char *)row, 1);
-            //      }
-            //      else {
-            //         file.write((char *)row, 3);
-            //      }
-            //      row++;
-            //   }
-            //   imagedata += subResourceLayout.rowPitch;
-            //}
-            //file.close();
-
-            //LOG("Framebuffer image saved to %s\n"_ansi, filename);
-
-            // Clean up resources
-         vkUnmapMemory(device, dstImageMemory);
-         vkFreeMemory(device, dstImageMemory, nullptr);
-         vkDestroyImage(device, dstImage, nullptr);
-      }
-
-      vkQueueWaitIdle(queue);
-
-   }
-
-
-
-   void offscreen_application::render_loop(const ::function < void(void*, int, int, int)>& callback)
-   {
-
-
-      //MSG msg;
-      //bool quitMessageReceived = false;
-      //while (!quitMessageReceived) {
-      //   while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-      //      TranslateMessage(&msg);
-      //      DispatchMessage(&msg);
-      //      if (msg.message == WM_QUIT) {
-      //         quitMessageReceived = true;
-      //         break;
-      //      }
-      //   }
-      //   if (prepared && !IsIconic(window)) {
-      while (::task_get_run())
-      {
-         nextFrame(callback);
-         //void * pData = nullptr;
-         //vkMapMemory(m_pvulkandevice->logicalDevice, offscreenPass.color.mem, 0, destWidth * destHeight * 4, VK_MEMORY_MAP_PLACED_BIT_EXT, &pData);
-         //callback(pData, destWidth, destHeight, destWidth * 4);
-         //vkUnmapMemory(m_pvulkandevice->logicalDevice, offscreenPass.color.mem);
-         preempt(20_ms);
-      }
-      //    // SRS - for non-apple plaforms, handle benchmarking here within base_application_with_swap_chain::renderLoop()
-      //    //     - for macOS, handle benchmarking within NSApp rendering loop via displayLinkOutputCb()
-      // #if !(defined(VK_USE_PLATFORM_IOS_MVK) || defined(VK_USE_PLATFORM_MACOS_MVK) || defined(VK_USE_PLATFORM_METAL_EXT))
-      //    if (benchmark.active) {
-      // #if defined(VK_USE_PLATFORM_WAYLAND_KHR)
-      //       while (!configured)
-      //          wl_display_dispatch(display);
-      //       while (wl_display_prepare_read(display) != 0)
-      //          wl_display_dispatch_pending(display);
-      //       wl_display_flush(display);
-      //       wl_display_read_events(display);
-      //       wl_display_dispatch_pending(display);
-      // #endif
-      //
-      //       benchmark.run([=] { render(callback); }, m_pvulkandevice->properties);
-      //       vkDeviceWaitIdle(device);
-      //       if (benchmark.filename != "") {
-      //          benchmark.saveResults();
-      //       }
-      //       return;
-      //    }
-      // #endif
-      //
-      //    destWidth = width;
-      //    destHeight = height;
-      //    lastTimestamp = std::chrono::high_resolution_clock::now();
-      //    tPrevEnd = lastTimestamp;
-      // #if defined(_WIN32)
-      //    //MSG msg;
-      //    //bool quitMessageReceived = false;
-      //    //while (!quitMessageReceived) {
-      //    //   while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-      //    //      TranslateMessage(&msg);
-      //    //      DispatchMessage(&msg);
-      //    //      if (msg.message == WM_QUIT) {
-      //    //         quitMessageReceived = true;
-      //    //         break;
-      //    //      }
-      //    //   }
-      //    //   if (prepared && !IsIconic(window)) {
-      //    while (::task_get_run())
-      //    {
-      //       nextFrame(callback);
-      //       //void * pData = nullptr;
-      //       //vkMapMemory(m_pvulkandevice->logicalDevice, offscreenPass.color.mem, 0, destWidth * destHeight * 4, VK_MEMORY_MAP_PLACED_BIT_EXT, &pData);
-      //       //callback(pData, destWidth, destHeight, destWidth * 4);
-      //       //vkUnmapMemory(m_pvulkandevice->logicalDevice, offscreenPass.color.mem);
-      //       preempt(20_ms);
-      //    }
-      // #elif defined(VK_USE_PLATFORM_ANDROID_KHR)
-      //    while (1)
-      //    {
-      //       int ident;
-      //       int happenings;
-      //       struct android_poll_source * source;
-      //       bool destroy = false;
-      //
-      //       focused = true;
-      //
-      //       while ((ident = ALooper_pollAll(focused ? 0 : -1, NULL, &happenings, (void **)&source)) >= 0)
-      //       {
-      //          if (source != NULL)
-      //          {
-      //             source->process(androidApp, source);
-      //          }
-      //          if (androidApp->destroyRequested != 0)
-      //          {
-      //             LOGD("Android app destroy requested"_ansi);
-      //             destroy = true;
-      //             break;
-      //          }
-      //       }
-      //
-      //       // App destruction requested
-      //       // Exit loop, example will be destroyed in application main
-      //       if (destroy)
-      //       {
-      //          ANativeActivity_finish(androidApp->activity);
-      //          break;
-      //       }
-      //
-      //       // Render frame
-      //       if (prepared)
-      //       {
-      //          auto tStart = std::chrono::high_resolution_clock::now();
-      //          render();
-      //          frameCounter++;
-      //          auto tEnd = std::chrono::high_resolution_clock::now();
-      //          auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
-      //          frameTimer = tDiff / 1000.0f;
-      //          camera.update(frameTimer);
-      //          // Convert to clamped timer value
-      //          if (!paused)
-      //          {
-      //             timer += timerSpeed * frameTimer;
-      //             if (timer > 1.0)
-      //             {
-      //                timer -= 1.0f;
-      //             }
-      //          }
-      //          float fpsTimer = std::chrono::duration<double, std::milli>(tEnd - lastTimestamp).count();
-      //          if (fpsTimer > 1000.0f)
-      //          {
-      //             lastFPS = (float)frameCounter * (1000.0f / fpsTimer);
-      //             frameCounter = 0;
-      //             lastTimestamp = tEnd;
-      //          }
-      //
-      //          updateOverlay();
-      //
-      //          bool updateView = false;
-      //
-      //          // Check touch state (for movement)
-      //          if (touchDown) {
-      //             touchTimer += frameTimer;
-      //          }
-      //          if (touchTimer >= 1.0) {
-      //             camera.keys.up = true;
-      //          }
-      //
-      //          // Check gamepad state
-      //          const float deadZone = 0.0015f;
-      //          if (camera.type != Camera::CameraType::firstperson)
-      //          {
-      //             // Rotate
-      //             if (std::abs(gamePadState.axisLeft.x) > deadZone)
-      //             {
-      //                camera.rotate(glm::vec3(0.0f, gamePadState.axisLeft.x * 0.5f, 0.0f));
-      //                updateView = true;
-      //             }
-      //             if (std::abs(gamePadState.axisLeft.y) > deadZone)
-      //             {
-      //                camera.rotate(glm::vec3(gamePadState.axisLeft.y * 0.5f, 0.0f, 0.0f));
-      //                updateView = true;
-      //             }
-      //             // Zoom
-      //             if (std::abs(gamePadState.axisRight.y) > deadZone)
-      //             {
-      //                camera.translate(glm::vec3(0.0f, 0.0f, gamePadState.axisRight.y * 0.01f));
-      //                updateView = true;
-      //             }
-      //          }
-      //          else
-      //          {
-      //             updateView = camera.updatePad(gamePadState.axisLeft, gamePadState.axisRight, frameTimer);
-      //          }
-      //       }
-      //    }
-      // #elif defined(_DIRECT2DISPLAY)
-      //    while (!quit)
-      //    {
-      //       auto tStart = std::chrono::high_resolution_clock::now();
-      //       if (viewUpdated)
-      //       {
-      //          viewUpdated = false;
-      //       }
-      //       render();
-      //       frameCounter++;
-      //       auto tEnd = std::chrono::high_resolution_clock::now();
-      //       auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
-      //       frameTimer = tDiff / 1000.0f;
-      //       camera.update(frameTimer);
-      //       if (camera.moving())
-      //       {
-      //          viewUpdated = true;
-      //       }
-      //       // Convert to clamped timer value
-      //       if (!paused)
-      //       {
-      //          timer += timerSpeed * frameTimer;
-      //          if (timer > 1.0)
-      //          {
-      //             timer -= 1.0f;
-      //          }
-      //       }
-      //       float fpsTimer = std::chrono::duration<double, std::milli>(tEnd - lastTimestamp).count();
-      //       if (fpsTimer > 1000.0f)
-      //       {
-      //          lastFPS = (float)frameCounter * (1000.0f / fpsTimer);
-      //          frameCounter = 0;
-      //          lastTimestamp = tEnd;
-      //       }
-      //       updateOverlay();
-      //    }
-      // #elif defined(VK_USE_PLATFORM_DIRECTFB_EXT)
-      //    while (!quit)
-      //    {
-      //       auto tStart = std::chrono::high_resolution_clock::now();
-      //       if (viewUpdated)
-      //       {
-      //          viewUpdated = false;
-      //       }
-      //       DFBWindowEvent happening;
-      //       while (!event_buffer->GetEvent(event_buffer, DFB_EVENT(&happening)))
-      //       {
-      //          handleEvent(&happening);
-      //       }
-      //       render();
-      //       frameCounter++;
-      //       auto tEnd = std::chrono::high_resolution_clock::now();
-      //       auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
-      //       frameTimer = tDiff / 1000.0f;
-      //       camera.update(frameTimer);
-      //       if (camera.moving())
-      //       {
-      //          viewUpdated = true;
-      //       }
-      //       // Convert to clamped timer value
-      //       if (!paused)
-      //       {
-      //          timer += timerSpeed * frameTimer;
-      //          if (timer > 1.0)
-      //          {
-      //             timer -= 1.0f;
-      //          }
-      //       }
-      //       float fpsTimer = std::chrono::duration<double, std::milli>(tEnd - lastTimestamp).count();
-      //       if (fpsTimer > 1000.0f)
-      //       {
-      //          lastFPS = (float)frameCounter * (1000.0f / fpsTimer);
-      //          frameCounter = 0;
-      //          lastTimestamp = tEnd;
-      //       }
-      //       updateOverlay();
-      //    }
-      // #elif defined(VK_USE_PLATFORM_WAYLAND_KHR)
-      //    while (!quit)
-      //    {
-      //       auto tStart = std::chrono::high_resolution_clock::now();
-      //       if (viewUpdated)
-      //       {
-      //          viewUpdated = false;
-      //       }
-      //
-      //       while (!configured)
-      //          wl_display_dispatch(display);
-      //       while (wl_display_prepare_read(display) != 0)
-      //          wl_display_dispatch_pending(display);
-      //       wl_display_flush(display);
-      //       wl_display_read_events(display);
-      //       wl_display_dispatch_pending(display);
-      //
-      //       render();
-      //       frameCounter++;
-      //       auto tEnd = std::chrono::high_resolution_clock::now();
-      //       auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
-      //       frameTimer = tDiff / 1000.0f;
-      //       camera.update(frameTimer);
-      //       if (camera.moving())
-      //       {
-      //          viewUpdated = true;
-      //       }
-      //       // Convert to clamped timer value
-      //       if (!paused)
-      //       {
-      //          timer += timerSpeed * frameTimer;
-      //          if (timer > 1.0)
-      //          {
-      //             timer -= 1.0f;
-      //          }
-      //       }
-      //       float fpsTimer = std::chrono::duration<double, std::milli>(tEnd - lastTimestamp).count();
-      //       if (fpsTimer > 1000.0f)
-      //       {
-      //          if (!settings.overlay)
-      //          {
-      //             std::string windowTitle = getWindowTitle();
-      //             xdg_toplevel_set_title(xdg_toplevel, windowTitle.c_str());
-      //          }
-      //          lastFPS = (float)frameCounter * (1000.0f / fpsTimer);
-      //          frameCounter = 0;
-      //          lastTimestamp = tEnd;
-      //       }
-      //       updateOverlay();
-      //    }
-      // #elif defined(VK_USE_PLATFORM_XCB_KHR)
-      //    xcb_flush(connection);
-      //    while (!quit)
-      //    {
-      //       auto tStart = std::chrono::high_resolution_clock::now();
-      //       if (viewUpdated)
-      //       {
-      //          viewUpdated = false;
-      //       }
-      //       xcb_generic_event_t * happening;
-      //       while ((happening = xcb_poll_for_event(connection)))
-      //       {
-      //          handleEvent(happening);
-      //          free(happening);
-      //       }
-      //       render();
-      //       frameCounter++;
-      //       auto tEnd = std::chrono::high_resolution_clock::now();
-      //       auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
-      //       frameTimer = tDiff / 1000.0f;
-      //       camera.update(frameTimer);
-      //       if (camera.moving())
-      //       {
-      //          viewUpdated = true;
-      //       }
-      //       // Convert to clamped timer value
-      //       if (!paused)
-      //       {
-      //          timer += timerSpeed * frameTimer;
-      //          if (timer > 1.0)
-      //          {
-      //             timer -= 1.0f;
-      //          }
-      //       }
-      //       float fpsTimer = std::chrono::duration<double, std::milli>(tEnd - lastTimestamp).count();
-      //       if (fpsTimer > 1000.0f)
-      //       {
-      //          if (!settings.overlay)
-      //          {
-      //             std::string windowTitle = getWindowTitle();
-      //             xcb_change_property(connection, XCB_PROP_MODE_REPLACE,
-      //                window, XCB_ATOM_WM_NAME, XCB_ATOM_STRING, 8,
-      //                windowTitle.size(), windowTitle.c_str());
-      //          }
-      //          lastFPS = (float)frameCounter * (1000.0f / fpsTimer);
-      //          frameCounter = 0;
-      //          lastTimestamp = tEnd;
-      //       }
-      //       updateOverlay();
-      //    }
-      // #elif defined(VK_USE_PLATFORM_HEADLESS_EXT)
-      //    while (!quit)
-      //    {
-      //       auto tStart = std::chrono::high_resolution_clock::now();
-      //       if (viewUpdated)
-      //       {
-      //          viewUpdated = false;
-      //       }
-      //       render();
-      //       frameCounter++;
-      //       auto tEnd = std::chrono::high_resolution_clock::now();
-      //       auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
-      //       frameTimer = tDiff / 1000.0f;
-      //       camera.update(frameTimer);
-      //       if (camera.moving())
-      //       {
-      //          viewUpdated = true;
-      //       }
-      //       // Convert to clamped timer value
-      //       timer += timerSpeed * frameTimer;
-      //       if (timer > 1.0)
-      //       {
-      //          timer -= 1.0f;
-      //       }
-      //       float fpsTimer = std::chrono::duration<double, std::milli>(tEnd - lastTimestamp).count();
-      //       if (fpsTimer > 1000.0f)
-      //       {
-      //          lastFPS = (float)frameCounter * (1000.0f / fpsTimer);
-      //          frameCounter = 0;
-      //          lastTimestamp = tEnd;
-      //       }
-      //       updateOverlay();
-      //    }
-      // #elif (defined(VK_USE_PLATFORM_MACOS_MVK) || defined(VK_USE_PLATFORM_METAL_EXT)) && defined(VK_EXAMPLE_XCODE_GENERATED)
-      //    [NSApp run];
-      // #elif defined(VK_USE_PLATFORM_SCREEN_QNX)
-      //    while (!quit) {
-      //       handleEvent();
-      //
-      //       if (prepared) {
-      //          nextFrame();
-      //       }
-      //    }
-      // #endif
-         // Flush device to make sure all resources can be freed
-      if (device != VK_NULL_HANDLE) {
-         vkDeviceWaitIdle(device);
-      }
-   }
-
-
-   //offscreen_application * VulkanExample;
-   //LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-   //{
-   //   if (VulkanExample != NULL)
-   //   {
-   //      offscreen_application->handleMessages(hWnd, uMsg, wParam, lParam);
-   //   }
-   //   return (DefWindowProc(hWnd, uMsg, wParam, lParam));
-   //}
-
-
-   ::pointer<::vulkan::application > start_offscreen_application(::vkc::VkContainer* pvkcontainer, mouseState* pmousestate)
-   {
-
-      auto pvulkanoffscreenapplication = pvkcontainer->__create_new < offscreen_application >();
-
-      pvulkanoffscreenapplication->m_pmousestate = pmousestate;
-
-      pvulkanoffscreenapplication->initVulkan();
-
-      // VulkanExample->setupWindow(::GetModuleHandleW(L"app_core_vulken.dll"_ansi), WndProc);
-
-      pvulkanoffscreenapplication->prepare();
-
-      //   pvulkanexample->renderLoop20(callback);
-         //delete(VulkanExample);
-
-      return pvulkanoffscreenapplication;
-
-   }
-
-
-} // namespace vulkan
+VulkanExample *vulkanExample;																		
+LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)						
+{																									
+	if (vulkanExample != NULL)																		
+	{																								
+		vulkanExample->handleMessages(hWnd, uMsg, wParam, lParam);									
+	}																								
+	return (DefWindowProc(hWnd, uMsg, wParam, lParam));												
+}																									
+int run_vulkan_example()									
+{																									
+	vulkanExample = ___new VulkanExample();															
+	vulkanExample->initVulkan();																	
+	vulkanExample->setupWindow(::GetModuleHandleW(L"app_core_vulken.dll"), WndProc);
+	vulkanExample->prepare();																		
+	vulkanExample->renderLoop();																	
+	delete(vulkanExample);																			
+	return 0;																						
+}
 
 
 ///*
@@ -1233,24 +592,24 @@ namespace vulkan
 //  * Windows
 //  */
 //#define VULKAN_EXAMPLE_MAIN()																		\
-//offscreen_application *offscreen_application;																		\
+//VulkanExample *vulkanExample;																		\
 //LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)						\
 //{																									\
-//	if (offscreen_application != NULL)																		\
+//	if (vulkanExample != NULL)																		\
 //	{																								\
-//		offscreen_application->handleMessages(hWnd, uMsg, wParam, lParam);									\
+//		vulkanExample->handleMessages(hWnd, uMsg, wParam, lParam);									\
 //	}																								\
 //	return (DefWindowProc(hWnd, uMsg, wParam, lParam));												\
 //}																									\
 //int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)									\
 //{																									\
-//	for (int32_t i = 0; i < __argc; i++) { offscreen_application::args.push_back(__argv[i]); };  			\
-//	offscreen_application = ___new offscreen_application();															\
-//	offscreen_application->initVulkan();																	\
-//	offscreen_application->setupWindow(hInstance, WndProc);													\
-//	offscreen_application->prepare();																		\
-//	offscreen_application->renderLoop();																	\
-//	delete(offscreen_application);																			\
+//	for (int32_t i = 0; i < __argc; i++) { VulkanExample::args.push_back(__argv[i]); };  			\
+//	vulkanExample = ___new VulkanExample();															\
+//	vulkanExample->initVulkan();																	\
+//	vulkanExample->setupWindow(hInstance, WndProc);													\
+//	vulkanExample->prepare();																		\
+//	vulkanExample->renderLoop();																	\
+//	delete(vulkanExample);																			\
 //	return 0;																						\
 //}
 //
@@ -1259,17 +618,17 @@ namespace vulkan
 //  * Android
 //  */
 //#define VULKAN_EXAMPLE_MAIN()																		\
-//offscreen_application *offscreen_application;																		\
+//VulkanExample *vulkanExample;																		\
 //void android_main(android_app* state)																\
 //{																									\
-//	offscreen_application = ___new offscreen_application();															\
-//	state->userData = offscreen_application;																\
-//	state->onAppCmd = offscreen_application::handleAppCommand;												\
-//	state->onInputEvent = offscreen_application::handleAppInput;											\
+//	vulkanExample = ___new VulkanExample();															\
+//	state->userData = vulkanExample;																\
+//	state->onAppCmd = VulkanExample::handleAppCommand;												\
+//	state->onInputEvent = VulkanExample::handleAppInput;											\
 //	androidApp = state;																				\
 //	vks::android::getDeviceConfig();																\
-//	offscreen_application->renderLoop();																	\
-//	delete(offscreen_application);																			\
+//	vulkanExample->renderLoop();																	\
+//	delete(vulkanExample);																			\
 //}
 
 //#elif defined(_DIRECT2DISPLAY)
@@ -1277,18 +636,18 @@ namespace vulkan
 //  * Direct-to-display
 //  */
 //#define VULKAN_EXAMPLE_MAIN()																		\
-//offscreen_application *offscreen_application;																		\
+//VulkanExample *vulkanExample;																		\
 //static void handleEvent()                                											\
 //{																									\
 //}																									\
 //int main(const int argc, const char *argv[])													    \
 //{																									\
-//	for (size_t i = 0; i < argc; i++) { offscreen_application::args.push_back(argv[i]); };  				\
-//	offscreen_application = ___new offscreen_application();															\
-//	offscreen_application->initVulkan();																	\
-//	offscreen_application->prepare();																		\
-//	offscreen_application->renderLoop();																	\
-//	delete(offscreen_application);																			\
+//	for (size_t i = 0; i < argc; i++) { VulkanExample::args.push_back(argv[i]); };  				\
+//	vulkanExample = ___new VulkanExample();															\
+//	vulkanExample->initVulkan();																	\
+//	vulkanExample->prepare();																		\
+//	vulkanExample->renderLoop();																	\
+//	delete(vulkanExample);																			\
 //	return 0;																						\
 //}
 
@@ -1297,23 +656,23 @@ namespace vulkan
 //  * Direct FB
 //  */
 //#define VULKAN_EXAMPLE_MAIN()																		\
-//offscreen_application *offscreen_application;																		\
+//VulkanExample *vulkanExample;																		\
 //static void handleEvent(const DFBWindowEvent *happening)												\
 //{																									\
-//	if (offscreen_application != NULL)																		\
+//	if (vulkanExample != NULL)																		\
 //	{																								\
-//		offscreen_application->handleEvent(happening);															\
+//		vulkanExample->handleEvent(happening);															\
 //	}																								\
 //}																									\
 //int main(const int argc, const char *argv[])													    \
 //{																									\
-//	for (size_t i = 0; i < argc; i++) { offscreen_application::args.push_back(argv[i]); };  				\
-//	offscreen_application = ___new offscreen_application();															\
-//	offscreen_application->initVulkan();																	\
-//	offscreen_application->setupWindow();					 												\
-//	offscreen_application->prepare();																		\
-//	offscreen_application->renderLoop();																	\
-//	delete(offscreen_application);																			\
+//	for (size_t i = 0; i < argc; i++) { VulkanExample::args.push_back(argv[i]); };  				\
+//	vulkanExample = ___new VulkanExample();															\
+//	vulkanExample->initVulkan();																	\
+//	vulkanExample->setupWindow();					 												\
+//	vulkanExample->prepare();																		\
+//	vulkanExample->renderLoop();																	\
+//	delete(vulkanExample);																			\
 //	return 0;																						\
 //}
 
@@ -1322,16 +681,16 @@ namespace vulkan
 //  * Wayland / headless
 //  */
 //#define VULKAN_EXAMPLE_MAIN()																		\
-//offscreen_application *offscreen_application;																		\
+//VulkanExample *vulkanExample;																		\
 //int main(const int argc, const char *argv[])													    \
 //{																									\
-//	for (size_t i = 0; i < argc; i++) { offscreen_application::args.push_back(argv[i]); };  				\
-//	offscreen_application = ___new offscreen_application();															\
-//	offscreen_application->initVulkan();																	\
-//	offscreen_application->setupWindow();					 												\
-//	offscreen_application->prepare();																		\
-//	offscreen_application->renderLoop();																	\
-//	delete(offscreen_application);																			\
+//	for (size_t i = 0; i < argc; i++) { VulkanExample::args.push_back(argv[i]); };  				\
+//	vulkanExample = ___new VulkanExample();															\
+//	vulkanExample->initVulkan();																	\
+//	vulkanExample->setupWindow();					 												\
+//	vulkanExample->prepare();																		\
+//	vulkanExample->renderLoop();																	\
+//	delete(vulkanExample);																			\
 //	return 0;																						\
 //}
 
@@ -1340,23 +699,23 @@ namespace vulkan
 //  * X11 Xcb
 //  */
 //#define VULKAN_EXAMPLE_MAIN()																		\
-//offscreen_application *offscreen_application;																		\
+//VulkanExample *vulkanExample;																		\
 //static void handleEvent(const xcb_generic_event_t *happening)											\
 //{																									\
-//	if (offscreen_application != NULL)																		\
+//	if (vulkanExample != NULL)																		\
 //	{																								\
-//		offscreen_application->handleEvent(happening);															\
+//		vulkanExample->handleEvent(happening);															\
 //	}																								\
 //}																									\
 //int main(const int argc, const char *argv[])													    \
 //{																									\
-//	for (size_t i = 0; i < argc; i++) { offscreen_application::args.push_back(argv[i]); };  				\
-//	offscreen_application = ___new offscreen_application();															\
-//	offscreen_application->initVulkan();																	\
-//	offscreen_application->setupWindow();					 												\
-//	offscreen_application->prepare();																		\
-//	offscreen_application->renderLoop();																	\
-//	delete(offscreen_application);																			\
+//	for (size_t i = 0; i < argc; i++) { VulkanExample::args.push_back(argv[i]); };  				\
+//	vulkanExample = ___new VulkanExample();															\
+//	vulkanExample->initVulkan();																	\
+//	vulkanExample->setupWindow();					 												\
+//	vulkanExample->prepare();																		\
+//	vulkanExample->renderLoop();																	\
+//	delete(vulkanExample);																			\
 //	return 0;																						\
 //}
 
@@ -1366,18 +725,18 @@ namespace vulkan
 //  */
 //#if defined(VK_EXAMPLE_XCODE_GENERATED)
 //#define VULKAN_EXAMPLE_MAIN()																		\
-//offscreen_application *offscreen_application;																		\
+//VulkanExample *vulkanExample;																		\
 //int main(const int argc, const char *argv[])														\
 //{																									\
 //	@autoreleasepool																				\
 //	{																								\
-//		for (size_t i = 0; i < argc; i++) { offscreen_application::args.push_back(argv[i]); };				\
-//		offscreen_application = ___new offscreen_application();														\
-//		offscreen_application->initVulkan();																\
-//		offscreen_application->setupWindow(nullptr);														\
-//		offscreen_application->prepare();																	\
-//		offscreen_application->renderLoop();																\
-//		delete(offscreen_application);																		\
+//		for (size_t i = 0; i < argc; i++) { VulkanExample::args.push_back(argv[i]); };				\
+//		vulkanExample = ___new VulkanExample();														\
+//		vulkanExample->initVulkan();																\
+//		vulkanExample->setupWindow(nullptr);														\
+//		vulkanExample->prepare();																	\
+//		vulkanExample->renderLoop();																\
+//		delete(vulkanExample);																		\
 //	}																								\
 //	return 0;																						\
 //}
@@ -1390,19 +749,18 @@ namespace vulkan
 //  * QNX Screen
 //  */
 //#define VULKAN_EXAMPLE_MAIN()																		
-//offscreen_application *offscreen_application;																		
+//VulkanExample *vulkanExample;																		
 //int main(const int argc, const char *argv[])														
 //{																									
-//	for (int i = 0; i < argc; i++) { offscreen_application::args.push_back(argv[i]); };						
-//	offscreen_application = ___new offscreen_application();															
-//	offscreen_application->initVulkan();																	
-//	offscreen_application->setupWindow();																	
-//	offscreen_application->prepare();																		
-//	offscreen_application->renderLoop();																	
-//	delete(offscreen_application);																			
+//	for (int i = 0; i < argc; i++) { VulkanExample::args.push_back(argv[i]); };						
+//	vulkanExample = ___new VulkanExample();															
+//	vulkanExample->initVulkan();																	
+//	vulkanExample->setupWindow();																	
+//	vulkanExample->prepare();																		
+//	vulkanExample->renderLoop();																	
+//	delete(vulkanExample);																			
 //	return 0;																						
 //}
 //
 //
 //
-

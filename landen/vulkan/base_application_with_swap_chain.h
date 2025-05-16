@@ -63,13 +63,13 @@
 #include "keycodes.h"
 #include "VulkanTools.h"
 #include "VulkanDebug.h"
-#include "VulkanUIOverlay.h"
-#include "VulkanSwapChain.h"
-#include "VulkanBuffer.h"
-#include "VulkanDevice.h"
-#include "VulkanTexture.h"
+#include "ui_overlay.h"
+#include "swap_chain.h"
+#include "buffer.h"
+#include "device.h"
+#include "texture.h"
 
-#include "VulkanInitializers.hpp"
+#include "VulkanInitializers.h"
 #include "camera.hpp"
 #include "benchmark.hpp"
 
@@ -150,7 +150,7 @@ namespace vulkan
       // Pipeline cache object
       VkPipelineCache pipelineCache{ VK_NULL_HANDLE };
       // Wraps the swap chain to present images (framebuffers) to the windowing system
-      VulkanSwapChain swapChain;
+      vulkan::swap_chain m_swapchain;
       // Synchronization semaphores
       struct {
          // Swap chain image presentation
@@ -167,7 +167,7 @@ namespace vulkan
       uint32_t width = 1280;
       uint32_t height = 720;
 
-      vks::UIOverlay ui;
+      vulkan::ui_overlay ui;
       //CommandLineParser commandLineParser;
 
       /** @brief Last frame time measured using a high performance timer (if available) */
@@ -176,7 +176,7 @@ namespace vulkan
       vks::Benchmark benchmark;
 
       /** @brief Encapsulated physical and logical vulkan device */
-      ::vks::VulkanDevice* m_pvulkandevice = nullptr;
+      ::vulkan::device* m_pvulkandevice = nullptr;
 
       /** @brief Example settings that can be changed e.g. by command line arguments */
       struct Settings {
@@ -413,7 +413,7 @@ namespace vulkan
       virtual void renderFrame();
 
       /** @brief (Virtual) Called when the UI overlay is updating, can be used to add custom elements to the overlay */
-      virtual void OnUpdateUIOverlay(vks::UIOverlay* overlay);
+      virtual void OnUpdateUIOverlay(vulkan::ui_overlay* overlay);
 
 #if defined(_WIN32)
       virtual void OnHandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);

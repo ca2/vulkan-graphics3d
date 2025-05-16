@@ -13,13 +13,13 @@
 #include "camera.hpp"
 //#include "VulkanSwapChain.h"
 #include "VulkanglTFModel.h"
-#include "VulkanUIOverlay.h"
+#include "ui_overlay.h"
 #include "shared.h"
 #define FB_DIM 512
 #define FB_COLOR_FORMAT VK_FORMAT_R8G8B8A8_UNORM
 
 #if defined(_WIN32)
-#pragma comment(linker, "/subsystem:console"_ansi)
+//#pragma comment(linker, "/subsystem:console")
 #elif defined(VK_USE_PLATFORM_ANDROID_KHR)
 #include <android/native_activity.h>
 #include <android/asset_manager.h>
@@ -917,7 +917,7 @@ VulkanExample5::~VulkanExample5()
       // Vulkan device creation
       // This is handled by a separate class that gets a logical device representation
       // and encapsulates functions related to a device
-      m_pvulkandevice = ___new vks::VulkanDevice(m_physicalDevice);
+      m_pvulkandevice = ___new vulkan::device(m_physicalDevice);
 
       // Derived examples can enable extensions based on the list of supported extensions read from the physical device
       getEnabledExtensions();
@@ -1752,7 +1752,7 @@ VulkanExample5::~VulkanExample5()
 
       updateOverlay();
    }
-   void VulkanExampleRenderHeadless::OnUpdateUIOverlay(vks::UIOverlay * overlay)
+   void VulkanExampleRenderHeadless::OnUpdateUIOverlay(vulkan::ui_overlay * overlay)
    {
       if (overlay->header("Settings"_ansi)) {
          if (overlay->checkBox("Display render target"_ansi, &m_debugDisplay)) {
@@ -1834,7 +1834,7 @@ VulkanExample5::~VulkanExample5()
       
          const uint32_t glTFLoadingFlags = vkglTF::FileLoadingFlags::PreTransformVertices | vkglTF::FileLoadingFlags::PreMultiplyVertexColors | vkglTF::FileLoadingFlags::FlipY;
 
-         ::vks::VulkanDevice * pdevice = m_pvulkandevice;
+         ::vulkan::device * pdevice = m_pvulkandevice;
 
          ::file::path pathFolder(getAssetPath().c_str());
 

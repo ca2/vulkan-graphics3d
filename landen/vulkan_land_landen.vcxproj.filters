@@ -37,13 +37,13 @@
     <ClCompile Include="vulkan\offscreen_application.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
-    <ClCompile Include="vulkan\VulkanBuffer.cpp">
+    <ClCompile Include="vulkan\buffer.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
     <ClCompile Include="vulkan\VulkanDebug.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
-    <ClCompile Include="vulkan\VulkanDevice.cpp">
+    <ClCompile Include="vulkan\device.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
     <ClCompile Include="vulkan\VulkanglTFModel.cpp">
@@ -52,13 +52,13 @@
     <ClCompile Include="vulkan\VulkanRaytracingSample.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
-    <ClCompile Include="vulkan\VulkanTexture.cpp">
+    <ClCompile Include="vulkan\texture.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
     <ClCompile Include="vulkan\VulkanTools.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
-    <ClCompile Include="vulkan\VulkanUIOverlay.cpp">
+    <ClCompile Include="vulkan\ui_overlay.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
     <ClCompile Include="vulkan\VulkanExampleRenderHeadless.cpp">
@@ -79,7 +79,7 @@
     <ClCompile Include="vulkan\VulkanAndroid.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
-    <ClCompile Include="vulkan\VulkanSwapChain.cpp">
+    <ClCompile Include="vulkan\swap_chain.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
   </ItemGroup>
@@ -123,10 +123,10 @@
     <ClInclude Include="vulkan\VulkanDebug.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="Vulkan\VulkanUIOverlay.h">
+    <ClInclude Include="Vulkan\ui_overlay.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="Vulkan\VulkanDevice.h">
+    <ClInclude Include="Vulkan\device.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
     <ClInclude Include="vulkan\Entrypoints.h">
@@ -135,7 +135,7 @@
     <ClInclude Include="vulkan\VulkanAndroid.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="vulkan\VulkanBuffer.h">
+    <ClInclude Include="vulkan\buffer.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
     <ClInclude Include="vulkan\VulkanglTFModel.h">
@@ -144,10 +144,10 @@
     <ClInclude Include="vulkan\VulkanRaytracingSample.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="vulkan\VulkanSwapChain.h">
+    <ClInclude Include="vulkan\swap_chain.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="vulkan\VulkanTexture.h">
+    <ClInclude Include="vulkan\texture.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
     <ClInclude Include="vulkan\benchmark.hpp">
@@ -169,9 +169,6 @@
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
     <ClInclude Include="vulkan\VulkanFrameBuffer.hpp">
-      <Filter>Header Files\vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="vulkan\VulkanInitializers.hpp">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
     <ClInclude Include="vulkan\shared.h">

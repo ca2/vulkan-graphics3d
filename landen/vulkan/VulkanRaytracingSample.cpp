@@ -26,7 +26,7 @@ void VulkanRaytracingSample::setupRenderPass()
 
 	std::array<VkAttachmentDescription, 2> attachments = {};
 	// Color attachment
-	attachments[0].format = swapChain.colorFormat;
+	attachments[0].format = m_swapchain.colorFormat;
 	attachments[0].samples = VK_SAMPLE_COUNT_1_BIT;
 	attachments[0].loadOp = colorLoadOp;
 	attachments[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -111,10 +111,10 @@ void VulkanRaytracingSample::setupFrameBuffer()
 	frameBufferCreateInfo.layers = 1;
 
 	// Create frame buffers for every swap chain image
-	frameBuffers.resize(swapChain.imageCount);
+	frameBuffers.resize(m_swapchain.imageCount);
 	for (uint32_t i = 0; i < frameBuffers.size(); i++)
 	{
-		attachments[0] = swapChain.buffers[i].view;
+		attachments[0] = m_swapchain.buffers[i].view;
 		VK_CHECK_RESULT(vkCreateFramebuffer(device, &frameBufferCreateInfo, nullptr, &frameBuffers[i]));
 	}
 }
@@ -333,7 +333,7 @@ void VulkanRaytracingSample::createShaderBindingTable(ShaderBindingTable& shader
 		&shaderBindingTable, 
 		rayTracingPipelineProperties.shaderGroupHandleSize * handleCount));
 	// Get the strided address to be used when dispatching the rays
-	shaderBindingTable.stridedDeviceAddressRegion = getSbtEntryStridedDeviceAddressRegion(shaderBindingTable.buffer, handleCount);
+	shaderBindingTable.stridedDeviceAddressRegion = getSbtEntryStridedDeviceAddressRegion(shaderBindingTable.m_vkbuffer, handleCount);
 	// Map persistent 
 	shaderBindingTable.map();
 }

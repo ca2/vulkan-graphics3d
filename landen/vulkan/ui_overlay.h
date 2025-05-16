@@ -5,8 +5,8 @@
 *
 * This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)
 */
-
 #pragma once
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,8 +19,8 @@
 #include <vulkan/vulkan.h>
 #include "VulkanTools.h"
 #include "VulkanDebug.h"
-#include "VulkanBuffer.h"
-#include "VulkanDevice.h"
+#include "buffer.h"
+#include "device.h"
 
 #include "imgui/imgui.h"
 
@@ -28,19 +28,24 @@
 #include "VulkanAndroid.h"
 #endif
 
-namespace vks
+
+namespace vulkan
 {
-	class UIOverlay
+
+
+	class ui_overlay
 	{
 	public:
-		vks::VulkanDevice* device{ nullptr };
+
+
+		vulkan::device* device{ nullptr };
 		VkQueue queue{ VK_NULL_HANDLE };
 
 		VkSampleCountFlagBits rasterizationSamples{ VK_SAMPLE_COUNT_1_BIT };
 		uint32_t subpass{ 0 };
 
-		vks::Buffer vertexBuffer;
-		vks::Buffer indexBuffer;
+		vulkan::buffer vertexBuffer;
+		vulkan::buffer indexBuffer;
 		int32_t vertexCount{ 0 };
 		int32_t indexCount{ 0 };
 
@@ -67,8 +72,8 @@ namespace vks
 		float scale{ 1.0f };
 		float updateTimer{ 0.0f };
 
-		UIOverlay();
-		~UIOverlay();
+		ui_overlay();
+		~ui_overlay();
 
 		void preparePipeline(const VkPipelineCache pipelineCache, const VkRenderPass renderPass, const VkFormat colorFormat, const VkFormat depthFormat);
 		void prepareResources();
@@ -91,4 +96,10 @@ namespace vks
 		bool colorPicker(const char* caption, float* color);
 		void text(const char* formatstr, ...);
 	};
-}
+
+
+} // namespace vulkan
+
+
+
+

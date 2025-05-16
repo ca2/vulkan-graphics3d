@@ -1060,7 +1060,7 @@ namespace vulkan
       // Vulkan device creation
       // This is handled by a separate class that gets a logical device representation
       // and encapsulates functions related to a device
-      m_pvulkandevice = ___new vks::VulkanDevice(physicalDevice);
+      m_pvulkandevice = ___new vulkan::device(physicalDevice);
 
       // Derived examples can enable extensions based on the list of supported extensions read from the physical device
       getEnabledExtensions();
@@ -3352,7 +3352,7 @@ namespace vulkan
       //   swapChain.create(&width, &height, settings.vsync, settings.fullscreen);
    }
 
-   void base_application_no_swap_chain::OnUpdateUIOverlay(vks::UIOverlay* overlay) {}
+   void base_application_no_swap_chain::OnUpdateUIOverlay(vulkan::ui_overlay* overlay) {}
 
    //#if defined(_WIN32)
    //void base_application_no_swap_chain::OnHandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {};

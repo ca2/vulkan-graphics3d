@@ -5,7 +5,7 @@
 #include <functional>
 
 //#include "vma/vk_mem_alloc.h"
-#include "vulkan-land/landen/vulkan/VulkanDevice.h"
+#include "vulkan-land/landen/vulkan/device.h"
 #include "vulkan-land/landen/vulkan/base_application_no_swap_chain.h"
 #include "VK_abstraction/vk_descriptors.h"
 #include "VK_abstraction/vk_gameObject.h"

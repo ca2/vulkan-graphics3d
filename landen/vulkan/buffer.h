@@ -7,24 +7,30 @@
 *
 * This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)
 */
-
 #pragma once
 
+
 #include <vector>
+
 
 #include "vulkan/vulkan.h"
 #include "VulkanTools.h"
 
-namespace vks
+
+namespace vulkan
 {	
+
+
 	/**
 	* @brief Encapsulates access to a Vulkan buffer backed up by device memory
 	* @note To be filled by an external source like the VulkanDevice
 	*/
-	struct Buffer
+	struct buffer
 	{
+
+
 		VkDevice device;
-		VkBuffer buffer = VK_NULL_HANDLE;
+		VkBuffer m_vkbuffer = VK_NULL_HANDLE;
 		VkDeviceMemory memory = VK_NULL_HANDLE;
 		VkDescriptorBufferInfo descriptor;
 		VkDeviceSize size = 0;
@@ -34,6 +40,8 @@ namespace vks
 		VkBufferUsageFlags usageFlags;
 		/** @brief Memory property flags to be filled by external source at buffer creation (to query at some later point) */
 		VkMemoryPropertyFlags memoryPropertyFlags;
+
+
 		VkResult map(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
 		void unmap();
 		VkResult bind(VkDeviceSize offset = 0);
@@ -42,5 +50,11 @@ namespace vks
 		VkResult flush(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
 		VkResult invalidate(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
 		void destroy();
+
+
 	};
-}
+
+
+} // namespace vulkan
+
+

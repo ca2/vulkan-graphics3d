@@ -25,9 +25,9 @@ namespace vulkan
       } models;
 
       struct {
-         vks::Buffer vsShared;
-         vks::Buffer vsMirror;
-         vks::Buffer vsOffScreen;
+         vulkan::buffer vsShared;
+         vulkan::buffer vsMirror;
+         vulkan::buffer vsOffScreen;
       } uniformBuffers;
 
       struct UniformData {
@@ -106,7 +106,7 @@ namespace vulkan
 
       virtual void render(const ::function < void(void*, int, int, int)>& callback);
 
-      virtual void OnUpdateUIOverlay(vks::UIOverlay* overlay);
+      virtual void OnUpdateUIOverlay(vulkan::ui_overlay* overlay);
 
       void sample(const ::function < void(void*, int, int, int)>& callback);
 

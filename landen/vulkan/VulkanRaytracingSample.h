@@ -11,7 +11,7 @@
 #include "vulkan/vulkan.h"
 #include "base_application_with_swap_chain.h"
 #include "VulkanTools.h"
-#include "VulkanDevice.h"
+#include "device.h"
 
 class VulkanRaytracingSample :
 	public ::vulkan::base_application_with_swap_chain
@@ -67,7 +67,7 @@ public:
 	} storageImage;
 
 	// Extends the buffer class and holds information for a shader binding table
-	class ShaderBindingTable : public vks::Buffer {
+	class ShaderBindingTable : public vulkan::buffer {
 	public:
 		VkStridedDeviceAddressRegionKHR stridedDeviceAddressRegion{};
 	};

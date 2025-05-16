@@ -15,7 +15,7 @@
 #include "camera.hpp"
 //#include "VulkanSwapChain.h"
 #include "VulkanglTFModel.h"
-#include "VulkanUIOverlay.h"
+#include "ui_overlay.h"
 #include "shared.h"
 //#if defined(_WIN32)
 //#pragma comment(linker, "/subsystem:console"_ansi)
@@ -103,9 +103,9 @@ public:
 
 
    struct {
-      vks::Buffer vsShared;
-      vks::Buffer vsMirror;
-      vks::Buffer vsOffScreen;
+      vulkan::buffer vsShared;
+      vulkan::buffer vsMirror;
+      vulkan::buffer vsOffScreen;
    } m_uniformBuffers;
 
    struct UniformData {
@@ -223,7 +223,7 @@ public:
       VkImageView view;
    };
    /** @brief Encapsulated physical and logical vulkan device */
-   ::vks::VulkanDevice * m_pvulkandevice = nullptr;
+   ::vulkan::device * m_pvulkandevice = nullptr;
 
    /** @brief Example settings that can be changed e.g. by command line arguments */
    struct Settings {
@@ -244,7 +244,7 @@ public:
       glm::vec2 axisRight = glm::vec2(0.0f);
    } m_gamePadState;
 
-   vks::UIOverlay m_ui;
+   vulkan::ui_overlay m_ui;
 
 
    struct OffscreenPass {
@@ -307,7 +307,7 @@ public:
    void nextFrame(const ::function < void(void *, int, int, int)> & callback);
 
 
-   void OnUpdateUIOverlay(vks::UIOverlay * overlay);
+   void OnUpdateUIOverlay(vulkan::ui_overlay * overlay);
 
    void updateOverlay();
 
