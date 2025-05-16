@@ -5,18 +5,24 @@
 namespace vulkan
 {
 
+
    class CLASS_DECL_VULKAN_LAND_LANDEN application :
       virtual public ::particle
    {
    public:
 
 
-      virtual void handleMouseMove(int x, int y);
+      application();
+      ~application() override;
 
+
+      virtual void handleMouseMove(int x, int y);
 
       virtual void run_application();
 
       virtual void resize(int cx, int cy);
+
+
 
    };
 

@@ -25,7 +25,212 @@ extern CAMetalLayer* layer;
 namespace vulkan
 {
 
+   
    std::vector<const char*> base_application_no_swap_chain::args;
+
+
+   base_application_no_swap_chain::base_application_no_swap_chain()
+   {
+
+      m_pmousestate = nullptr;
+#if !defined(VK_USE_PLATFORM_ANDROID_KHR)
+      // Check for a valid asset path
+   //   struct stat info;
+   //   if (stat(getAssetPath().c_str(), &info) != 0)
+   //   {
+   //#if defined(_WIN32)
+   //      std::string msg = "Could not locate asset path in \"" + getAssetPath() + "\" !";
+   //      MessageBox(NULL, ::wstring(msg.c_str()), L"Fatal error", MB_OK | MB_ICONERROR);
+   //#else
+   //      std::cerr << "Error: Could not find asset path in " << getAssetPath() << "\n"_ansi;
+   //#endif
+   //      exit(-1);
+   //   }
+#endif
+
+   // Validation for all samples can be forced at compile time using the FORCE_VALIDATION define
+#if defined(FORCE_VALIDATION)
+      settings.validation = true;
+#endif
+
+      //	// Command line arguments
+      //	commandLineParser.add("help"_ansi, { "--help"_ansi }, 0, "Show help"_ansi);
+      //	commandLineParser.add("validation"_ansi, { "-v"_ansi, "--validation"_ansi }, 0, "Enable validation layers"_ansi);
+      //	commandLineParser.add("vsync"_ansi, { "-vs"_ansi, "--vsync"_ansi }, 0, "Enable V-Sync"_ansi);
+      //	commandLineParser.add("fullscreen"_ansi, { "-f"_ansi, "--fullscreen"_ansi }, 0, "Start in fullscreen mode"_ansi);
+      //	commandLineParser.add("width"_ansi, { "-w"_ansi, "--width"_ansi }, 1, "Set window width"_ansi);
+      //	commandLineParser.add("height"_ansi, { "-h"_ansi, "--height"_ansi }, 1, "Set window height"_ansi);
+      //	commandLineParser.add("shaders"_ansi, { "-s"_ansi, "--shaders"_ansi }, 1, "Select shader type to use (glsl or hlsl)"_ansi);
+      //	commandLineParser.add("gpuselection"_ansi, { "-g"_ansi, "--gpu"_ansi }, 1, "Select GPU to run on"_ansi);
+      //	commandLineParser.add("gpulist"_ansi, { "-gl"_ansi, "--listgpus"_ansi }, 0, "Display a list of available Vulkan devices"_ansi);
+      //	commandLineParser.add("benchmark"_ansi, { "-b"_ansi, "--benchmark"_ansi }, 0, "Run example in benchmark mode"_ansi);
+      //	commandLineParser.add("benchmarkwarmup"_ansi, { "-bw"_ansi, "--benchwarmup"_ansi }, 1, "Set warmup time for benchmark mode in seconds"_ansi);
+      //	commandLineParser.add("benchmarkruntime"_ansi, { "-br"_ansi, "--benchruntime"_ansi }, 1, "Set duration time for benchmark mode in seconds"_ansi);
+      //	commandLineParser.add("benchmarkresultfile"_ansi, { "-bf"_ansi, "--benchfilename"_ansi }, 1, "Set file name for benchmark results"_ansi);
+      //	commandLineParser.add("benchmarkresultframes"_ansi, { "-bt"_ansi, "--benchframetimes"_ansi }, 0, "Save frame times to benchmark results file"_ansi);
+      //	commandLineParser.add("benchmarkframes"_ansi, { "-bfs"_ansi, "--benchmarkframes"_ansi }, 1, "Only render the given number of frames"_ansi);
+      //
+      //	commandLineParser.parse(args);
+      //	if (commandLineParser.isSet("help"_ansi)) {
+      //#if defined(_WIN32)
+      //		setupConsole("Vulkan example"_ansi);
+      //#endif
+      //		commandLineParser.printHelp();
+      //		std::cin.get();
+      //		exit(0);
+      //	}
+      //	if (commandLineParser.isSet("validation"_ansi)) {
+      //		settings.validation = true;
+      //	}
+      //	if (commandLineParser.isSet("vsync"_ansi)) {
+      //		settings.vsync = true;
+      //	}
+      //	if (commandLineParser.isSet("height"_ansi)) {
+      //		height = commandLineParser.getValueAsInt("height"_ansi, height);
+      //	}
+      //	if (commandLineParser.isSet("width"_ansi)) {
+      //		width = commandLineParser.getValueAsInt("width"_ansi, width);
+      //	}
+      //	if (commandLineParser.isSet("fullscreen"_ansi)) {
+      //		settings.fullscreen = true;
+      //	}
+      //	if (commandLineParser.isSet("shaders"_ansi)) {
+      //		std::string value = commandLineParser.getValueAsString("shaders"_ansi, "glsl"_ansi);
+      //		if ((value != "glsl"_ansi) && (value != "hlsl"_ansi)) {
+      //			std::cerr << "Shader type must be one of 'glsl' or 'hlsl'\n"_ansi;
+      //		}
+      //		else {
+      //			shaderDir = value;
+      //		}
+      //	}
+      //	if (commandLineParser.isSet("benchmark"_ansi)) {
+      //		benchmark.active = true;
+      //		vks::tools::errorModeSilent = true;
+      //	}
+      //	if (commandLineParser.isSet("benchmarkwarmup"_ansi)) {
+      //		benchmark.warmup = commandLineParser.getValueAsInt("benchmarkwarmup"_ansi, 0);
+      //	}
+      //	if (commandLineParser.isSet("benchmarkruntime"_ansi)) {
+      //		benchmark.duration = commandLineParser.getValueAsInt("benchmarkruntime"_ansi, benchmark.duration);
+      //	}
+      //	if (commandLineParser.isSet("benchmarkresultfile"_ansi)) {
+      //		benchmark.filename = commandLineParser.getValueAsString("benchmarkresultfile"_ansi, benchmark.filename);
+      //	}
+      //	if (commandLineParser.isSet("benchmarkresultframes"_ansi)) {
+      //		benchmark.outputFrameTimes = true;
+      //	}
+      //	if (commandLineParser.isSet("benchmarkframes"_ansi)) {
+      //		benchmark.outputFrames = commandLineParser.getValueAsInt("benchmarkframes"_ansi, benchmark.outputFrames);
+      //	}
+   //
+   // #if defined(VK_USE_PLATFORM_ANDROID_KHR)
+   //    // Vulkan library is loaded dynamically on Android
+   //    bool libLoaded = vks::android::loadVulkanLibrary();
+   //    assert(libLoaded);
+   // #elif defined(_DIRECT2DISPLAY)
+   //
+   // #elif defined(VK_USE_PLATFORM_WAYLAND_KHR)
+   //    initWaylandConnection();
+   // #elif defined(VK_USE_PLATFORM_XCB_KHR)
+   //    initxcbConnection();
+   // #endif
+   //
+   // #if defined(_WIN32)
+   //    // Enable console if validation is active, debug message callback will output to it
+   //    if (this->settings.validation)
+   //    {
+   //       setupConsole("Vulkan example");
+   //    }
+   //    setupDPIAwareness();
+   // #endif
+   }
+
+   base_application_no_swap_chain::~base_application_no_swap_chain()
+   {
+      // Clean up Vulkan resources
+      //swapChain.cleanup();
+      if (descriptorPool != VK_NULL_HANDLE)
+      {
+         vkDestroyDescriptorPool(device, descriptorPool, nullptr);
+      }
+      destroyCommandBuffers();
+      if (renderPass != VK_NULL_HANDLE)
+      {
+         vkDestroyRenderPass(device, renderPass, nullptr);
+      }
+      for (uint32_t i = 0; i < frameBuffers.size(); i++)
+      {
+         vkDestroyFramebuffer(device, frameBuffers[i], nullptr);
+      }
+
+      for (auto& shaderModule : shaderModules)
+      {
+         vkDestroyShaderModule(device, shaderModule, nullptr);
+      }
+      vkDestroyImageView(device, depthStencil.view, nullptr);
+      vkDestroyImage(device, depthStencil.image, nullptr);
+      vkFreeMemory(device, depthStencil.memory, nullptr);
+
+      vkDestroyPipelineCache(device, pipelineCache, nullptr);
+
+      vkDestroyCommandPool(device, cmdPool, nullptr);
+
+      //vkDestroySemaphore(device, semaphores.presentComplete, nullptr);
+      //vkDestroySemaphore(device, semaphores.renderComplete, nullptr);
+      for (auto& fence : waitFences) {
+         vkDestroyFence(device, fence, nullptr);
+      }
+
+      if (settings.overlay) {
+         ui.freeResources();
+      }
+
+      delete m_pvulkandevice;
+
+      if (settings.validation)
+      {
+         vks::debug::freeDebugCallback(instance);
+      }
+
+      vkDestroyInstance(instance, nullptr);
+
+      // #if defined(_DIRECT2DISPLAY)
+      //
+      // #elif defined(VK_USE_PLATFORM_DIRECTFB_EXT)
+      //    if (event_buffer)
+      //       event_buffer->Release(event_buffer);
+      //    if (surface)
+      //       surface->Release(surface);
+      //    if (window)
+      //       window->Release(window);
+      //    if (layer)
+      //       layer->Release(layer);
+      //    if (dfb)
+      //       dfb->Release(dfb);
+      // #elif defined(VK_USE_PLATFORM_WAYLAND_KHR)
+      //    xdg_toplevel_destroy(xdg_toplevel);
+      //    xdg_surface_destroy(xdg_surface);
+      //    wl_surface_destroy(surface);
+      //    if (keyboard)
+      //       wl_keyboard_destroy(keyboard);
+      //    if (pointer)
+      //       wl_pointer_destroy(pointer);
+      //    if (seat)
+      //       wl_seat_destroy(seat);
+      //    xdg_wm_base_destroy(shell);
+      //    wl_compositor_destroy(compositor);
+      //    wl_registry_destroy(registry);
+      //    wl_display_disconnect(display);
+      // #elif defined(VK_USE_PLATFORM_XCB_KHR)
+      //    xcb_destroy_window(connection, window);
+      //    xcb_disconnect(connection);
+      // #elif defined(VK_USE_PLATFORM_SCREEN_QNX)
+      //    screen_destroy_event(screen_event);
+      //    screen_destroy_window(screen_window);
+      //    screen_destroy_context(screen_context);
+      // #endif
+   }
+
 
    VkResult base_application_no_swap_chain::createInstance()
    {
@@ -773,206 +978,6 @@ namespace vulkan
       VK_CHECK_RESULT(vkQueueWaitIdle(queue));
    }
 
-   base_application_no_swap_chain::base_application_no_swap_chain()
-   {
-      m_pmousestate = nullptr;
-#if !defined(VK_USE_PLATFORM_ANDROID_KHR)
-      // Check for a valid asset path
-   //   struct stat info;
-   //   if (stat(getAssetPath().c_str(), &info) != 0)
-   //   {
-   //#if defined(_WIN32)
-   //      std::string msg = "Could not locate asset path in \"" + getAssetPath() + "\" !";
-   //      MessageBox(NULL, ::wstring(msg.c_str()), L"Fatal error", MB_OK | MB_ICONERROR);
-   //#else
-   //      std::cerr << "Error: Could not find asset path in " << getAssetPath() << "\n"_ansi;
-   //#endif
-   //      exit(-1);
-   //   }
-#endif
-
-   // Validation for all samples can be forced at compile time using the FORCE_VALIDATION define
-#if defined(FORCE_VALIDATION)
-      settings.validation = true;
-#endif
-
-      //	// Command line arguments
-      //	commandLineParser.add("help"_ansi, { "--help"_ansi }, 0, "Show help"_ansi);
-      //	commandLineParser.add("validation"_ansi, { "-v"_ansi, "--validation"_ansi }, 0, "Enable validation layers"_ansi);
-      //	commandLineParser.add("vsync"_ansi, { "-vs"_ansi, "--vsync"_ansi }, 0, "Enable V-Sync"_ansi);
-      //	commandLineParser.add("fullscreen"_ansi, { "-f"_ansi, "--fullscreen"_ansi }, 0, "Start in fullscreen mode"_ansi);
-      //	commandLineParser.add("width"_ansi, { "-w"_ansi, "--width"_ansi }, 1, "Set window width"_ansi);
-      //	commandLineParser.add("height"_ansi, { "-h"_ansi, "--height"_ansi }, 1, "Set window height"_ansi);
-      //	commandLineParser.add("shaders"_ansi, { "-s"_ansi, "--shaders"_ansi }, 1, "Select shader type to use (glsl or hlsl)"_ansi);
-      //	commandLineParser.add("gpuselection"_ansi, { "-g"_ansi, "--gpu"_ansi }, 1, "Select GPU to run on"_ansi);
-      //	commandLineParser.add("gpulist"_ansi, { "-gl"_ansi, "--listgpus"_ansi }, 0, "Display a list of available Vulkan devices"_ansi);
-      //	commandLineParser.add("benchmark"_ansi, { "-b"_ansi, "--benchmark"_ansi }, 0, "Run example in benchmark mode"_ansi);
-      //	commandLineParser.add("benchmarkwarmup"_ansi, { "-bw"_ansi, "--benchwarmup"_ansi }, 1, "Set warmup time for benchmark mode in seconds"_ansi);
-      //	commandLineParser.add("benchmarkruntime"_ansi, { "-br"_ansi, "--benchruntime"_ansi }, 1, "Set duration time for benchmark mode in seconds"_ansi);
-      //	commandLineParser.add("benchmarkresultfile"_ansi, { "-bf"_ansi, "--benchfilename"_ansi }, 1, "Set file name for benchmark results"_ansi);
-      //	commandLineParser.add("benchmarkresultframes"_ansi, { "-bt"_ansi, "--benchframetimes"_ansi }, 0, "Save frame times to benchmark results file"_ansi);
-      //	commandLineParser.add("benchmarkframes"_ansi, { "-bfs"_ansi, "--benchmarkframes"_ansi }, 1, "Only render the given number of frames"_ansi);
-      //
-      //	commandLineParser.parse(args);
-      //	if (commandLineParser.isSet("help"_ansi)) {
-      //#if defined(_WIN32)
-      //		setupConsole("Vulkan example"_ansi);
-      //#endif
-      //		commandLineParser.printHelp();
-      //		std::cin.get();
-      //		exit(0);
-      //	}
-      //	if (commandLineParser.isSet("validation"_ansi)) {
-      //		settings.validation = true;
-      //	}
-      //	if (commandLineParser.isSet("vsync"_ansi)) {
-      //		settings.vsync = true;
-      //	}
-      //	if (commandLineParser.isSet("height"_ansi)) {
-      //		height = commandLineParser.getValueAsInt("height"_ansi, height);
-      //	}
-      //	if (commandLineParser.isSet("width"_ansi)) {
-      //		width = commandLineParser.getValueAsInt("width"_ansi, width);
-      //	}
-      //	if (commandLineParser.isSet("fullscreen"_ansi)) {
-      //		settings.fullscreen = true;
-      //	}
-      //	if (commandLineParser.isSet("shaders"_ansi)) {
-      //		std::string value = commandLineParser.getValueAsString("shaders"_ansi, "glsl"_ansi);
-      //		if ((value != "glsl"_ansi) && (value != "hlsl"_ansi)) {
-      //			std::cerr << "Shader type must be one of 'glsl' or 'hlsl'\n"_ansi;
-      //		}
-      //		else {
-      //			shaderDir = value;
-      //		}
-      //	}
-      //	if (commandLineParser.isSet("benchmark"_ansi)) {
-      //		benchmark.active = true;
-      //		vks::tools::errorModeSilent = true;
-      //	}
-      //	if (commandLineParser.isSet("benchmarkwarmup"_ansi)) {
-      //		benchmark.warmup = commandLineParser.getValueAsInt("benchmarkwarmup"_ansi, 0);
-      //	}
-      //	if (commandLineParser.isSet("benchmarkruntime"_ansi)) {
-      //		benchmark.duration = commandLineParser.getValueAsInt("benchmarkruntime"_ansi, benchmark.duration);
-      //	}
-      //	if (commandLineParser.isSet("benchmarkresultfile"_ansi)) {
-      //		benchmark.filename = commandLineParser.getValueAsString("benchmarkresultfile"_ansi, benchmark.filename);
-      //	}
-      //	if (commandLineParser.isSet("benchmarkresultframes"_ansi)) {
-      //		benchmark.outputFrameTimes = true;
-      //	}
-      //	if (commandLineParser.isSet("benchmarkframes"_ansi)) {
-      //		benchmark.outputFrames = commandLineParser.getValueAsInt("benchmarkframes"_ansi, benchmark.outputFrames);
-      //	}
-   //
-   // #if defined(VK_USE_PLATFORM_ANDROID_KHR)
-   //    // Vulkan library is loaded dynamically on Android
-   //    bool libLoaded = vks::android::loadVulkanLibrary();
-   //    assert(libLoaded);
-   // #elif defined(_DIRECT2DISPLAY)
-   //
-   // #elif defined(VK_USE_PLATFORM_WAYLAND_KHR)
-   //    initWaylandConnection();
-   // #elif defined(VK_USE_PLATFORM_XCB_KHR)
-   //    initxcbConnection();
-   // #endif
-   //
-   // #if defined(_WIN32)
-   //    // Enable console if validation is active, debug message callback will output to it
-   //    if (this->settings.validation)
-   //    {
-   //       setupConsole("Vulkan example");
-   //    }
-   //    setupDPIAwareness();
-   // #endif
-   }
-
-   base_application_no_swap_chain::~base_application_no_swap_chain()
-   {
-      // Clean up Vulkan resources
-      //swapChain.cleanup();
-      if (descriptorPool != VK_NULL_HANDLE)
-      {
-         vkDestroyDescriptorPool(device, descriptorPool, nullptr);
-      }
-      destroyCommandBuffers();
-      if (renderPass != VK_NULL_HANDLE)
-      {
-         vkDestroyRenderPass(device, renderPass, nullptr);
-      }
-      for (uint32_t i = 0; i < frameBuffers.size(); i++)
-      {
-         vkDestroyFramebuffer(device, frameBuffers[i], nullptr);
-      }
-
-      for (auto& shaderModule : shaderModules)
-      {
-         vkDestroyShaderModule(device, shaderModule, nullptr);
-      }
-      vkDestroyImageView(device, depthStencil.view, nullptr);
-      vkDestroyImage(device, depthStencil.image, nullptr);
-      vkFreeMemory(device, depthStencil.memory, nullptr);
-
-      vkDestroyPipelineCache(device, pipelineCache, nullptr);
-
-      vkDestroyCommandPool(device, cmdPool, nullptr);
-
-      //vkDestroySemaphore(device, semaphores.presentComplete, nullptr);
-      //vkDestroySemaphore(device, semaphores.renderComplete, nullptr);
-      for (auto& fence : waitFences) {
-         vkDestroyFence(device, fence, nullptr);
-      }
-
-      if (settings.overlay) {
-         ui.freeResources();
-      }
-
-      delete m_pvulkandevice;
-
-      if (settings.validation)
-      {
-         vks::debug::freeDebugCallback(instance);
-      }
-
-      vkDestroyInstance(instance, nullptr);
-
-      // #if defined(_DIRECT2DISPLAY)
-      //
-      // #elif defined(VK_USE_PLATFORM_DIRECTFB_EXT)
-      //    if (event_buffer)
-      //       event_buffer->Release(event_buffer);
-      //    if (surface)
-      //       surface->Release(surface);
-      //    if (window)
-      //       window->Release(window);
-      //    if (layer)
-      //       layer->Release(layer);
-      //    if (dfb)
-      //       dfb->Release(dfb);
-      // #elif defined(VK_USE_PLATFORM_WAYLAND_KHR)
-      //    xdg_toplevel_destroy(xdg_toplevel);
-      //    xdg_surface_destroy(xdg_surface);
-      //    wl_surface_destroy(surface);
-      //    if (keyboard)
-      //       wl_keyboard_destroy(keyboard);
-      //    if (pointer)
-      //       wl_pointer_destroy(pointer);
-      //    if (seat)
-      //       wl_seat_destroy(seat);
-      //    xdg_wm_base_destroy(shell);
-      //    wl_compositor_destroy(compositor);
-      //    wl_registry_destroy(registry);
-      //    wl_display_disconnect(display);
-      // #elif defined(VK_USE_PLATFORM_XCB_KHR)
-      //    xcb_destroy_window(connection, window);
-      //    xcb_disconnect(connection);
-      // #elif defined(VK_USE_PLATFORM_SCREEN_QNX)
-      //    screen_destroy_event(screen_event);
-      //    screen_destroy_window(screen_window);
-      //    screen_destroy_context(screen_context);
-      // #endif
-   }
 
    bool base_application_no_swap_chain::initVulkan()
    {

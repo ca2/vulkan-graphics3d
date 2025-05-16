@@ -11,9 +11,12 @@
 namespace vulkan
 {
 
-   class offscreen_application : public base_application_no_swap_chain
+   class offscreen_application : 
+      virtual public base_application_no_swap_chain
    {
    public:
+
+
       bool debugDisplay = false;
 
       struct {

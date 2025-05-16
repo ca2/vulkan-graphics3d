@@ -6,6 +6,21 @@
 namespace vulkan
 {
 
+
+
+   application::application()
+   {
+
+
+   }
+
+
+   application::~application()
+   {
+
+
+   }
+
    
    void application::handleMouseMove(int x, int y)
    {
