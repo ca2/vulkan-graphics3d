@@ -186,7 +186,10 @@ namespace vulkan_land_landen
 
                m_pvulkanapplication = m_pimpact->start_vulkan_application();
 
+               m_pvulkanapplication->m_callbackOffscreen = m_pimpact->m_callbackOffscreen;
+
                m_pvulkanapplication->run_application();
+
                m_ptask3dApp.release();
 
             });

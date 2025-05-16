@@ -11,6 +11,7 @@
 namespace vulkan
 {
 
+
    class offscreen_application : 
       virtual public base_application_no_swap_chain
    {
@@ -80,6 +81,9 @@ namespace vulkan
 
       offscreen_application();
       ~offscreen_application();
+
+
+      void run_application() override;
 
       // Setup the offscreen framebuffer for rendering the mirrored scene
       // The color attachment of this framebuffer will then be used to sample from in the fragment shader of the final pass

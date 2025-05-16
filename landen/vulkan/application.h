@@ -11,6 +11,8 @@ namespace vulkan
    {
    public:
 
+      ::function < void(void*, int, int, int)> m_callbackOffscreen;
+
 
       application();
       ~application() override;

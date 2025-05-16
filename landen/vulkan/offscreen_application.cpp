@@ -781,6 +781,13 @@ namespace vulkan
    }
 
 
+   void offscreen_application::run_application()
+   {
+
+      render_loop(m_callbackOffscreen);
+
+   }
+
 
    void offscreen_application::render_loop(const ::function < void(void*, int, int, int)>& callback)
    {

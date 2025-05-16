@@ -200,8 +200,8 @@ namespace vulkan_land_landen
          if (is_absolute_mouse_position())
          {
 
-            m_dCursorX = ((point.x() - (w / 2.0)) * 2.0);
-            m_dCursorY = ((point.y() - (h / 2.0)) * 2.0);
+            xCursor = ((point.x() - (w / 2.0)) * 2.0);
+            yCursor = ((point.y() - (h / 2.0)) * 2.0);
 
          }
          else
@@ -210,14 +210,17 @@ namespace vulkan_land_landen
             //xCursor = point.x();
             //yCursor = point.y();
 
-            m_dCursorX = point.x();
-            m_dCursorY = point.y();
+            xCursor = point.x();
+            yCursor = point.y();
 
          }
 
+         m_dCursorX = xCursor;
+         m_dCursorY = yCursor;
+
          track_mouse_leave();
 
-         //get_app()->m_pvulkanapplication->handleMouseMove(xCursor, yCursor);
+         get_app()->m_pvulkanapplication->handleMouseMove(xCursor, yCursor);
 
       }
 
@@ -474,6 +477,7 @@ namespace vulkan_land_landen
       }
 
       m_width = rectangleX.width();
+
       m_height = rectangleX.height();
 
       get_app()->update_3d_application(m_width, m_height);
