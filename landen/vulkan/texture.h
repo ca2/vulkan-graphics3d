@@ -13,15 +13,15 @@
 #include <string>
 #include <vector>
 
-#include "vulkan/vulkan.h"
+#include "_vulkan.h"
 
 #ifdef HAS_KTX
 #include <ktx.h>
 #include <ktxvulkan.h>
 
 #include "VulkanBuffer.h"
-#include "VulkanDevice.h"
-#include "VulkanTools.h"
+#include "device.h"
+#include "tools.h"
 
 #if defined(__ANDROID__)
 #	include <android/asset_manager.h>
@@ -37,7 +37,7 @@ class texture
 	VkImageLayout         imageLayout;
 	VkDeviceMemory        deviceMemory;
 	VkImageView           view;
-	uint32_t              width, height;
+	uint32_t              m_iWidth, m_iHeight;
 	uint32_t              mipLevels;
 	uint32_t              layerCount;
 	VkDescriptorImageInfo descriptor;

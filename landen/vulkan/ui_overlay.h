@@ -16,9 +16,9 @@
 #include <sstream>
 #include <iomanip>
 
-#include <vulkan/vulkan.h>
-#include "VulkanTools.h"
-#include "VulkanDebug.h"
+#include "_vulkan.h"
+#include "tools.h"
+#include "debug.h"
 #include "buffer.h"
 #include "device.h"
 
@@ -51,7 +51,7 @@ namespace vulkan
 
 		std::vector<VkPipelineShaderStageCreateInfo> shaders;
 
-		VkDescriptorPool descriptorPool{ VK_NULL_HANDLE };
+		VkDescriptorPool m_vkdescriptorpool{ VK_NULL_HANDLE };
 		VkDescriptorSetLayout descriptorSetLayout{ VK_NULL_HANDLE };
 		VkDescriptorSet descriptorSet{ VK_NULL_HANDLE };
 		VkPipelineLayout pipelineLayout{ VK_NULL_HANDLE };
@@ -75,12 +75,12 @@ namespace vulkan
 		ui_overlay();
 		~ui_overlay();
 
-		void preparePipeline(const VkPipelineCache pipelineCache, const VkRenderPass renderPass, const VkFormat colorFormat, const VkFormat depthFormat);
+		void preparePipeline(const VkPipelineCache m_vkpipelinecache, const VkRenderPass m_vkrenderpass, const VkFormat colorFormat, const VkFormat depthFormat);
 		void prepareResources();
 
 		bool update();
 		void draw(const VkCommandBuffer commandBuffer);
-		void resize(uint32_t width, uint32_t height);
+		void resize(uint32_t m_iWidth, uint32_t m_iHeight);
 
 		void freeResources();
 

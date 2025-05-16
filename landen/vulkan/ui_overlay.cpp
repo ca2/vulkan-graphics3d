@@ -200,7 +200,7 @@ namespace vulkan
 			vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1)
 		};
 		VkDescriptorPoolCreateInfo descriptorPoolInfo = vks::initializers::descriptorPoolCreateInfo(poolSizes, 2);
-		VK_CHECK_RESULT(vkCreateDescriptorPool(device->logicalDevice, &descriptorPoolInfo, nullptr, &descriptorPool));
+		VK_CHECK_RESULT(vkCreateDescriptorPool(device->logicalDevice, &descriptorPoolInfo, nullptr, &m_vkdescriptorpool));
 
 		// Descriptor set layout
 		std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings = {
@@ -210,7 +210,7 @@ namespace vulkan
 		VK_CHECK_RESULT(vkCreateDescriptorSetLayout(device->logicalDevice, &descriptorLayout, nullptr, &descriptorSetLayout));
 
 		// Descriptor set
-		VkDescriptorSetAllocateInfo allocInfo = vks::initializers::descriptorSetAllocateInfo(descriptorPool, &descriptorSetLayout, 1);
+		VkDescriptorSetAllocateInfo allocInfo = vks::initializers::descriptorSetAllocateInfo(m_vkdescriptorpool, &descriptorSetLayout, 1);
 		VK_CHECK_RESULT(vkAllocateDescriptorSets(device->logicalDevice, &allocInfo, &descriptorSet));
 		VkDescriptorImageInfo fontDescriptor = vks::initializers::descriptorImageInfo(
 			sampler,
@@ -224,7 +224,7 @@ namespace vulkan
 	}
 
 	/** Prepare a separate pipeline for the UI overlay rendering decoupled from the main application */
-	void ui_overlay::preparePipeline(const VkPipelineCache pipelineCache, const VkRenderPass renderPass, const VkFormat colorFormat, const VkFormat depthFormat)
+	void ui_overlay::preparePipeline(const VkPipelineCache m_vkpipelinecache, const VkRenderPass m_vkrenderpass, const VkFormat colorFormat, const VkFormat depthFormat)
 	{
 		// Pipeline layout
 		// Push constants for UI rendering parameters
@@ -271,7 +271,7 @@ namespace vulkan
 		VkPipelineDynamicStateCreateInfo dynamicState =
 			vks::initializers::pipelineDynamicStateCreateInfo(dynamicStateEnables);
 
-		VkGraphicsPipelineCreateInfo pipelineCreateInfo = vks::initializers::pipelineCreateInfo(pipelineLayout, renderPass);
+		VkGraphicsPipelineCreateInfo pipelineCreateInfo = vks::initializers::pipelineCreateInfo(pipelineLayout, m_vkrenderpass);
 
 		pipelineCreateInfo.pInputAssemblyState = &inputAssemblyState;
 		pipelineCreateInfo.pRasterizationState = &rasterizationState;
@@ -285,9 +285,9 @@ namespace vulkan
 		pipelineCreateInfo.subpass = subpass;
 		
 #if defined(VK_KHR_dynamic_rendering)
-		// SRS - if we are using dynamic rendering (i.e. renderPass null), must define color, depth and stencil attachments at pipeline create time
+		// SRS - if we are using dynamic rendering (i.e. m_vkrenderpass null), must define color, depth and stencil attachments at pipeline create time
 		VkPipelineRenderingCreateInfo pipelineRenderingCreateInfo = {};
-		if (renderPass == VK_NULL_HANDLE) {
+		if (m_vkrenderpass == VK_NULL_HANDLE) {
 			pipelineRenderingCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
 			pipelineRenderingCreateInfo.colorAttachmentCount = 1;
 			pipelineRenderingCreateInfo.pColorAttachmentFormats = &colorFormat;
@@ -314,7 +314,7 @@ namespace vulkan
 
 		pipelineCreateInfo.pVertexInputState = &vertexInputState;
 
-		VK_CHECK_RESULT(vkCreateGraphicsPipelines(device->logicalDevice, pipelineCache, 1, &pipelineCreateInfo, nullptr, &pipeline));
+		VK_CHECK_RESULT(vkCreateGraphicsPipelines(device->logicalDevice, m_vkpipelinecache, 1, &pipelineCreateInfo, nullptr, &pipeline));
 	}
 
 	/** Update vertex and index buffer containing the imGui elements when required */
@@ -416,10 +416,10 @@ namespace vulkan
 		}
 	}
 
-	void ui_overlay::resize(uint32_t width, uint32_t height)
+	void ui_overlay::resize(uint32_t m_iWidth, uint32_t m_iHeight)
 	{
 		ImGuiIO& io = ImGui::GetIO();
-		io.DisplaySize = ImVec2((float)(width), (float)(height));
+		io.DisplaySize = ImVec2((float)(m_iWidth), (float)(m_iHeight));
 	}
 
 	void ui_overlay::freeResources()
@@ -431,7 +431,7 @@ namespace vulkan
 		vkFreeMemory(device->logicalDevice, fontMemory, nullptr);
 		vkDestroySampler(device->logicalDevice, sampler, nullptr);
 		vkDestroyDescriptorSetLayout(device->logicalDevice, descriptorSetLayout, nullptr);
-		vkDestroyDescriptorPool(device->logicalDevice, descriptorPool, nullptr);
+		vkDestroyDescriptorPool(device->logicalDevice, m_vkdescriptorpool, nullptr);
 		vkDestroyPipelineLayout(device->logicalDevice, pipelineLayout, nullptr);
 		vkDestroyPipeline(device->logicalDevice, pipeline, nullptr);
 	}

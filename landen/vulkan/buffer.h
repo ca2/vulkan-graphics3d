@@ -13,8 +13,8 @@
 #include <vector>
 
 
-#include "vulkan/vulkan.h"
-#include "VulkanTools.h"
+#include "_vulkan.h"
+#include "tools.h"
 
 
 namespace vulkan
@@ -23,7 +23,7 @@ namespace vulkan
 
 	/**
 	* @brief Encapsulates access to a Vulkan buffer backed up by device memory
-	* @note To be filled by an external source like the VulkanDevice
+	* @note To be filled by an external source like the device
 	*/
 	struct buffer
 	{

@@ -11,8 +11,8 @@
 
 
 #include "buffer.h"
-#include "VulkanTools.h"
-#include "vulkan/vulkan.h"
+#include "tools.h"
+#include "_vulkan.h"
 #include <algorithm>
 #include <assert.h>
 #include <exception>

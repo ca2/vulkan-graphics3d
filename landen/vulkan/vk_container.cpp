@@ -28,7 +28,7 @@ namespace vkc
 		//glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		//glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
-		//window = glfwCreateWindow(width, height, windowName.c_str(), nullptr, nullptr);
+		//window = glfwCreateWindow(m_iWidth, m_iHeight, windowName.c_str(), nullptr, nullptr);
 		//glfwSetWindowUserPointer(window, this);
 		//glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
 	}
@@ -56,10 +56,10 @@ namespace vkc
 	//	}
 	//}
 
-	/*void VkContainer::framebufferResizeCallback(GLFWwindow* window, int width, int height) {
+	/*void VkContainer::framebufferResizeCallback(GLFWwindow* window, int m_iWidth, int m_iHeight) {
 		auto Window = reinterpret_cast<VkContainer*>(glfwGetWindowUserPointer(window));
 		Window->framebufferResized = true;
-		Window->width = width;
-		Window->height = height;
+		Window->m_iWidth = m_iWidth;
+		Window->m_iHeight = m_iHeight;
 	}*/
 }

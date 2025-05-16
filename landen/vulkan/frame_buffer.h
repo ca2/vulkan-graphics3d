@@ -11,16 +11,18 @@
 #include <algorithm>
 #include <iterator>
 #include <vector>
-#include "vulkan/vulkan.h"
-#include "VulkanDevice.h"
-#include "VulkanTools.h"
+#include "_vulkan.h"
+#include "device.h"
+#include "tools.h"
 
-namespace vks
+
+namespace vulkan
 {
+
 	/**
 	* @brief Encapsulates a single frame buffer attachment 
 	*/
-	struct FramebufferAttachment
+	struct frame_buffer_attachment
 	{
 		VkImage image;
 		VkDeviceMemory memory;
@@ -74,7 +76,7 @@ namespace vks
 	/**
 	* @brief Describes the attributes of an attachment to be created
 	*/
-	struct AttachmentCreateInfo
+	struct attachment_create_info
 	{
 		uint32_t width, height;
 		uint32_t layerCount;
@@ -86,23 +88,23 @@ namespace vks
 	/**
 	* @brief Encapsulates a complete Vulkan framebuffer with an arbitrary number and combination of attachments
 	*/
-	struct Framebuffer
+	struct frame_buffer
 	{
 	private:
-		vks::VulkanDevice *vulkanDevice;
+		vks::device *vulkanDevice;
 	public:
 		uint32_t width, height;
 		VkFramebuffer framebuffer;
 		VkRenderPass renderPass;
 		VkSampler sampler;
-		std::vector<vks::FramebufferAttachment> attachments;
+		std::vector<vks::frame_buffer_attachment> attachments;
 
 		/**
 		* Default constructor
 		*
-		* @param vulkanDevice Pointer to a valid VulkanDevice
+		* @param vulkanDevice Pointer to a valid device
 		*/
-		Framebuffer(vks::VulkanDevice *vulkanDevice)
+		frame_buffer(vks::device *vulkanDevice)
 		{
 			assert(vulkanDevice);
 			this->vulkanDevice = vulkanDevice;
@@ -111,7 +113,7 @@ namespace vks
 		/**
 		* Destroy and free Vulkan resources used for the framebuffer and all of its attachments
 		*/
-		~Framebuffer()
+		~frame_buffer()
 		{
 			assert(vulkanDevice);
 			for (auto attachment : attachments)
@@ -132,9 +134,9 @@ namespace vks
 		*
 		* @return Index of the new attachment
 		*/
-		uint32_t addAttachment(vks::AttachmentCreateInfo createinfo)
+		uint32_t addAttachment(vks::attachment_create_info createinfo)
 		{
-			vks::FramebufferAttachment attachment;
+			vks::frame_buffer_attachment attachment;
 
 			attachment.format = createinfo.format;
 
@@ -362,4 +364,9 @@ namespace vks
 			return VK_SUCCESS;
 		}
 	};
-}
+
+
+} // namespace vulkan
+
+
+

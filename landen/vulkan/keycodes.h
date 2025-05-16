@@ -49,7 +49,7 @@
 
 #elif (defined(VK_USE_PLATFORM_IOS_MVK) || defined(VK_USE_PLATFORM_MACOS_MVK) || defined(VK_USE_PLATFORM_METAL_EXT))
 #if !defined(VK_EXAMPLE_XCODE_GENERATED)
-// For iOS and macOS pre-configured Xcode example project: Use character keycodes
+// For iOS and macOS pre-m_bConfigured Xcode example project: Use character keycodes
 // - Use numeric keys as optional alternative to function keys
 #define KEY_DELETE 0x7F
 #define KEY_ESCAPE 0x1B

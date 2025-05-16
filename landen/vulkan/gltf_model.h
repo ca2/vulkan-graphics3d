@@ -20,7 +20,7 @@
 #include <fstream>
 #include <vector>
 
-#include "vulkan/vulkan.h"
+#include "_vulkan.h"
 #include "device.h"
 #ifdef HAS_KTX
 #include <ktx.h>
@@ -66,7 +66,7 @@ namespace vkglTF
 		VkImageLayout imageLayout;
 		VkDeviceMemory deviceMemory;
 		VkImageView view;
-		uint32_t width, height;
+		uint32_t m_iWidth, m_iHeight;
 		uint32_t mipLevels;
 		uint32_t layerCount;
 		VkDescriptorImageInfo descriptor;
@@ -100,7 +100,7 @@ namespace vkglTF
 		VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
 
 		Material(vulkan::device* pdevice) : m_pvulkandevice(pdevice) {};
-		void createDescriptorSet(VkDescriptorPool descriptorPool, VkDescriptorSetLayout descriptorSetLayout, uint32_t descriptorBindingFlags);
+		void createDescriptorSet(VkDescriptorPool m_vkdescriptorpool, VkDescriptorSetLayout descriptorSetLayout, uint32_t descriptorBindingFlags);
 	};
 
 	/*
@@ -262,7 +262,7 @@ namespace vkglTF
 		void createEmptyTexture(VkQueue transferQueue);
 	public:
 		::vulkan::device* m_pvulkandevice = nullptr;
-		VkDescriptorPool descriptorPool;
+		VkDescriptorPool m_vkdescriptorpool;
 
 		struct Vertices {
 			int count;

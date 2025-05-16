@@ -30,7 +30,7 @@ namespace vulkan
 #elif defined(VK_USE_PLATFORM_METAL_EXT)
 	void swap_chain::initSurface(CAMetalLayer* metalLayer)
 #elif (defined(_DIRECT2DISPLAY) || defined(VK_USE_PLATFORM_HEADLESS_EXT))
-	void swap_chain::initSurface(uint32_t width, uint32_t height)
+	void swap_chain::initSurface(uint32_t m_iWidth, uint32_t m_iHeight)
 #elif defined(VK_USE_PLATFORM_SCREEN_QNX)
 	void swap_chain::initSurface(screen_context_t screen_context, screen_window_t screen_window)
 #endif
@@ -71,7 +71,7 @@ namespace vulkan
 		surfaceCreateInfo.pLayer = metalLayer;
 		err = vkCreateMetalSurfaceEXT(instance, &surfaceCreateInfo, NULL, &surface);
 #elif defined(_DIRECT2DISPLAY)
-		createDirect2DisplaySurface(width, height);
+		createDirect2DisplaySurface(m_iWidth, m_iHeight);
 #elif defined(VK_USE_PLATFORM_DIRECTFB_EXT)
 		VkDirectFBSurfaceCreateInfoEXT surfaceCreateInfo = {};
 		surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_DIRECTFB_SURFACE_CREATE_INFO_EXT;
@@ -212,7 +212,7 @@ namespace vulkan
 		this->device = device;
 	}
 
-	void swap_chain::create(uint32_t* width, uint32_t* height, bool vsync, bool fullscreen)
+	void swap_chain::create(uint32_t* puWidth, uint32_t* puHeight, bool vsync, bool fullscreen)
 	{
 		assert(physicalDevice);
 		assert(device);
@@ -234,20 +234,20 @@ namespace vulkan
 		VK_CHECK_RESULT(vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, presentModes.data()));
 
 		VkExtent2D swapchainExtent = {};
-		// If width (and height) equals the special value 0xFFFFFFFF, the size of the surface will be set by the swapchain
+		// If m_iWidth (and m_iHeight) equals the special value 0xFFFFFFFF, the size of the surface will be set by the swapchain
 		if (surfCaps.currentExtent.width == (uint32_t)-1)
 		{
 			// If the surface size is undefined, the size is set to
 			// the size of the images requested.
-			swapchainExtent.width = *width;
-			swapchainExtent.height = *height;
+			swapchainExtent.width = *puWidth;
+			swapchainExtent.height = *puHeight;
 		}
 		else
 		{
 			// If the surface size is defined, the swap chain size must match
 			swapchainExtent = surfCaps.currentExtent;
-			*width = surfCaps.currentExtent.width;
-			*height = surfCaps.currentExtent.height;
+			*puWidth = surfCaps.currentExtent.width;
+			*puHeight = surfCaps.currentExtent.height;
 		}
 
 
@@ -445,7 +445,7 @@ namespace vulkan
 	/**
 	* Create direct to display surface
 	*/
-	void swap_chain::createDirect2DisplaySurface(uint32_t width, uint32_t height)
+	void swap_chain::createDirect2DisplaySurface(uint32_t m_iWidth, uint32_t m_iHeight)
 	{
 		uint32_t displayPropertyCount;
 
@@ -477,7 +477,7 @@ namespace vulkan
 			{
 				const VkDisplayModePropertiesKHR* mode = &pModeProperties[j];
 
-				if (mode->parameters.visibleRegion.width == width && mode->parameters.visibleRegion.height == height)
+				if (mode->parameters.visibleRegion.m_iWidth == m_iWidth && mode->parameters.visibleRegion.m_iHeight == m_iHeight)
 				{
 					displayMode = mode->displayMode;
 					foundMode = true;
@@ -565,8 +565,8 @@ namespace vulkan
 		surfaceInfo.transform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
 		surfaceInfo.globalAlpha = 1.0;
 		surfaceInfo.alphaMode = alphaMode;
-		surfaceInfo.imageExtent.width = width;
-		surfaceInfo.imageExtent.height = height;
+		surfaceInfo.imageExtent.m_iWidth = m_iWidth;
+		surfaceInfo.imageExtent.m_iHeight = m_iHeight;
 
 		VkResult result = vkCreateDisplayPlaneSurfaceKHR(instance, &surfaceInfo, NULL, &surface);
 		if (result != VK_SUCCESS) {

@@ -40,28 +40,28 @@
     <ClCompile Include="vulkan\buffer.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
-    <ClCompile Include="vulkan\VulkanDebug.cpp">
+    <ClCompile Include="vulkan\debug.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
     <ClCompile Include="vulkan\device.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
-    <ClCompile Include="vulkan\VulkanglTFModel.cpp">
+    <ClCompile Include="vulkan\gltf_model.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
-    <ClCompile Include="vulkan\VulkanRaytracingSample.cpp">
+    <ClCompile Include="vulkan\raytracing_application.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
     <ClCompile Include="vulkan\texture.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
-    <ClCompile Include="vulkan\VulkanTools.cpp">
+    <ClCompile Include="vulkan\tools.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
     <ClCompile Include="vulkan\ui_overlay.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
-    <ClCompile Include="vulkan\VulkanExampleRenderHeadless.cpp">
+    <ClCompile Include="vulkan\headless_rendering_application.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
     <ClCompile Include="vulkan\base_application_no_swap_chain.cpp">
@@ -76,7 +76,7 @@
     <ClCompile Include="vulkan\base_application_with_swap_chain.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
-    <ClCompile Include="vulkan\VulkanAndroid.cpp">
+    <ClCompile Include="vulkan\android.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
     <ClCompile Include="vulkan\swap_chain.cpp">
@@ -102,7 +102,7 @@
     <ClInclude Include="_.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="_user.h">
+    <ClInclude Include="_vulkan.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
@@ -114,13 +114,13 @@
     <ClInclude Include="vulkan\keycodes.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="vulkan\VulkanTools.h">
+    <ClInclude Include="vulkan\tools.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="vulkan\VulkanInitializers.h">
+    <ClInclude Include="vulkan\initializers.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="vulkan\VulkanDebug.h">
+    <ClInclude Include="vulkan\debug.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
     <ClInclude Include="Vulkan\ui_overlay.h">
@@ -129,19 +129,16 @@
     <ClInclude Include="Vulkan\device.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="vulkan\Entrypoints.h">
-      <Filter>Header Files\vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="vulkan\VulkanAndroid.h">
+    <ClInclude Include="vulkan\android.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
     <ClInclude Include="vulkan\buffer.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="vulkan\VulkanglTFModel.h">
+    <ClInclude Include="vulkan\gltf_model.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="vulkan\VulkanRaytracingSample.h">
+    <ClInclude Include="vulkan\raytracing_application.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
     <ClInclude Include="vulkan\swap_chain.h">
@@ -150,31 +147,28 @@
     <ClInclude Include="vulkan\texture.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="vulkan\benchmark.hpp">
+    <ClInclude Include="vulkan\benchmark.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="vulkan\camera.hpp">
+    <ClInclude Include="vulkan\camera.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="vulkan\CommandLineParser.hpp">
+    <ClInclude Include="vulkan\command_line_parser.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="vulkan\frustum.hpp">
+    <ClInclude Include="vulkan\frustum.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="vulkan\keycodes.hpp">
+    <ClInclude Include="vulkan\threadpool.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="vulkan\threadpool.hpp">
-      <Filter>Header Files\vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="vulkan\VulkanFrameBuffer.hpp">
+    <ClInclude Include="vulkan\frame_buffer.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
     <ClInclude Include="vulkan\shared.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="vulkan\VulkanExampleRenderHeadless.h">
+    <ClInclude Include="vulkan\headless_rendering_application.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
     <ClInclude Include="vulkan\base_application_no_swap_chain.h">

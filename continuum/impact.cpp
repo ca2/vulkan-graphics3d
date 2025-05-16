@@ -15,7 +15,7 @@
 CLASS_DECL_AURA ::color::color dk_red(); // <3 tbs
 namespace vkc
 {
-   ::pointer<::vulkan::application > start_vulkan_application(::vkc::VkContainer* pvkcontainer, mouseState* pmousestate);
+   ::pointer<::vulkan::application > start_vulkan_application(::vkc::VkContainer* pvkcontainer, mouse_state* pmousestate);
 } // namespace vkc
 
 namespace vulkan_land_continuum

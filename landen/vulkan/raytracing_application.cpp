@@ -6,14 +6,14 @@
 * This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)
 */
 #include "framework.h"
-#include "VulkanRaytracingSample.h"
+#include "raytracing_application.h"
 
-void VulkanRaytracingSample::setupRenderPass()
+void raytracing_application::setupRenderPass()
 {
 	// Update the default render pass with different color attachment load ops to keep attachment contents
 	// With this change, we can e.g. draw an UI on top of the ray traced scene
 
-	vkDestroyRenderPass(device, renderPass, nullptr);
+	vkDestroyRenderPass(device, m_vkrenderpass, nullptr);
 
 	VkAttachmentLoadOp colorLoadOp{ VK_ATTACHMENT_LOAD_OP_LOAD };
 	VkImageLayout colorInitialLayout{ VK_IMAGE_LAYOUT_PRESENT_SRC_KHR };
@@ -90,10 +90,10 @@ void VulkanRaytracingSample::setupRenderPass()
 	renderPassInfo.pSubpasses = &subpassDescription;
 	renderPassInfo.dependencyCount = static_cast<uint32_t>(dependencies.size());
 	renderPassInfo.pDependencies = dependencies.data();
-	VK_CHECK_RESULT(vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass));
+	VK_CHECK_RESULT(vkCreateRenderPass(device, &renderPassInfo, nullptr, &m_vkrenderpass));
 }
 
-void VulkanRaytracingSample::setupFrameBuffer()
+void raytracing_application::setupFrameBuffer()
 {
 	VkImageView attachments[2];
 
@@ -103,23 +103,23 @@ void VulkanRaytracingSample::setupFrameBuffer()
 	VkFramebufferCreateInfo frameBufferCreateInfo = {};
 	frameBufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 	frameBufferCreateInfo.pNext = NULL;
-	frameBufferCreateInfo.renderPass = renderPass;
+	frameBufferCreateInfo.m_vkrenderpass = m_vkrenderpass;
 	frameBufferCreateInfo.attachmentCount = 2;
 	frameBufferCreateInfo.pAttachments = attachments;
-	frameBufferCreateInfo.width = width;
-	frameBufferCreateInfo.height = height;
+	frameBufferCreateInfo.m_iWidth = m_iWidth;
+	frameBufferCreateInfo.m_iHeight = m_iHeight;
 	frameBufferCreateInfo.layers = 1;
 
 	// Create frame buffers for every swap chain image
-	frameBuffers.resize(m_swapchain.imageCount);
-	for (uint32_t i = 0; i < frameBuffers.size(); i++)
+	m_vkframebuffers.resize(m_swapchain.imageCount);
+	for (uint32_t i = 0; i < m_vkframebuffers.size(); i++)
 	{
 		attachments[0] = m_swapchain.buffers[i].view;
-		VK_CHECK_RESULT(vkCreateFramebuffer(device, &frameBufferCreateInfo, nullptr, &frameBuffers[i]));
+		VK_CHECK_RESULT(vkCreateFramebuffer(device, &frameBufferCreateInfo, nullptr, &m_vkframebuffers[i]));
 	}
 }
 
-void VulkanRaytracingSample::enableExtensions()
+void raytracing_application::enableExtensions()
 {
 	// Require Vulkan 1.1
 	apiVersion = VK_API_VERSION_1_1;
@@ -142,7 +142,7 @@ void VulkanRaytracingSample::enableExtensions()
 	enabledDeviceExtensions.push_back(VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME);
 }
 
-VulkanRaytracingSample::ScratchBuffer VulkanRaytracingSample::createScratchBuffer(VkDeviceSize size)
+raytracing_application::ScratchBuffer raytracing_application::createScratchBuffer(VkDeviceSize size)
 {
 	ScratchBuffer scratchBuffer{};
 	// Buffer and memory
@@ -171,7 +171,7 @@ VulkanRaytracingSample::ScratchBuffer VulkanRaytracingSample::createScratchBuffe
 	return scratchBuffer;
 }
 
-void VulkanRaytracingSample::deleteScratchBuffer(ScratchBuffer& scratchBuffer)
+void raytracing_application::deleteScratchBuffer(ScratchBuffer& scratchBuffer)
 {
 	if (scratchBuffer.memory != VK_NULL_HANDLE) {
 		vkFreeMemory(m_pvulkandevice->logicalDevice, scratchBuffer.memory, nullptr);
@@ -181,7 +181,7 @@ void VulkanRaytracingSample::deleteScratchBuffer(ScratchBuffer& scratchBuffer)
 	}
 }
 
-void VulkanRaytracingSample::createAccelerationStructure(AccelerationStructure& accelerationStructure, VkAccelerationStructureTypeKHR type, VkAccelerationStructureBuildSizesInfoKHR buildSizeInfo)
+void raytracing_application::createAccelerationStructure(AccelerationStructure& accelerationStructure, VkAccelerationStructureTypeKHR type, VkAccelerationStructureBuildSizesInfoKHR buildSizeInfo)
 {
 	// Buffer and memory
 	VkBufferCreateInfo bufferCreateInfo{};
@@ -215,14 +215,14 @@ void VulkanRaytracingSample::createAccelerationStructure(AccelerationStructure& 
 	accelerationStructure.deviceAddress = vkGetAccelerationStructureDeviceAddressKHR(m_pvulkandevice->logicalDevice, &accelerationDeviceAddressInfo);
 }
 
-void VulkanRaytracingSample::deleteAccelerationStructure(AccelerationStructure& accelerationStructure)
+void raytracing_application::deleteAccelerationStructure(AccelerationStructure& accelerationStructure)
 {
 	vkFreeMemory(device, accelerationStructure.memory, nullptr);
 	vkDestroyBuffer(device, accelerationStructure.buffer, nullptr);
 	vkDestroyAccelerationStructureKHR(device, accelerationStructure.handle, nullptr);
 }
 
-uint64_t VulkanRaytracingSample::getBufferDeviceAddress(VkBuffer buffer)
+uint64_t raytracing_application::getBufferDeviceAddress(VkBuffer buffer)
 {
 	VkBufferDeviceAddressInfoKHR bufferDeviceAI{};
 	bufferDeviceAI.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
@@ -230,7 +230,7 @@ uint64_t VulkanRaytracingSample::getBufferDeviceAddress(VkBuffer buffer)
 	return vkGetBufferDeviceAddressKHR(m_pvulkandevice->logicalDevice, &bufferDeviceAI);
 }
 
-void VulkanRaytracingSample::createStorageImage(VkFormat format, VkExtent3D extent)
+void raytracing_application::createStorageImage(VkFormat format, VkExtent3D extent)
 {
 	// Release ressources if image is to be recreated
 	if (storageImage.image != VK_NULL_HANDLE) {
@@ -280,14 +280,14 @@ void VulkanRaytracingSample::createStorageImage(VkFormat format, VkExtent3D exte
 	m_pvulkandevice->flushCommandBuffer(cmdBuffer, queue);
 }
 
-void VulkanRaytracingSample::deleteStorageImage()
+void raytracing_application::deleteStorageImage()
 {
 	vkDestroyImageView(m_pvulkandevice->logicalDevice, storageImage.view, nullptr);
 	vkDestroyImage(m_pvulkandevice->logicalDevice, storageImage.image, nullptr);
 	vkFreeMemory(m_pvulkandevice->logicalDevice, storageImage.memory, nullptr);
 }
 
-void VulkanRaytracingSample::prepare()
+void raytracing_application::prepare()
 {
 	base_application_with_swap_chain::prepare();
 	// Get properties and features
@@ -314,7 +314,7 @@ void VulkanRaytracingSample::prepare()
 	vkCreateRayTracingPipelinesKHR = reinterpret_cast<PFN_vkCreateRayTracingPipelinesKHR>(vkGetDeviceProcAddr(device, "vkCreateRayTracingPipelinesKHR"_ansi));
 }
 
-VkStridedDeviceAddressRegionKHR VulkanRaytracingSample::getSbtEntryStridedDeviceAddressRegion(VkBuffer buffer, uint32_t handleCount)
+VkStridedDeviceAddressRegionKHR raytracing_application::getSbtEntryStridedDeviceAddressRegion(VkBuffer buffer, uint32_t handleCount)
 {
 	const uint32_t handleSizeAligned = vks::tools::alignedSize(rayTracingPipelineProperties.shaderGroupHandleSize, rayTracingPipelineProperties.shaderGroupHandleAlignment);
 	VkStridedDeviceAddressRegionKHR stridedDeviceAddressRegionKHR{};
@@ -324,7 +324,7 @@ VkStridedDeviceAddressRegionKHR VulkanRaytracingSample::getSbtEntryStridedDevice
 	return stridedDeviceAddressRegionKHR;
 }
 
-void VulkanRaytracingSample::createShaderBindingTable(ShaderBindingTable& shaderBindingTable, uint32_t handleCount)
+void raytracing_application::createShaderBindingTable(ShaderBindingTable& shaderBindingTable, uint32_t handleCount)
 {
 	// Create buffer to hold all shader handles for the SBT
 	VK_CHECK_RESULT(m_pvulkandevice->createBuffer(
@@ -338,18 +338,18 @@ void VulkanRaytracingSample::createShaderBindingTable(ShaderBindingTable& shader
 	shaderBindingTable.map();
 }
 
-void VulkanRaytracingSample::drawUI(VkCommandBuffer commandBuffer, VkFramebuffer framebuffer)
+void raytracing_application::drawUI(VkCommandBuffer commandBuffer, VkFramebuffer framebuffer)
 {
 	VkClearValue clearValues[2];
 	clearValues[0].color = defaultClearColor;
 	clearValues[1].depthStencil = { 1.0f, 0 };
 
 	VkRenderPassBeginInfo renderPassBeginInfo = vks::initializers::renderPassBeginInfo();
-	renderPassBeginInfo.renderPass = renderPass;
+	renderPassBeginInfo.m_vkrenderpass = m_vkrenderpass;
 	renderPassBeginInfo.renderArea.offset.x = 0;
 	renderPassBeginInfo.renderArea.offset.y = 0;
-	renderPassBeginInfo.renderArea.extent.width = width;
-	renderPassBeginInfo.renderArea.extent.height = height;
+	renderPassBeginInfo.renderArea.extent.m_iWidth = m_iWidth;
+	renderPassBeginInfo.renderArea.extent.m_iHeight = m_iHeight;
 	renderPassBeginInfo.clearValueCount = 2;
 	renderPassBeginInfo.pClearValues = clearValues;
 	renderPassBeginInfo.framebuffer = framebuffer;

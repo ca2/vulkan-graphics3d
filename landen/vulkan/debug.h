@@ -7,7 +7,7 @@
  */
 
 #pragma once
-#include "vulkan/vulkan.h"
+#include "_vulkan.h"
 
 #include <math.h>
 #include <stdlib.h>

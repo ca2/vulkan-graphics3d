@@ -8,8 +8,8 @@
 
 #pragma once
 
-#include "vulkan/vulkan.h"
-#include "VulkanInitializers.h"
+#include "_vulkan.h"
+#include "initializers.h"
 
 #include <math.h>
 #include <stdlib.h>
@@ -65,8 +65,10 @@ const std::string getShaderBasePath();
 
 namespace vks
 {
+
 	namespace tools
 	{
+
 		/** @brief Disable message boxes on fatal errors */
 		extern bool errorModeSilent;
 

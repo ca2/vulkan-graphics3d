@@ -13,7 +13,7 @@
 #pragma once
 
 #include <vector>
-#include "vulkan/vulkan.h"
+#include "_vulkan.h"
 
 namespace vks
 {
@@ -168,28 +168,28 @@ namespace vks
       }
 
       inline VkViewport viewport(
-         float width,
-         float height,
+         float iWidth,
+         float iHeight,
          float minDepth,
          float maxDepth)
       {
          VkViewport viewport{};
-         viewport.width = width;
-         viewport.height = height;
+         viewport.width = iWidth;
+         viewport.height = iHeight;
          viewport.minDepth = minDepth;
          viewport.maxDepth = maxDepth;
          return viewport;
       }
 
       inline VkRect2D rect2D(
-         int32_t width,
-         int32_t height,
+         int32_t iWidth,
+         int32_t iHeight,
          int32_t offsetX,
          int32_t offsetY)
       {
          VkRect2D rect2D{};
-         rect2D.extent.width = width;
-         rect2D.extent.height = height;
+         rect2D.extent.width = iWidth;
+         rect2D.extent.height = iHeight;
          rect2D.offset.x = offsetX;
          rect2D.offset.y = offsetY;
          return rect2D;
@@ -304,13 +304,13 @@ namespace vks
       }
 
       inline VkDescriptorSetAllocateInfo descriptorSetAllocateInfo(
-         VkDescriptorPool descriptorPool,
+         VkDescriptorPool descriptorpool,
          const VkDescriptorSetLayout * pSetLayouts,
          uint32_t descriptorSetCount)
       {
          VkDescriptorSetAllocateInfo descriptorSetAllocateInfo{};
          descriptorSetAllocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-         descriptorSetAllocateInfo.descriptorPool = descriptorPool;
+         descriptorSetAllocateInfo.descriptorPool = descriptorpool;
          descriptorSetAllocateInfo.pSetLayouts = pSetLayouts;
          descriptorSetAllocateInfo.descriptorSetCount = descriptorSetCount;
          return descriptorSetAllocateInfo;

@@ -83,8 +83,8 @@ namespace vulkan
       assert(result == KTX_SUCCESS);
 
       this->device = device;
-      width = ktxTexture->baseWidth;
-      height = ktxTexture->baseHeight;
+      m_iWidth = ktxTexture->baseWidth;
+      m_iHeight = ktxTexture->baseHeight;
       mipLevels = ktxTexture->numLevels;
 
       ktx_uint8_t* ktxTextureData = ktxTexture_GetData(ktxTexture);
@@ -151,8 +151,8 @@ namespace vulkan
             bufferCopyRegion.imageSubresource.mipLevel = i;
             bufferCopyRegion.imageSubresource.baseArrayLayer = 0;
             bufferCopyRegion.imageSubresource.layerCount = 1;
-            bufferCopyRegion.imageExtent.width = ::maximum(1u, ktxTexture->baseWidth >> i);
-            bufferCopyRegion.imageExtent.height = ::maximum(1u, ktxTexture->baseHeight >> i);
+            bufferCopyRegion.imageExtent.m_iWidth = ::maximum(1u, ktxTexture->baseWidth >> i);
+            bufferCopyRegion.imageExtent.m_iHeight = ::maximum(1u, ktxTexture->baseHeight >> i);
             bufferCopyRegion.imageExtent.depth = 1;
             bufferCopyRegion.bufferOffset = offset;
 
@@ -169,7 +169,7 @@ namespace vulkan
          imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
          imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
          imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-         imageCreateInfo.extent = { width, height, 1 };
+         imageCreateInfo.extent = { m_iWidth, m_iHeight, 1 };
          imageCreateInfo.usage = imageUsageFlags;
          // Ensure that the TRANSFER_DST bit is set for staging
          if (!(imageCreateInfo.usage & VK_IMAGE_USAGE_TRANSFER_DST_BIT))
@@ -241,7 +241,7 @@ namespace vulkan
          VkImageCreateInfo imageCreateInfo = vks::initializers::imageCreateInfo();
          imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
          imageCreateInfo.format = format;
-         imageCreateInfo.extent = { width, height, 1 };
+         imageCreateInfo.extent = { m_iWidth, m_iHeight, 1 };
          imageCreateInfo.mipLevels = 1;
          imageCreateInfo.arrayLayers = 1;
          imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -347,8 +347,8 @@ namespace vulkan
    *
    * @param buffer Buffer containing texture data to upload
    * @param bufferSize Size of the buffer in machine units
-   * @param width Width of the texture to create
-   * @param height Height of the texture to create
+   * @param m_iWidth Width of the texture to create
+   * @param m_iHeight Height of the texture to create
    * @param format Vulkan format of the image data stored in the file
    * @param device Vulkan device to create the texture on
    * @param copyQueue Queue used for the texture staging copy commands (must support transfer)
@@ -361,8 +361,8 @@ namespace vulkan
       assert(buffer);
 
       this->device = device;
-      width = texWidth;
-      height = texHeight;
+      m_iWidth = texWidth;
+      m_iHeight = texHeight;
       mipLevels = 1;
 
       VkMemoryAllocateInfo memAllocInfo = vks::initializers::memoryAllocateInfo();
@@ -404,8 +404,8 @@ namespace vulkan
       bufferCopyRegion.imageSubresource.mipLevel = 0;
       bufferCopyRegion.imageSubresource.baseArrayLayer = 0;
       bufferCopyRegion.imageSubresource.layerCount = 1;
-      bufferCopyRegion.imageExtent.width = width;
-      bufferCopyRegion.imageExtent.height = height;
+      bufferCopyRegion.imageExtent.m_iWidth = m_iWidth;
+      bufferCopyRegion.imageExtent.m_iHeight = m_iHeight;
       bufferCopyRegion.imageExtent.depth = 1;
       bufferCopyRegion.bufferOffset = 0;
 
@@ -419,7 +419,7 @@ namespace vulkan
       imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
       imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
       imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-      imageCreateInfo.extent = { width, height, 1 };
+      imageCreateInfo.extent = { m_iWidth, m_iHeight, 1 };
       imageCreateInfo.usage = imageUsageFlags;
       // Ensure that the TRANSFER_DST bit is set for staging
       if (!(imageCreateInfo.usage & VK_IMAGE_USAGE_TRANSFER_DST_BIT))
@@ -525,8 +525,8 @@ namespace vulkan
       assert(result == KTX_SUCCESS);
 
       this->device = device;
-      width = ktxTexture->baseWidth;
-      height = ktxTexture->baseHeight;
+      m_iWidth = ktxTexture->baseWidth;
+      m_iHeight = ktxTexture->baseHeight;
       layerCount = ktxTexture->numLayers;
       mipLevels = ktxTexture->numLevels;
 
@@ -580,8 +580,8 @@ namespace vulkan
             bufferCopyRegion.imageSubresource.mipLevel = level;
             bufferCopyRegion.imageSubresource.baseArrayLayer = layer;
             bufferCopyRegion.imageSubresource.layerCount = 1;
-            bufferCopyRegion.imageExtent.width = ktxTexture->baseWidth >> level;
-            bufferCopyRegion.imageExtent.height = ktxTexture->baseHeight >> level;
+            bufferCopyRegion.imageExtent.m_iWidth = ktxTexture->baseWidth >> level;
+            bufferCopyRegion.imageExtent.m_iHeight = ktxTexture->baseHeight >> level;
             bufferCopyRegion.imageExtent.depth = 1;
             bufferCopyRegion.bufferOffset = offset;
 
@@ -597,7 +597,7 @@ namespace vulkan
       imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
       imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
       imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-      imageCreateInfo.extent = { width, height, 1 };
+      imageCreateInfo.extent = { m_iWidth, m_iHeight, 1 };
       imageCreateInfo.usage = imageUsageFlags;
       // Ensure that the TRANSFER_DST bit is set for staging
       if (!(imageCreateInfo.usage & VK_IMAGE_USAGE_TRANSFER_DST_BIT))
@@ -709,8 +709,8 @@ namespace vulkan
       assert(result == KTX_SUCCESS);
 
       this->device = device;
-      width = ktxTexture->baseWidth;
-      height = ktxTexture->baseHeight;
+      m_iWidth = ktxTexture->baseWidth;
+      m_iHeight = ktxTexture->baseHeight;
       mipLevels = ktxTexture->numLevels;
 
       ktx_uint8_t* ktxTextureData = ktxTexture_GetData(ktxTexture);
@@ -763,8 +763,8 @@ namespace vulkan
             bufferCopyRegion.imageSubresource.mipLevel = level;
             bufferCopyRegion.imageSubresource.baseArrayLayer = face;
             bufferCopyRegion.imageSubresource.layerCount = 1;
-            bufferCopyRegion.imageExtent.width = ktxTexture->baseWidth >> level;
-            bufferCopyRegion.imageExtent.height = ktxTexture->baseHeight >> level;
+            bufferCopyRegion.imageExtent.m_iWidth = ktxTexture->baseWidth >> level;
+            bufferCopyRegion.imageExtent.m_iHeight = ktxTexture->baseHeight >> level;
             bufferCopyRegion.imageExtent.depth = 1;
             bufferCopyRegion.bufferOffset = offset;
 
@@ -781,7 +781,7 @@ namespace vulkan
       imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
       imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
       imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-      imageCreateInfo.extent = { width, height, 1 };
+      imageCreateInfo.extent = { m_iWidth, m_iHeight, 1 };
       imageCreateInfo.usage = imageUsageFlags;
       // Ensure that the TRANSFER_DST bit is set for staging
       if (!(imageCreateInfo.usage & VK_IMAGE_USAGE_TRANSFER_DST_BIT))

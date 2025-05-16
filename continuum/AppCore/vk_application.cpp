@@ -1,5 +1,6 @@
 #include "framework.h"
 // vk_core.cpp
+#include "vulkan-land/landen/vulkan/shared.h"
 #include "application.h"
 #include "apex/database/stream.h"
 // std
@@ -39,7 +40,7 @@
 namespace vkc {
 
 
-   ::pointer<::vulkan::application > start_vulkan_application(::vkc::VkContainer* pvkcontainer, mouseState* pmousestate)
+   ::pointer<::vulkan::application > start_vulkan_application(::vkc::VkContainer* pvkcontainer, mouse_state* pmousestate)
    {
       auto pvulkanexample = pvkcontainer->__create_new < Application >();
 

@@ -9,12 +9,12 @@
 #include <glm/gtc/type_ptr.hpp>
 
 /** @brief State of mouse/touch input */
-struct mouseState 
+struct mouse_state 
 {
    struct {
       bool left = false;
       bool right = false;
       bool middle = false;
-   } buttons;
+   } m_buttons;
    glm::vec2 position;
 } ;

@@ -20,12 +20,12 @@ namespace vulkan
       
       m_colorformatFB = FB_COLOR_FORMAT;
       m_strTitle = "Offscreen rendering"_ansi;
-      timerSpeed *= 0.25f;
-      camera.type = Camera::CameraType::lookat;
-      camera.setPosition(glm::vec3(0.0f, 1.0f, -6.0f));
-      camera.setRotation(glm::vec3(-2.5f, 0.0f, 0.0f));
-      camera.setRotationSpeed(0.5f);
-      camera.setPerspective(60.0f, (float)width / (float)height, 0.1f, 256.0f);
+      m_fTimerSpeed *= 0.25f;
+      m_camera.type = Camera::CameraType::lookat;
+      m_camera.setPosition(glm::vec3(0.0f, 1.0f, -6.0f));
+      m_camera.setRotation(glm::vec3(-2.5f, 0.0f, 0.0f));
+      m_camera.setRotationSpeed(0.5f);
+      m_camera.setPerspective(60.0f, (float)m_iWidth / (float)m_iHeight, 0.1f, 256.0f);
       // The scene shader uses a clipping plane, so this feature has to be enabled
       enabledFeatures.shaderClipDistance = VK_TRUE;
 
@@ -49,7 +49,7 @@ namespace vulkan
          vkDestroyImage(device, offscreenPass.depth.image, nullptr);
          vkFreeMemory(device, offscreenPass.depth.mem, nullptr);
 
-         vkDestroyRenderPass(device, offscreenPass.renderPass, nullptr);
+         vkDestroyRenderPass(device, offscreenPass.m_vkrenderpass, nullptr);
          vkDestroySampler(device, offscreenPass.sampler, nullptr);
          vkDestroyFramebuffer(device, offscreenPass.frameBuffer, nullptr);
 
@@ -78,8 +78,8 @@ namespace vulkan
    void offscreen_application::prepareOffscreen()
    {
 
-      offscreenPass.width = FB_DIM;
-      offscreenPass.height = FB_DIM;
+      offscreenPass.m_iWidth = FB_DIM;
+      offscreenPass.m_iHeight = FB_DIM;
 
       // Find a suitable depth format
       VkFormat fbDepthFormat;
@@ -90,8 +90,8 @@ namespace vulkan
       VkImageCreateInfo image = vks::initializers::imageCreateInfo();
       image.imageType = VK_IMAGE_TYPE_2D;
       image.format = FB_COLOR_FORMAT;
-      image.extent.width = offscreenPass.width;
-      image.extent.height = offscreenPass.height;
+      image.extent.m_iWidth = offscreenPass.m_iWidth;
+      image.extent.m_iHeight = offscreenPass.m_iHeight;
       image.extent.depth = 1;
       image.mipLevels = 1;
       image.arrayLayers = 1;
@@ -224,18 +224,18 @@ namespace vulkan
       renderPassInfo.dependencyCount = static_cast<uint32_t>(dependencies.size());
       renderPassInfo.pDependencies = dependencies.data();
 
-      VK_CHECK_RESULT(vkCreateRenderPass(device, &renderPassInfo, nullptr, &offscreenPass.renderPass));
+      VK_CHECK_RESULT(vkCreateRenderPass(device, &renderPassInfo, nullptr, &offscreenPass.m_vkrenderpass));
 
       VkImageView attachments[2];
       attachments[0] = offscreenPass.color.view;
       attachments[1] = offscreenPass.depth.view;
 
       VkFramebufferCreateInfo fbufCreateInfo = vks::initializers::framebufferCreateInfo();
-      fbufCreateInfo.renderPass = offscreenPass.renderPass;
+      fbufCreateInfo.m_vkrenderpass = offscreenPass.m_vkrenderpass;
       fbufCreateInfo.attachmentCount = 2;
       fbufCreateInfo.pAttachments = attachments;
-      fbufCreateInfo.width = offscreenPass.width;
-      fbufCreateInfo.height = offscreenPass.height;
+      fbufCreateInfo.m_iWidth = offscreenPass.m_iWidth;
+      fbufCreateInfo.m_iHeight = offscreenPass.m_iHeight;
       fbufCreateInfo.layers = 1;
 
       VK_CHECK_RESULT(vkCreateFramebuffer(device, &fbufCreateInfo, nullptr, &offscreenPass.frameBuffer));
@@ -250,9 +250,9 @@ namespace vulkan
    {
       VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
 
-      for (int32_t i = 0; i < m_drawCmdBuffers.size(); ++i)
+      for (int32_t i = 0; i < m_vkcommandbuffersDraw.size(); ++i)
       {
-         VK_CHECK_RESULT(vkBeginCommandBuffer(m_drawCmdBuffers[i], &cmdBufInfo));
+         VK_CHECK_RESULT(vkBeginCommandBuffer(m_vkcommandbuffersDraw[i], &cmdBufInfo));
 
          /*
             First render pass: Offscreen rendering
@@ -263,27 +263,27 @@ namespace vulkan
             clearValues[1].depthStencil = { 1.0f, 0 };
 
             VkRenderPassBeginInfo renderPassBeginInfo = vks::initializers::renderPassBeginInfo();
-            renderPassBeginInfo.renderPass = offscreenPass.renderPass;
+            renderPassBeginInfo.m_vkrenderpass = offscreenPass.m_vkrenderpass;
             renderPassBeginInfo.framebuffer = offscreenPass.frameBuffer;
-            renderPassBeginInfo.renderArea.extent.width = offscreenPass.width;
-            renderPassBeginInfo.renderArea.extent.height = offscreenPass.height;
+            renderPassBeginInfo.renderArea.extent.m_iWidth = offscreenPass.m_iWidth;
+            renderPassBeginInfo.renderArea.extent.m_iHeight = offscreenPass.m_iHeight;
             renderPassBeginInfo.clearValueCount = 2;
             renderPassBeginInfo.pClearValues = clearValues;
 
-            vkCmdBeginRenderPass(m_drawCmdBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+            vkCmdBeginRenderPass(m_vkcommandbuffersDraw[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-            VkViewport viewport = vks::initializers::viewport((float)offscreenPass.width, (float)offscreenPass.height, 0.0f, 1.0f);
-            vkCmdSetViewport(m_drawCmdBuffers[i], 0, 1, &viewport);
+            VkViewport viewport = vks::initializers::viewport((float)offscreenPass.m_iWidth, (float)offscreenPass.m_iHeight, 0.0f, 1.0f);
+            vkCmdSetViewport(m_vkcommandbuffersDraw[i], 0, 1, &viewport);
 
-            VkRect2D scissor = vks::initializers::rect2D(offscreenPass.width, offscreenPass.height, 0, 0);
-            vkCmdSetScissor(m_drawCmdBuffers[i], 0, 1, &scissor);
+            VkRect2D scissor = vks::initializers::rect2D(offscreenPass.m_iWidth, offscreenPass.m_iHeight, 0, 0);
+            vkCmdSetScissor(m_vkcommandbuffersDraw[i], 0, 1, &scissor);
 
             // Mirrored scene
-            vkCmdBindDescriptorSets(m_drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.shaded, 0, 1, &descriptorSets.offscreen, 0, NULL);
-            vkCmdBindPipeline(m_drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.shadedOffscreen);
-            models.example.draw(m_drawCmdBuffers[i]);
+            vkCmdBindDescriptorSets(m_vkcommandbuffersDraw[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.shaded, 0, 1, &descriptorSets.offscreen, 0, NULL);
+            vkCmdBindPipeline(m_vkcommandbuffersDraw[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.shadedOffscreen);
+            models.example.draw(m_vkcommandbuffersDraw[i]);
 
-            vkCmdEndRenderPass(m_drawCmdBuffers[i]);
+            vkCmdEndRenderPass(m_vkcommandbuffersDraw[i]);
          }
 
          /*
@@ -299,46 +299,46 @@ namespace vulkan
             clearValues[1].depthStencil = { 1.0f, 0 };
 
             VkRenderPassBeginInfo renderPassBeginInfo = vks::initializers::renderPassBeginInfo();
-            renderPassBeginInfo.renderPass = renderPass;
-            renderPassBeginInfo.framebuffer = frameBuffers[i];
-            renderPassBeginInfo.renderArea.extent.width = width;
-            renderPassBeginInfo.renderArea.extent.height = height;
+            renderPassBeginInfo.m_vkrenderpass = m_vkrenderpass;
+            renderPassBeginInfo.framebuffer = m_vkframebuffers[i];
+            renderPassBeginInfo.renderArea.extent.m_iWidth = m_iWidth;
+            renderPassBeginInfo.renderArea.extent.m_iHeight = m_iHeight;
             renderPassBeginInfo.clearValueCount = 2;
             renderPassBeginInfo.pClearValues = clearValues;
 
-            vkCmdBeginRenderPass(m_drawCmdBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+            vkCmdBeginRenderPass(m_vkcommandbuffersDraw[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-            VkViewport viewport = vks::initializers::viewport((float)width, (float)height, 0.0f, 1.0f);
-            vkCmdSetViewport(m_drawCmdBuffers[i], 0, 1, &viewport);
+            VkViewport viewport = vks::initializers::viewport((float)m_iWidth, (float)m_iHeight, 0.0f, 1.0f);
+            vkCmdSetViewport(m_vkcommandbuffersDraw[i], 0, 1, &viewport);
 
-            VkRect2D scissor = vks::initializers::rect2D(width, height, 0, 0);
-            vkCmdSetScissor(m_drawCmdBuffers[i], 0, 1, &scissor);
+            VkRect2D scissor = vks::initializers::rect2D(m_iWidth, m_iHeight, 0, 0);
+            vkCmdSetScissor(m_vkcommandbuffersDraw[i], 0, 1, &scissor);
 
             if (debugDisplay)
             {
                // Display the offscreen render target
-               vkCmdBindDescriptorSets(m_drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.textured, 0, 1, &descriptorSets.mirror, 0, nullptr);
-               vkCmdBindPipeline(m_drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.debug);
-               vkCmdDraw(m_drawCmdBuffers[i], 3, 1, 0, 0);
+               vkCmdBindDescriptorSets(m_vkcommandbuffersDraw[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.textured, 0, 1, &descriptorSets.mirror, 0, nullptr);
+               vkCmdBindPipeline(m_vkcommandbuffersDraw[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.debug);
+               vkCmdDraw(m_vkcommandbuffersDraw[i], 3, 1, 0, 0);
             }
             else {
                // Render the scene
                // Reflection plane
-               vkCmdBindDescriptorSets(m_drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.textured, 0, 1, &descriptorSets.mirror, 0, nullptr);
-               vkCmdBindPipeline(m_drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.mirror);
-               models.plane.draw(m_drawCmdBuffers[i]);
+               vkCmdBindDescriptorSets(m_vkcommandbuffersDraw[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.textured, 0, 1, &descriptorSets.mirror, 0, nullptr);
+               vkCmdBindPipeline(m_vkcommandbuffersDraw[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.mirror);
+               models.plane.draw(m_vkcommandbuffersDraw[i]);
                // Model
-               vkCmdBindDescriptorSets(m_drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.shaded, 0, 1, &descriptorSets.model, 0, nullptr);
-               vkCmdBindPipeline(m_drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.shaded);
-               models.example.draw(m_drawCmdBuffers[i]);
+               vkCmdBindDescriptorSets(m_vkcommandbuffersDraw[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.shaded, 0, 1, &descriptorSets.model, 0, nullptr);
+               vkCmdBindPipeline(m_vkcommandbuffersDraw[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.shaded);
+               models.example.draw(m_vkcommandbuffersDraw[i]);
             }
 
-            drawUI(m_drawCmdBuffers[i]);
+            drawUI(m_vkcommandbuffersDraw[i]);
 
-            vkCmdEndRenderPass(m_drawCmdBuffers[i]);
+            vkCmdEndRenderPass(m_vkcommandbuffersDraw[i]);
          }
 
-         VK_CHECK_RESULT(vkEndCommandBuffer(m_drawCmdBuffers[i]));
+         VK_CHECK_RESULT(vkEndCommandBuffer(m_vkcommandbuffersDraw[i]));
       }
    }
 
@@ -364,7 +364,7 @@ namespace vulkan
          vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 8)
       };
       VkDescriptorPoolCreateInfo descriptorPoolInfo = vks::initializers::descriptorPoolCreateInfo(poolSizes, 5);
-      VK_CHECK_RESULT(vkCreateDescriptorPool(device, &descriptorPoolInfo, nullptr, &descriptorPool));
+      VK_CHECK_RESULT(vkCreateDescriptorPool(device, &descriptorPoolInfo, nullptr, &m_vkdescriptorpool));
 
       // Layout
       std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings;
@@ -390,7 +390,7 @@ namespace vulkan
 
       // Sets
       // Mirror plane descriptor set
-      VkDescriptorSetAllocateInfo allocInfo = vks::initializers::descriptorSetAllocateInfo(descriptorPool, &descriptorSetLayouts.textured, 1);
+      VkDescriptorSetAllocateInfo allocInfo = vks::initializers::descriptorSetAllocateInfo(m_vkdescriptorpool, &descriptorSetLayouts.textured, 1);
       VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &allocInfo, &descriptorSets.mirror));
       std::vector<VkWriteDescriptorSet> writeDescriptorSets = {
          // Binding 0 : Vertex shader uniform buffer
@@ -401,7 +401,7 @@ namespace vulkan
       vkUpdateDescriptorSets(device, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
 
       // Shaded descriptor sets
-      allocInfo = vks::initializers::descriptorSetAllocateInfo(descriptorPool, &descriptorSetLayouts.shaded, 1);
+      allocInfo = vks::initializers::descriptorSetAllocateInfo(m_vkdescriptorpool, &descriptorSetLayouts.shaded, 1);
       // Model
       VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &allocInfo, &descriptorSets.model));
       std::vector<VkWriteDescriptorSet> modelWriteDescriptorSets = {
@@ -441,7 +441,7 @@ namespace vulkan
       VkPipelineDynamicStateCreateInfo dynamicState = vks::initializers::pipelineDynamicStateCreateInfo(dynamicStateEnables);
       std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages;
 
-      VkGraphicsPipelineCreateInfo pipelineCI = vks::initializers::pipelineCreateInfo(pipelineLayouts.textured, renderPass, 0);
+      VkGraphicsPipelineCreateInfo pipelineCI = vks::initializers::pipelineCreateInfo(pipelineLayouts.textured, m_vkrenderpass, 0);
       pipelineCI.pInputAssemblyState = &inputAssemblyState;
       pipelineCI.pRasterizationState = &rasterizationState;
       pipelineCI.pColorBlendState = &colorBlendState;
@@ -458,12 +458,12 @@ namespace vulkan
       // Render-target debug display
       shaderStages[0] = loadShader(getShadersPath() + "offscreen/quad.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
       shaderStages[1] = loadShader(getShadersPath() + "offscreen/quad.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
-      VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, pipelineCache, 1, &pipelineCI, nullptr, &pipelines.debug));
+      VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, m_vkpipelinecache, 1, &pipelineCI, nullptr, &pipelines.debug));
 
       // Mirror
       shaderStages[0] = loadShader(getShadersPath() + "offscreen/mirror.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
       shaderStages[1] = loadShader(getShadersPath() + "offscreen/mirror.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
-      VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, pipelineCache, 1, &pipelineCI, nullptr, &pipelines.mirror));
+      VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, m_vkpipelinecache, 1, &pipelineCI, nullptr, &pipelines.mirror));
 
       rasterizationState.cullMode = VK_CULL_MODE_BACK_BIT;
 
@@ -472,12 +472,12 @@ namespace vulkan
       // Scene
       shaderStages[0] = loadShader(getShadersPath() + "offscreen/phong.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
       shaderStages[1] = loadShader(getShadersPath() + "offscreen/phong.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
-      VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, pipelineCache, 1, &pipelineCI, nullptr, &pipelines.shaded));
+      VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, m_vkpipelinecache, 1, &pipelineCI, nullptr, &pipelines.shaded));
       // Offscreen
       // Flip cull mode
       rasterizationState.cullMode = VK_CULL_MODE_FRONT_BIT;
-      pipelineCI.renderPass = offscreenPass.renderPass;
-      VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, pipelineCache, 1, &pipelineCI, nullptr, &pipelines.shadedOffscreen));
+      pipelineCI.m_vkrenderpass = offscreenPass.m_vkrenderpass;
+      VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, m_vkpipelinecache, 1, &pipelineCI, nullptr, &pipelines.shadedOffscreen));
 
    }
 
@@ -501,8 +501,8 @@ namespace vulkan
 
    void offscreen_application::updateUniformBuffers()
    {
-      uniformData.projection = camera.matrices.perspective;
-      uniformData.view = camera.matrices.view;
+      uniformData.projection = m_camera.matrices.perspective;
+      uniformData.view = m_camera.matrices.view;
 
       // Model
       uniformData.model = glm::mat4(1.0f);
@@ -517,8 +517,8 @@ namespace vulkan
 
    void offscreen_application::updateUniformBufferOffscreen()
    {
-      uniformData.projection = camera.matrices.perspective;
-      uniformData.view = camera.matrices.view;
+      uniformData.projection = m_camera.matrices.perspective;
+      uniformData.view = m_camera.matrices.view;
       uniformData.model = glm::mat4(1.0f);
       uniformData.model = glm::rotate(uniformData.model, glm::radians(modelRotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
       uniformData.model = glm::scale(uniformData.model, glm::vec3(1.0f, -1.0f, 1.0f));
@@ -535,17 +535,17 @@ namespace vulkan
       setupDescriptors();
       preparePipelines();
       buildCommandBuffers();
-      prepared = true;
+      m_bPrepared = true;
    }
 
    void offscreen_application::draw(const ::function < void(void*, int, int, int)>& callback)
    {
       //base_application_no_swap_chain::prepareFrame();
       //submitInfo.commandBufferCount = 1;
-      //submitInfo.pCommandBuffers = &m_drawCmdBuffers[currentBuffer];
+      //submitInfo.pCommandBuffers = &m_vkcommandbuffersDraw[m_uiCurrentBuffer];
       //VK_CHECK_RESULT(vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE));
 
-      submitWork(m_drawCmdBuffers[currentBuffer], queue);
+      submitWork(m_vkcommandbuffersDraw[m_uiCurrentBuffer], queue);
       //base_application_no_swap_chain::submitFrame();
       vkQueueWaitIdle(queue);
       sample(callback);
@@ -570,13 +570,13 @@ namespace vulkan
 
    void offscreen_application::render(const ::function < void(void*, int, int, int)>& callback)
    {
-      if (!prepared)
+      if (!m_bPrepared)
          return;
       draw(callback);
-      if (!paused || camera.updated)
+      if (!m_bPaused || m_camera.updated)
       {
-         if (!paused) {
-            modelRotation.y += frameTimer * 10.0f;
+         if (!m_bPaused) {
+            modelRotation.y += m_fFrameTimer * 10.0f;
          }
          updateUniformBuffers();
          updateUniformBufferOffscreen();
@@ -606,8 +606,8 @@ namespace vulkan
          VkImageCreateInfo imgCreateInfo(vks::initializers::imageCreateInfo());
          imgCreateInfo.imageType = VK_IMAGE_TYPE_2D;
          imgCreateInfo.format = VK_FORMAT_R8G8B8A8_UNORM;
-         imgCreateInfo.extent.width = width;
-         imgCreateInfo.extent.height = height;
+         imgCreateInfo.extent.m_iWidth = m_iWidth;
+         imgCreateInfo.extent.m_iHeight = m_iHeight;
          imgCreateInfo.extent.depth = 1;
          imgCreateInfo.arrayLayers = 1;
          imgCreateInfo.mipLevels = 1;
@@ -655,8 +655,8 @@ namespace vulkan
          imageCopyRegion.srcSubresource.layerCount = 1;
          imageCopyRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
          imageCopyRegion.dstSubresource.layerCount = 1;
-         imageCopyRegion.extent.width = width;
-         imageCopyRegion.extent.height = height;
+         imageCopyRegion.extent.m_iWidth = m_iWidth;
+         imageCopyRegion.extent.m_iHeight = m_iHeight;
          imageCopyRegion.extent.depth = 1;
 
          vkCmdCopyImage(
@@ -711,7 +711,7 @@ namespace vulkan
          //const bool colorSwizzle = (std::find(formatsBGR.begin(), formatsBGR.end(), VK_FORMAT_R8G8B8A8_UNORM) != formatsBGR.end());
          if (callback)
          {
-            callback((void*)imagedata, width, height, subResourceLayout.rowPitch);
+            callback((void*)imagedata, m_iWidth, m_iHeight, subResourceLayout.rowPitch);
 
          }
 
@@ -768,7 +768,7 @@ namespace vulkan
             //}
             //file.close();
 
-            //LOG("Framebuffer image saved to %s\n"_ansi, filename);
+            //LOG("frame_buffer image saved to %s\n"_ansi, filename);
 
             // Clean up resources
          vkUnmapMemory(device, dstImageMemory);
@@ -804,22 +804,22 @@ namespace vulkan
       //         break;
       //      }
       //   }
-      //   if (prepared && !IsIconic(window)) {
+      //   if (m_bPrepared && !IsIconic(window)) {
       while (::task_get_run())
       {
          nextFrame(callback);
          //void * pData = nullptr;
-         //vkMapMemory(m_pvulkandevice->logicalDevice, offscreenPass.color.mem, 0, destWidth * destHeight * 4, VK_MEMORY_MAP_PLACED_BIT_EXT, &pData);
-         //callback(pData, destWidth, destHeight, destWidth * 4);
+         //vkMapMemory(m_pvulkandevice->logicalDevice, offscreenPass.color.mem, 0, m_iDestWidth * m_iDestHeight * 4, VK_MEMORY_MAP_PLACED_BIT_EXT, &pData);
+         //callback(pData, m_iDestWidth, m_iDestHeight, m_iDestWidth * 4);
          //vkUnmapMemory(m_pvulkandevice->logicalDevice, offscreenPass.color.mem);
          preempt(20_ms);
       }
       //    // SRS - for non-apple plaforms, handle benchmarking here within base_application_with_swap_chain::renderLoop()
       //    //     - for macOS, handle benchmarking within NSApp rendering loop via displayLinkOutputCb()
       // #if !(defined(VK_USE_PLATFORM_IOS_MVK) || defined(VK_USE_PLATFORM_MACOS_MVK) || defined(VK_USE_PLATFORM_METAL_EXT))
-      //    if (benchmark.active) {
+      //    if (m_benchmark.active) {
       // #if defined(VK_USE_PLATFORM_WAYLAND_KHR)
-      //       while (!configured)
+      //       while (!m_bConfigured)
       //          wl_display_dispatch(display);
       //       while (wl_display_prepare_read(display) != 0)
       //          wl_display_dispatch_pending(display);
@@ -828,17 +828,17 @@ namespace vulkan
       //       wl_display_dispatch_pending(display);
       // #endif
       //
-      //       benchmark.run([=] { render(callback); }, m_pvulkandevice->properties);
+      //       m_benchmark.run([=] { render(callback); }, m_pvulkandevice->properties);
       //       vkDeviceWaitIdle(device);
-      //       if (benchmark.filename != "") {
-      //          benchmark.saveResults();
+      //       if (m_benchmark.filename != "") {
+      //          m_benchmark.saveResults();
       //       }
       //       return;
       //    }
       // #endif
       //
-      //    destWidth = width;
-      //    destHeight = height;
+      //    m_iDestWidth = m_iWidth;
+      //    m_iDestHeight = m_iHeight;
       //    lastTimestamp = std::chrono::high_resolution_clock::now();
       //    tPrevEnd = lastTimestamp;
       // #if defined(_WIN32)
@@ -853,13 +853,13 @@ namespace vulkan
       //    //         break;
       //    //      }
       //    //   }
-      //    //   if (prepared && !IsIconic(window)) {
+      //    //   if (m_bPrepared && !IsIconic(window)) {
       //    while (::task_get_run())
       //    {
       //       nextFrame(callback);
       //       //void * pData = nullptr;
-      //       //vkMapMemory(m_pvulkandevice->logicalDevice, offscreenPass.color.mem, 0, destWidth * destHeight * 4, VK_MEMORY_MAP_PLACED_BIT_EXT, &pData);
-      //       //callback(pData, destWidth, destHeight, destWidth * 4);
+      //       //vkMapMemory(m_pvulkandevice->logicalDevice, offscreenPass.color.mem, 0, m_iDestWidth * m_iDestHeight * 4, VK_MEMORY_MAP_PLACED_BIT_EXT, &pData);
+      //       //callback(pData, m_iDestWidth, m_iDestHeight, m_iDestWidth * 4);
       //       //vkUnmapMemory(m_pvulkandevice->logicalDevice, offscreenPass.color.mem);
       //       preempt(20_ms);
       //    }
@@ -896,22 +896,22 @@ namespace vulkan
       //       }
       //
       //       // Render frame
-      //       if (prepared)
+      //       if (m_bPrepared)
       //       {
       //          auto tStart = std::chrono::high_resolution_clock::now();
       //          render();
       //          frameCounter++;
       //          auto tEnd = std::chrono::high_resolution_clock::now();
       //          auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
-      //          frameTimer = tDiff / 1000.0f;
-      //          camera.update(frameTimer);
-      //          // Convert to clamped timer value
-      //          if (!paused)
+      //          m_fFrameTimer = tDiff / 1000.0f;
+      //          m_camera.update(m_fFrameTimer);
+      //          // Convert to clamped m_fTimer value
+      //          if (!m_bPaused)
       //          {
-      //             timer += timerSpeed * frameTimer;
-      //             if (timer > 1.0)
+      //             m_fTimer += m_fTimerSpeed * m_fFrameTimer;
+      //             if (m_fTimer > 1.0)
       //             {
-      //                timer -= 1.0f;
+      //                m_fTimer -= 1.0f;
       //             }
       //          }
       //          float fpsTimer = std::chrono::duration<double, std::milli>(tEnd - lastTimestamp).count();
@@ -928,65 +928,65 @@ namespace vulkan
       //
       //          // Check touch state (for movement)
       //          if (touchDown) {
-      //             touchTimer += frameTimer;
+      //             touchTimer += m_fFrameTimer;
       //          }
       //          if (touchTimer >= 1.0) {
-      //             camera.keys.up = true;
+      //             m_camera.keys.up = true;
       //          }
       //
       //          // Check gamepad state
       //          const float deadZone = 0.0015f;
-      //          if (camera.type != Camera::CameraType::firstperson)
+      //          if (m_camera.type != Camera::CameraType::firstperson)
       //          {
       //             // Rotate
-      //             if (std::abs(gamePadState.axisLeft.x) > deadZone)
+      //             if (std::abs(m_gamepadstate.axisLeft.x) > deadZone)
       //             {
-      //                camera.rotate(glm::vec3(0.0f, gamePadState.axisLeft.x * 0.5f, 0.0f));
+      //                m_camera.rotate(glm::vec3(0.0f, m_gamepadstate.axisLeft.x * 0.5f, 0.0f));
       //                updateView = true;
       //             }
-      //             if (std::abs(gamePadState.axisLeft.y) > deadZone)
+      //             if (std::abs(m_gamepadstate.axisLeft.y) > deadZone)
       //             {
-      //                camera.rotate(glm::vec3(gamePadState.axisLeft.y * 0.5f, 0.0f, 0.0f));
+      //                m_camera.rotate(glm::vec3(m_gamepadstate.axisLeft.y * 0.5f, 0.0f, 0.0f));
       //                updateView = true;
       //             }
       //             // Zoom
-      //             if (std::abs(gamePadState.axisRight.y) > deadZone)
+      //             if (std::abs(m_gamepadstate.axisRight.y) > deadZone)
       //             {
-      //                camera.translate(glm::vec3(0.0f, 0.0f, gamePadState.axisRight.y * 0.01f));
+      //                m_camera.translate(glm::vec3(0.0f, 0.0f, m_gamepadstate.axisRight.y * 0.01f));
       //                updateView = true;
       //             }
       //          }
       //          else
       //          {
-      //             updateView = camera.updatePad(gamePadState.axisLeft, gamePadState.axisRight, frameTimer);
+      //             updateView = m_camera.updatePad(m_gamepadstate.axisLeft, m_gamepadstate.axisRight, m_fFrameTimer);
       //          }
       //       }
       //    }
       // #elif defined(_DIRECT2DISPLAY)
-      //    while (!quit)
+      //    while (!m_bQuit)
       //    {
       //       auto tStart = std::chrono::high_resolution_clock::now();
-      //       if (viewUpdated)
+      //       if (m_bViewUpdated)
       //       {
-      //          viewUpdated = false;
+      //          m_bViewUpdated = false;
       //       }
       //       render();
       //       frameCounter++;
       //       auto tEnd = std::chrono::high_resolution_clock::now();
       //       auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
-      //       frameTimer = tDiff / 1000.0f;
-      //       camera.update(frameTimer);
-      //       if (camera.moving())
+      //       m_fFrameTimer = tDiff / 1000.0f;
+      //       m_camera.update(m_fFrameTimer);
+      //       if (m_camera.moving())
       //       {
-      //          viewUpdated = true;
+      //          m_bViewUpdated = true;
       //       }
-      //       // Convert to clamped timer value
-      //       if (!paused)
+      //       // Convert to clamped m_fTimer value
+      //       if (!m_bPaused)
       //       {
-      //          timer += timerSpeed * frameTimer;
-      //          if (timer > 1.0)
+      //          m_fTimer += m_fTimerSpeed * m_fFrameTimer;
+      //          if (m_fTimer > 1.0)
       //          {
-      //             timer -= 1.0f;
+      //             m_fTimer -= 1.0f;
       //          }
       //       }
       //       float fpsTimer = std::chrono::duration<double, std::milli>(tEnd - lastTimestamp).count();
@@ -999,12 +999,12 @@ namespace vulkan
       //       updateOverlay();
       //    }
       // #elif defined(VK_USE_PLATFORM_DIRECTFB_EXT)
-      //    while (!quit)
+      //    while (!m_bQuit)
       //    {
       //       auto tStart = std::chrono::high_resolution_clock::now();
-      //       if (viewUpdated)
+      //       if (m_bViewUpdated)
       //       {
-      //          viewUpdated = false;
+      //          m_bViewUpdated = false;
       //       }
       //       DFBWindowEvent happening;
       //       while (!event_buffer->GetEvent(event_buffer, DFB_EVENT(&happening)))
@@ -1015,19 +1015,19 @@ namespace vulkan
       //       frameCounter++;
       //       auto tEnd = std::chrono::high_resolution_clock::now();
       //       auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
-      //       frameTimer = tDiff / 1000.0f;
-      //       camera.update(frameTimer);
-      //       if (camera.moving())
+      //       m_fFrameTimer = tDiff / 1000.0f;
+      //       m_camera.update(m_fFrameTimer);
+      //       if (m_camera.moving())
       //       {
-      //          viewUpdated = true;
+      //          m_bViewUpdated = true;
       //       }
-      //       // Convert to clamped timer value
-      //       if (!paused)
+      //       // Convert to clamped m_fTimer value
+      //       if (!m_bPaused)
       //       {
-      //          timer += timerSpeed * frameTimer;
-      //          if (timer > 1.0)
+      //          m_fTimer += m_fTimerSpeed * m_fFrameTimer;
+      //          if (m_fTimer > 1.0)
       //          {
-      //             timer -= 1.0f;
+      //             m_fTimer -= 1.0f;
       //          }
       //       }
       //       float fpsTimer = std::chrono::duration<double, std::milli>(tEnd - lastTimestamp).count();
@@ -1040,15 +1040,15 @@ namespace vulkan
       //       updateOverlay();
       //    }
       // #elif defined(VK_USE_PLATFORM_WAYLAND_KHR)
-      //    while (!quit)
+      //    while (!m_bQuit)
       //    {
       //       auto tStart = std::chrono::high_resolution_clock::now();
-      //       if (viewUpdated)
+      //       if (m_bViewUpdated)
       //       {
-      //          viewUpdated = false;
+      //          m_bViewUpdated = false;
       //       }
       //
-      //       while (!configured)
+      //       while (!m_bConfigured)
       //          wl_display_dispatch(display);
       //       while (wl_display_prepare_read(display) != 0)
       //          wl_display_dispatch_pending(display);
@@ -1060,19 +1060,19 @@ namespace vulkan
       //       frameCounter++;
       //       auto tEnd = std::chrono::high_resolution_clock::now();
       //       auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
-      //       frameTimer = tDiff / 1000.0f;
-      //       camera.update(frameTimer);
-      //       if (camera.moving())
+      //       m_fFrameTimer = tDiff / 1000.0f;
+      //       m_camera.update(m_fFrameTimer);
+      //       if (m_camera.moving())
       //       {
-      //          viewUpdated = true;
+      //          m_bViewUpdated = true;
       //       }
-      //       // Convert to clamped timer value
-      //       if (!paused)
+      //       // Convert to clamped m_fTimer value
+      //       if (!m_bPaused)
       //       {
-      //          timer += timerSpeed * frameTimer;
-      //          if (timer > 1.0)
+      //          m_fTimer += m_fTimerSpeed * m_fFrameTimer;
+      //          if (m_fTimer > 1.0)
       //          {
-      //             timer -= 1.0f;
+      //             m_fTimer -= 1.0f;
       //          }
       //       }
       //       float fpsTimer = std::chrono::duration<double, std::milli>(tEnd - lastTimestamp).count();
@@ -1091,12 +1091,12 @@ namespace vulkan
       //    }
       // #elif defined(VK_USE_PLATFORM_XCB_KHR)
       //    xcb_flush(connection);
-      //    while (!quit)
+      //    while (!m_bQuit)
       //    {
       //       auto tStart = std::chrono::high_resolution_clock::now();
-      //       if (viewUpdated)
+      //       if (m_bViewUpdated)
       //       {
-      //          viewUpdated = false;
+      //          m_bViewUpdated = false;
       //       }
       //       xcb_generic_event_t * happening;
       //       while ((happening = xcb_poll_for_event(connection)))
@@ -1108,19 +1108,19 @@ namespace vulkan
       //       frameCounter++;
       //       auto tEnd = std::chrono::high_resolution_clock::now();
       //       auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
-      //       frameTimer = tDiff / 1000.0f;
-      //       camera.update(frameTimer);
-      //       if (camera.moving())
+      //       m_fFrameTimer = tDiff / 1000.0f;
+      //       m_camera.update(m_fFrameTimer);
+      //       if (m_camera.moving())
       //       {
-      //          viewUpdated = true;
+      //          m_bViewUpdated = true;
       //       }
-      //       // Convert to clamped timer value
-      //       if (!paused)
+      //       // Convert to clamped m_fTimer value
+      //       if (!m_bPaused)
       //       {
-      //          timer += timerSpeed * frameTimer;
-      //          if (timer > 1.0)
+      //          m_fTimer += m_fTimerSpeed * m_fFrameTimer;
+      //          if (m_fTimer > 1.0)
       //          {
-      //             timer -= 1.0f;
+      //             m_fTimer -= 1.0f;
       //          }
       //       }
       //       float fpsTimer = std::chrono::duration<double, std::milli>(tEnd - lastTimestamp).count();
@@ -1140,28 +1140,28 @@ namespace vulkan
       //       updateOverlay();
       //    }
       // #elif defined(VK_USE_PLATFORM_HEADLESS_EXT)
-      //    while (!quit)
+      //    while (!m_bQuit)
       //    {
       //       auto tStart = std::chrono::high_resolution_clock::now();
-      //       if (viewUpdated)
+      //       if (m_bViewUpdated)
       //       {
-      //          viewUpdated = false;
+      //          m_bViewUpdated = false;
       //       }
       //       render();
       //       frameCounter++;
       //       auto tEnd = std::chrono::high_resolution_clock::now();
       //       auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
-      //       frameTimer = tDiff / 1000.0f;
-      //       camera.update(frameTimer);
-      //       if (camera.moving())
+      //       m_fFrameTimer = tDiff / 1000.0f;
+      //       m_camera.update(m_fFrameTimer);
+      //       if (m_camera.moving())
       //       {
-      //          viewUpdated = true;
+      //          m_bViewUpdated = true;
       //       }
-      //       // Convert to clamped timer value
-      //       timer += timerSpeed * frameTimer;
-      //       if (timer > 1.0)
+      //       // Convert to clamped m_fTimer value
+      //       m_fTimer += m_fTimerSpeed * m_fFrameTimer;
+      //       if (m_fTimer > 1.0)
       //       {
-      //          timer -= 1.0f;
+      //          m_fTimer -= 1.0f;
       //       }
       //       float fpsTimer = std::chrono::duration<double, std::milli>(tEnd - lastTimestamp).count();
       //       if (fpsTimer > 1000.0f)
@@ -1175,10 +1175,10 @@ namespace vulkan
       // #elif (defined(VK_USE_PLATFORM_MACOS_MVK) || defined(VK_USE_PLATFORM_METAL_EXT)) && defined(VK_EXAMPLE_XCODE_GENERATED)
       //    [NSApp run];
       // #elif defined(VK_USE_PLATFORM_SCREEN_QNX)
-      //    while (!quit) {
+      //    while (!m_bQuit) {
       //       handleEvent();
       //
-      //       if (prepared) {
+      //       if (m_bPrepared) {
       //          nextFrame();
       //       }
       //    }
@@ -1201,7 +1201,7 @@ namespace vulkan
    //}
 
 
-   ::pointer<::vulkan::application > start_offscreen_application(::vkc::VkContainer* pvkcontainer, mouseState* pmousestate)
+   ::pointer<::vulkan::application > start_offscreen_application(::vkc::VkContainer* pvkcontainer, m_mousestate* pmousestate)
    {
 
       auto pvulkanoffscreenapplication = pvkcontainer->__create_new < offscreen_application >();

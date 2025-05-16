@@ -2,7 +2,7 @@
 
 
 #include "base_application_no_swap_chain.h"
-#include "VulkanglTFModel.h"
+#include "gltf_model.h"
 
 // Offscreen frame buffer properties
 #define FB_DIM 512
@@ -61,17 +61,17 @@ namespace vulkan
          VkDescriptorSetLayout shaded{ VK_NULL_HANDLE };
       } descriptorSetLayouts;
 
-      // Framebuffer for offscreen rendering
+      // frame_buffer for offscreen rendering
       struct FrameBufferAttachment {
          VkImage image;
          VkDeviceMemory mem;
          VkImageView view;
       };
       struct OffscreenPass {
-         int32_t width, height;
+         int32_t m_iWidth, m_iHeight;
          VkFramebuffer frameBuffer;
          FrameBufferAttachment color, depth;
-         VkRenderPass renderPass;
+         VkRenderPass m_vkrenderpass;
          VkSampler sampler;
          VkDescriptorImageInfo descriptor;
       } offscreenPass{};

@@ -6,7 +6,7 @@
  * This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)
  */
 #include "framework.h"
-#include "VulkanDebug.h"
+#include "debug.h"
 #include <iostream>
 
 namespace vks

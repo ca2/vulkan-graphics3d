@@ -18,7 +18,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #define TINYGLTF_NO_STB_IMAGE_WRITE
 
-#include "VulkanglTFModel.h"
+#include "gltf_model.h"
 #include "acme/filesystem/filesystem/file_context.h"
 #include "acme/platform/application.h"
 #include <vector>
@@ -95,11 +95,11 @@ void vkglTF::Texture::fromglTfImage(tinygltf::Image &gltfimage, const ::file::pa
 		if (gltfimage.component == 3) {
 			// Most devices don't support RGB only on Vulkan so convert if necessary
 			// TODO: Check actual format support and transform only if required
-			bufferSize = gltfimage.width * gltfimage.height * 4;
+			bufferSize = gltfimage.m_iWidth * gltfimage.m_iHeight * 4;
 			buffer = ___new unsigned char[bufferSize];
 			unsigned char* rgba = buffer;
 			unsigned char* rgb = &gltfimage.image[0];
-			for (size_t i = 0; i < gltfimage.width * gltfimage.height; ++i) {
+			for (size_t i = 0; i < gltfimage.m_iWidth * gltfimage.m_iHeight; ++i) {
 				for (int32_t j = 0; j < 3; ++j) {
 					rgba[j] = rgb[j];
 				}
@@ -117,9 +117,9 @@ void vkglTF::Texture::fromglTfImage(tinygltf::Image &gltfimage, const ::file::pa
 
 		VkFormatProperties formatProperties;
 
-		width = gltfimage.width;
-		height = gltfimage.height;
-		mipLevels = static_cast<uint32_t>(floor(log2(std::max(width, height))) + 1.0);
+		m_iWidth = gltfimage.m_iWidth;
+		m_iHeight = gltfimage.m_iHeight;
+		mipLevels = static_cast<uint32_t>(floor(log2(std::max(m_iWidth, m_iHeight))) + 1.0);
 
 		vkGetPhysicalDeviceFormatProperties(m_pvulkandevice->physicalDevice, format, &formatProperties);
 		assert(formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_BLIT_SRC_BIT);
@@ -160,7 +160,7 @@ void vkglTF::Texture::fromglTfImage(tinygltf::Image &gltfimage, const ::file::pa
 		imageCreateInfo.usage = VK_IMAGE_USAGE_SAMPLED_BIT;
 		imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 		imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		imageCreateInfo.extent = { width, height, 1 };
+		imageCreateInfo.extent = { m_iWidth, m_iHeight, 1 };
 		imageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 		VK_CHECK_RESULT(vkCreateImage(m_pvulkandevice->logicalDevice, &imageCreateInfo, nullptr, &image));
 		vkGetImageMemoryRequirements(m_pvulkandevice->logicalDevice, image, &memReqs);
@@ -192,8 +192,8 @@ void vkglTF::Texture::fromglTfImage(tinygltf::Image &gltfimage, const ::file::pa
 		bufferCopyRegion.imageSubresource.mipLevel = 0;
 		bufferCopyRegion.imageSubresource.baseArrayLayer = 0;
 		bufferCopyRegion.imageSubresource.layerCount = 1;
-		bufferCopyRegion.imageExtent.width = width;
-		bufferCopyRegion.imageExtent.height = height;
+		bufferCopyRegion.imageExtent.m_iWidth = m_iWidth;
+		bufferCopyRegion.imageExtent.m_iHeight = m_iHeight;
 		bufferCopyRegion.imageExtent.depth = 1;
 
 		vkCmdCopyBufferToImage(copyCmd, stagingBuffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &bufferCopyRegion);
@@ -220,15 +220,15 @@ void vkglTF::Texture::fromglTfImage(tinygltf::Image &gltfimage, const ::file::pa
 			imageBlit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 			imageBlit.srcSubresource.layerCount = 1;
 			imageBlit.srcSubresource.mipLevel = i - 1;
-			imageBlit.srcOffsets[1].x = int32_t(width >> (i - 1));
-			imageBlit.srcOffsets[1].y = int32_t(height >> (i - 1));
+			imageBlit.srcOffsets[1].x = int32_t(m_iWidth >> (i - 1));
+			imageBlit.srcOffsets[1].y = int32_t(m_iHeight >> (i - 1));
 			imageBlit.srcOffsets[1].z = 1;
 
 			imageBlit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 			imageBlit.dstSubresource.layerCount = 1;
 			imageBlit.dstSubresource.mipLevel = i;
-			imageBlit.dstOffsets[1].x = int32_t(width >> i);
-			imageBlit.dstOffsets[1].y = int32_t(height >> i);
+			imageBlit.dstOffsets[1].x = int32_t(m_iWidth >> i);
+			imageBlit.dstOffsets[1].y = int32_t(m_iHeight >> i);
 			imageBlit.dstOffsets[1].z = 1;
 
 			VkImageSubresourceRange mipSubRange = {};
@@ -312,8 +312,8 @@ void vkglTF::Texture::fromglTfImage(tinygltf::Image &gltfimage, const ::file::pa
 		assert(result == KTX_SUCCESS);
 
 		this->m_pvulkandevice = m_pvulkandevice;
-		width = ktxTexture->baseWidth;
-		height = ktxTexture->baseHeight;
+		m_iWidth = ktxTexture->baseWidth;
+		m_iHeight = ktxTexture->baseHeight;
 		mipLevels = ktxTexture->numLevels;
 
 		ktx_uint8_t* ktxTextureData = ktxTexture_GetData(ktxTexture);
@@ -360,8 +360,8 @@ void vkglTF::Texture::fromglTfImage(tinygltf::Image &gltfimage, const ::file::pa
 			bufferCopyRegion.imageSubresource.mipLevel = i;
 			bufferCopyRegion.imageSubresource.baseArrayLayer = 0;
 			bufferCopyRegion.imageSubresource.layerCount = 1;
-			bufferCopyRegion.imageExtent.width = std::max(1u, ktxTexture->baseWidth >> i);
-			bufferCopyRegion.imageExtent.height = std::max(1u, ktxTexture->baseHeight >> i);
+			bufferCopyRegion.imageExtent.m_iWidth = std::max(1u, ktxTexture->baseWidth >> i);
+			bufferCopyRegion.imageExtent.m_iHeight = std::max(1u, ktxTexture->baseHeight >> i);
 			bufferCopyRegion.imageExtent.depth = 1;
 			bufferCopyRegion.bufferOffset = offset;
 			bufferCopyRegions.push_back(bufferCopyRegion);
@@ -377,7 +377,7 @@ void vkglTF::Texture::fromglTfImage(tinygltf::Image &gltfimage, const ::file::pa
 		imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
 		imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 		imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		imageCreateInfo.extent = { width, height, 1 };
+		imageCreateInfo.extent = { m_iWidth, m_iHeight, 1 };
 		imageCreateInfo.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 		VK_CHECK_RESULT(vkCreateImage(m_pvulkandevice->logicalDevice, &imageCreateInfo, nullptr, &image));
 
@@ -445,11 +445,11 @@ void vkglTF::Texture::fromglTfImage(tinygltf::Image &gltfimage, const ::file::pa
 /*
 	glTF material
 */
-void vkglTF::Material::createDescriptorSet(VkDescriptorPool descriptorPool, VkDescriptorSetLayout descriptorSetLayout, uint32_t descriptorBindingFlags)
+void vkglTF::Material::createDescriptorSet(VkDescriptorPool m_vkdescriptorpool, VkDescriptorSetLayout descriptorSetLayout, uint32_t descriptorBindingFlags)
 {
 	VkDescriptorSetAllocateInfo descriptorSetAllocInfo{};
 	descriptorSetAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-	descriptorSetAllocInfo.descriptorPool = descriptorPool;
+	descriptorSetAllocInfo.m_vkdescriptorpool = m_vkdescriptorpool;
 	descriptorSetAllocInfo.pSetLayouts = &descriptorSetLayout;
 	descriptorSetAllocInfo.descriptorSetCount = 1;
 	VK_CHECK_RESULT(vkAllocateDescriptorSets(m_pvulkandevice->logicalDevice, &descriptorSetAllocInfo, &descriptorSet));
@@ -636,12 +636,12 @@ vkglTF::Texture* vkglTF::Model::getTexture(uint32_t index)
 void vkglTF::Model::createEmptyTexture(VkQueue transferQueue)
 {
 	emptyTexture.m_pvulkandevice = m_pvulkandevice;
-	emptyTexture.width = 1;
-	emptyTexture.height = 1;
+	emptyTexture.m_iWidth = 1;
+	emptyTexture.m_iHeight = 1;
 	emptyTexture.layerCount = 1;
 	emptyTexture.mipLevels = 1;
 
-	size_t bufferSize = emptyTexture.width * emptyTexture.height * 4;
+	size_t bufferSize = emptyTexture.m_iWidth * emptyTexture.m_iHeight * 4;
 	unsigned char* buffer = ___new unsigned char[bufferSize];
 	memset(buffer, 0, bufferSize);
 
@@ -671,8 +671,8 @@ void vkglTF::Model::createEmptyTexture(VkQueue transferQueue)
 	VkBufferImageCopy bufferCopyRegion = {};
 	bufferCopyRegion.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 	bufferCopyRegion.imageSubresource.layerCount = 1;
-	bufferCopyRegion.imageExtent.width = emptyTexture.width;
-	bufferCopyRegion.imageExtent.height = emptyTexture.height;
+	bufferCopyRegion.imageExtent.m_iWidth = emptyTexture.m_iWidth;
+	bufferCopyRegion.imageExtent.m_iHeight = emptyTexture.m_iHeight;
 	bufferCopyRegion.imageExtent.depth = 1;
 
 	// Create optimal tiled target image
@@ -685,7 +685,7 @@ void vkglTF::Model::createEmptyTexture(VkQueue transferQueue)
 	imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
 	imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 	imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	imageCreateInfo.extent = { emptyTexture.width, emptyTexture.height, 1 };
+	imageCreateInfo.extent = { emptyTexture.m_iWidth, emptyTexture.m_iHeight, 1 };
 	imageCreateInfo.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 	VK_CHECK_RESULT(vkCreateImage(m_pvulkandevice->logicalDevice, &imageCreateInfo, nullptr, &emptyTexture.image));
 
@@ -762,7 +762,7 @@ vkglTF::Model::~Model()
 		vkDestroyDescriptorSetLayout(m_pvulkandevice->logicalDevice, descriptorSetLayoutImage, nullptr);
 		descriptorSetLayoutImage = VK_NULL_HANDLE;
 	}
-	vkDestroyDescriptorPool(m_pvulkandevice->logicalDevice, descriptorPool, nullptr);
+	vkDestroyDescriptorPool(m_pvulkandevice->logicalDevice, m_vkdescriptorpool, nullptr);
 	emptyTexture.destroy();
 }
 
@@ -1373,7 +1373,7 @@ void vkglTF::Model::loadFromFile(const ::file::path & filename, vulkan::device *
 	descriptorPoolCI.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
 	descriptorPoolCI.pPoolSizes = poolSizes.data();
 	descriptorPoolCI.maxSets = uboCount + imageCount;
-	VK_CHECK_RESULT(vkCreateDescriptorPool(m_pvulkandevice->logicalDevice, &descriptorPoolCI, nullptr, &descriptorPool));
+	VK_CHECK_RESULT(vkCreateDescriptorPool(m_pvulkandevice->logicalDevice, &descriptorPoolCI, nullptr, &m_vkdescriptorpool));
 
 	// Descriptors for per-node uniform buffers
 	{
@@ -1412,7 +1412,7 @@ void vkglTF::Model::loadFromFile(const ::file::path & filename, vulkan::device *
 		}
 		for (auto& material : materials) {
 			if (material.baseColorTexture != nullptr) {
-				material.createDescriptorSet(descriptorPool, vkglTF::descriptorSetLayoutImage, descriptorBindingFlags);
+				material.createDescriptorSet(m_vkdescriptorpool, vkglTF::descriptorSetLayoutImage, descriptorBindingFlags);
 			}
 		}
 	}
@@ -1586,7 +1586,7 @@ void vkglTF::Model::prepareNodeDescriptor(vkglTF::Node* node, VkDescriptorSetLay
 	if (node->mesh) {
 		VkDescriptorSetAllocateInfo descriptorSetAllocInfo{};
 		descriptorSetAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-		descriptorSetAllocInfo.descriptorPool = descriptorPool;
+		descriptorSetAllocInfo.m_vkdescriptorpool = m_vkdescriptorpool;
 		descriptorSetAllocInfo.pSetLayouts = &descriptorSetLayout;
 		descriptorSetAllocInfo.descriptorSetCount = 1;
 		VK_CHECK_RESULT(vkAllocateDescriptorSets(m_pvulkandevice->logicalDevice, &descriptorSetAllocInfo, &node->mesh->uniformBuffer.descriptorSet));

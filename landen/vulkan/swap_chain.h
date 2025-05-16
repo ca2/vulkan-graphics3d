@@ -16,8 +16,8 @@
 #include <stdio.h>
 #include <vector>
 
-#include <vulkan/vulkan.h>
-#include "VulkanTools.h"
+#include "_vulkan.h"
+#include "tools.h"
 
 #ifdef __ANDROID__
 #include "VulkanAndroid.h"
@@ -66,9 +66,9 @@ namespace vulkan
 #elif defined(VK_USE_PLATFORM_METAL_EXT)
 		void initSurface(CAMetalLayer* metalLayer);
 #elif (defined(_DIRECT2DISPLAY) || defined(VK_USE_PLATFORM_HEADLESS_EXT))
-		void initSurface(uint32_t width, uint32_t height);
+		void initSurface(uint32_t m_iWidth, uint32_t m_iHeight);
 #if defined(_DIRECT2DISPLAY)
-		void createDirect2DisplaySurface(uint32_t width, uint32_t height);
+		void createDirect2DisplaySurface(uint32_t m_iWidth, uint32_t m_iHeight);
 #endif
 #elif defined(VK_USE_PLATFORM_SCREEN_QNX)
 		void initSurface(screen_context_t screen_context, screen_window_t screen_window);
@@ -76,13 +76,13 @@ namespace vulkan
 		/* Set the Vulkan objects required for swapchain creation and management, must be called before swapchain creation */
 		void setContext(VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device);
 		/**
-		* Create the swapchain and get its images with given width and height
+		* Create the swapchain and get its images with given m_iWidth and m_iHeight
 		*
-		* @param width Pointer to the width of the swapchain (may be adjusted to fit the requirements of the swapchain)
-		* @param height Pointer to the height of the swapchain (may be adjusted to fit the requirements of the swapchain)
+		* @param m_iWidth Pointer to the m_iWidth of the swapchain (may be adjusted to fit the requirements of the swapchain)
+		* @param m_iHeight Pointer to the m_iHeight of the swapchain (may be adjusted to fit the requirements of the swapchain)
 		* @param vsync (Optional, default = false) Can be used to force vsync-ed rendering (by using VK_PRESENT_MODE_FIFO_KHR as presentation mode)
 		*/
-		void create(uint32_t* width, uint32_t* height, bool vsync = false, bool fullscreen = false);
+		void create(uint32_t* m_iWidth, uint32_t* m_iHeight, bool vsync = false, bool fullscreen = false);
 		/**
 		* Acquires the next image in the swap chain
 		*

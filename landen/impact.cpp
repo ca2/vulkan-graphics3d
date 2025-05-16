@@ -19,14 +19,14 @@ int run_vulkan_example();
 
 int run_vulkan_example2(const ::function < void(void*, int, int, int)>& callback);
 
-int run_vulkan_example5(mouseState* pmousestate, const ::function < void(void*, int, int, int)>& callback);
+int run_vulkan_example5(mouse_state* pmousestate, const ::function < void(void*, int, int, int)>& callback);
 
 
 namespace vulkan
 {
 
 
-   ::pointer<::vulkan::application > start_offscreen_application(vkc::VkContainer* pvkcontainer, mouseState* pmousestate);
+   ::pointer<::vulkan::application > start_offscreen_application(vkc::VkContainer* pvkcontainer, mouse_state* pmousestate);
 
 
 } // namespace vulkan
@@ -180,11 +180,11 @@ namespace vulkan_land_landen
 
          //m_mousestate.position.x = point.x();
          //m_mousestate.position.y = point.y();
-         //m_mousestate.buttons.left = true;
+         //m_mousestate.m_buttons.left = true;
          //         pmouse->m_p
 
-         double w = m_width;
-         double h = m_height;
+         double w = m_iWidth;
+         double h = m_iHeight;
 
          if (m_bLastMouse)
          {
@@ -264,7 +264,7 @@ namespace vulkan_land_landen
 
       m_mousestate.position.x = point.x();
       m_mousestate.position.y = point.y();
-      m_mousestate.buttons.left = true;
+      m_mousestate.m_buttons.left = true;
 
    }
 
@@ -282,7 +282,7 @@ namespace vulkan_land_landen
 
       m_mousestate.position.x = point.x();
       m_mousestate.position.y = point.y();
-      m_mousestate.buttons.left = false;
+      m_mousestate.m_buttons.left = false;
 
    }
 
@@ -332,7 +332,7 @@ namespace vulkan_land_landen
    }
 
 
-   void impact::on_timer(timer* ptimer)
+   void impact::on_timer(::timer * ptimer)
    {
 
    }
@@ -476,11 +476,11 @@ namespace vulkan_land_landen
 
       }
 
-      m_width = rectangleX.width();
+      m_iWidth = rectangleX.width();
 
-      m_height = rectangleX.height();
+      m_iHeight = rectangleX.height();
 
-      get_app()->update_3d_application(m_width, m_height);
+      get_app()->update_3d_application(m_iWidth, m_iHeight);
 
       reset_mouse_last_position();
 

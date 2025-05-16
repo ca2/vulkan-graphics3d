@@ -167,7 +167,7 @@ namespace vulkan
    {
       base_application_with_swap_chain::prepareFrame();
       submitInfo.commandBufferCount = 1;
-      submitInfo.pCommandBuffers = &m_drawCmdBuffers[currentBuffer];
+      submitInfo.pCommandBuffers = &m_vkcommandbuffersDraw[m_uiCurrentBuffer];
       VK_CHECK_RESULT(vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE));
       base_application_with_swap_chain::submitFrame();
    }
@@ -184,14 +184,14 @@ namespace vulkan
    void base_application_with_swap_chain::createCommandBuffers()
    {
       // Create one command buffer for each swap chain image
-      m_drawCmdBuffers.resize(m_swapchain.imageCount);
-      VkCommandBufferAllocateInfo cmdBufAllocateInfo = vks::initializers::commandBufferAllocateInfo(cmdPool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, static_cast<uint32_t>(m_drawCmdBuffers.size()));
-      VK_CHECK_RESULT(vkAllocateCommandBuffers(device, &cmdBufAllocateInfo, m_drawCmdBuffers.data()));
+      m_vkcommandbuffersDraw.resize(m_swapchain.imageCount);
+      VkCommandBufferAllocateInfo cmdBufAllocateInfo = vks::initializers::commandBufferAllocateInfo(cmdPool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, static_cast<uint32_t>(m_vkcommandbuffersDraw.size()));
+      VK_CHECK_RESULT(vkAllocateCommandBuffers(device, &cmdBufAllocateInfo, m_vkcommandbuffersDraw.data()));
    }
 
    void base_application_with_swap_chain::destroyCommandBuffers()
    {
-      vkFreeCommandBuffers(device, cmdPool, static_cast<uint32_t>(m_drawCmdBuffers.size()), m_drawCmdBuffers.data());
+      vkFreeCommandBuffers(device, cmdPool, static_cast<uint32_t>(m_vkcommandbuffersDraw.size()), m_vkcommandbuffersDraw.data());
    }
 
    std::string base_application_with_swap_chain::getShadersPath() const
@@ -203,7 +203,7 @@ namespace vulkan
    {
       VkPipelineCacheCreateInfo pipelineCacheCreateInfo = {};
       pipelineCacheCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
-      VK_CHECK_RESULT(vkCreatePipelineCache(device, &pipelineCacheCreateInfo, nullptr, &pipelineCache));
+      VK_CHECK_RESULT(vkCreatePipelineCache(device, &pipelineCacheCreateInfo, nullptr, &m_vkpipelinecache));
    }
 
    void base_application_with_swap_chain::prepare()
@@ -217,7 +217,7 @@ namespace vulkan
       setupRenderPass();
       createPipelineCache();
       setupFrameBuffer();
-      settings.overlay = settings.overlay && (!benchmark.active);
+      settings.overlay = settings.overlay && (!m_benchmark.active);
       if (settings.overlay) {
          ui.device = m_pvulkandevice;
          ui.queue = queue;
@@ -226,7 +226,7 @@ namespace vulkan
             loadShader(getShadersPath() + "base/uioverlay.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT),
          };
          ui.prepareResources();
-         ui.preparePipeline(pipelineCache, renderPass, m_swapchain.colorFormat, depthFormat);
+         ui.preparePipeline(m_vkpipelinecache, m_vkrenderpass, m_swapchain.colorFormat, depthFormat);
       }
    }
 
@@ -242,16 +242,16 @@ namespace vulkan
 #endif
       shaderStage.pName = "main"_ansi;
       assert(shaderStage.module != VK_NULL_HANDLE);
-      shaderModules.push_back(shaderStage.module);
+      m_vkshadermodules.push_back(shaderStage.module);
       return shaderStage;
    }
 
    void base_application_with_swap_chain::nextFrame()
    {
       auto tStart = std::chrono::high_resolution_clock::now();
-      if (viewUpdated)
+      if (m_bViewUpdated)
       {
-         viewUpdated = false;
+         m_bViewUpdated = false;
       }
 
       render();
@@ -263,19 +263,19 @@ namespace vulkan
 #else
       auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
 #endif
-      frameTimer = (float)tDiff / 1000.0f;
-      camera.update(frameTimer);
-      if (camera.moving())
+      m_fFrameTimer = (float)tDiff / 1000.0f;
+      m_camera.update(m_fFrameTimer);
+      if (m_camera.moving())
       {
-         viewUpdated = true;
+         m_bViewUpdated = true;
       }
-      // Convert to clamped timer value
-      if (!paused)
+      // Convert to clamped m_fTimer value
+      if (!m_bPaused)
       {
-         timer += timerSpeed * frameTimer;
-         if (timer > 1.0)
+         m_fTimer += m_fTimerSpeed * m_fFrameTimer;
+         if (m_fTimer > 1.0)
          {
-            timer -= 1.0f;
+            m_fTimer -= 1.0f;
          }
       }
       float fpsTimer = (float)(std::chrono::duration<double, std::milli>(tEnd - lastTimestamp).count());
@@ -301,9 +301,9 @@ namespace vulkan
       // SRS - for non-apple plaforms, handle benchmarking here within base_application_with_swap_chain::renderLoop()
       //     - for macOS, handle benchmarking within NSApp rendering loop via displayLinkOutputCb()
 #if !(defined(VK_USE_PLATFORM_IOS_MVK) || defined(VK_USE_PLATFORM_MACOS_MVK) || defined(VK_USE_PLATFORM_METAL_EXT))
-      if (benchmark.active) {
+      if (m_benchmark.active) {
 #if defined(VK_USE_PLATFORM_WAYLAND_KHR)
-         while (!configured)
+         while (!m_bConfigured)
             wl_display_dispatch(display);
          while (wl_display_prepare_read(display) != 0)
             wl_display_dispatch_pending(display);
@@ -312,17 +312,17 @@ namespace vulkan
          wl_display_dispatch_pending(display);
 #endif
 
-         benchmark.run([=] { render(); }, m_pvulkandevice->properties);
+         m_benchmark.run([=] { render(); }, m_pvulkandevice->properties);
          vkDeviceWaitIdle(device);
-         if (benchmark.filename != "") {
-            benchmark.saveResults();
+         if (m_benchmark.filename != "") {
+            m_benchmark.saveResults();
          }
          return;
       }
 #endif
 
-      destWidth = width;
-      destHeight = height;
+      m_iDestWidth = m_iWidth;
+      m_iDestHeight = m_iHeight;
       lastTimestamp = std::chrono::high_resolution_clock::now();
       tPrevEnd = lastTimestamp;
 #if defined(_WIN32)
@@ -337,7 +337,7 @@ namespace vulkan
                break;
             }
          }
-         if (prepared && !IsIconic(window)) {
+         if (m_bPrepared && !IsIconic(window)) {
             nextFrame();
          }
       }
@@ -374,22 +374,22 @@ namespace vulkan
          }
 
          // Render frame
-         if (prepared)
+         if (m_bPrepared)
          {
             auto tStart = std::chrono::high_resolution_clock::now();
             render();
             frameCounter++;
             auto tEnd = std::chrono::high_resolution_clock::now();
             auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
-            frameTimer = tDiff / 1000.0f;
-            camera.update(frameTimer);
-            // Convert to clamped timer value
-            if (!paused)
+            m_fFrameTimer = tDiff / 1000.0f;
+            m_camera.update(m_fFrameTimer);
+            // Convert to clamped m_fTimer value
+            if (!m_bPaused)
             {
-               timer += timerSpeed * frameTimer;
-               if (timer > 1.0)
+               m_fTimer += m_fTimerSpeed * m_fFrameTimer;
+               if (m_fTimer > 1.0)
                {
-                  timer -= 1.0f;
+                  m_fTimer -= 1.0f;
                }
             }
             float fpsTimer = std::chrono::duration<double, std::milli>(tEnd - lastTimestamp).count();
@@ -406,65 +406,65 @@ namespace vulkan
 
             // Check touch state (for movement)
             if (touchDown) {
-               touchTimer += frameTimer;
+               touchTimer += m_fFrameTimer;
             }
             if (touchTimer >= 1.0) {
-               camera.keys.up = true;
+               m_camera.keys.up = true;
             }
 
             // Check gamepad state
             const float deadZone = 0.0015f;
-            if (camera.type != Camera::CameraType::firstperson)
+            if (m_camera.type != Camera::CameraType::firstperson)
             {
                // Rotate
-               if (std::abs(gamePadState.axisLeft.x) > deadZone)
+               if (std::abs(m_gamepadstate.axisLeft.x) > deadZone)
                {
-                  camera.rotate(glm::vec3(0.0f, gamePadState.axisLeft.x * 0.5f, 0.0f));
+                  m_camera.rotate(glm::vec3(0.0f, m_gamepadstate.axisLeft.x * 0.5f, 0.0f));
                   updateView = true;
                }
-               if (std::abs(gamePadState.axisLeft.y) > deadZone)
+               if (std::abs(m_gamepadstate.axisLeft.y) > deadZone)
                {
-                  camera.rotate(glm::vec3(gamePadState.axisLeft.y * 0.5f, 0.0f, 0.0f));
+                  m_camera.rotate(glm::vec3(m_gamepadstate.axisLeft.y * 0.5f, 0.0f, 0.0f));
                   updateView = true;
                }
                // Zoom
-               if (std::abs(gamePadState.axisRight.y) > deadZone)
+               if (std::abs(m_gamepadstate.axisRight.y) > deadZone)
                {
-                  camera.translate(glm::vec3(0.0f, 0.0f, gamePadState.axisRight.y * 0.01f));
+                  m_camera.translate(glm::vec3(0.0f, 0.0f, m_gamepadstate.axisRight.y * 0.01f));
                   updateView = true;
                }
             }
             else
             {
-               updateView = camera.updatePad(gamePadState.axisLeft, gamePadState.axisRight, frameTimer);
+               updateView = m_camera.updatePad(m_gamepadstate.axisLeft, m_gamepadstate.axisRight, m_fFrameTimer);
             }
          }
       }
 #elif defined(_DIRECT2DISPLAY)
-      while (!quit)
+      while (!m_bQuit)
       {
          auto tStart = std::chrono::high_resolution_clock::now();
-         if (viewUpdated)
+         if (m_bViewUpdated)
          {
-            viewUpdated = false;
+            m_bViewUpdated = false;
          }
          render();
          frameCounter++;
          auto tEnd = std::chrono::high_resolution_clock::now();
          auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
-         frameTimer = tDiff / 1000.0f;
-         camera.update(frameTimer);
-         if (camera.moving())
+         m_fFrameTimer = tDiff / 1000.0f;
+         m_camera.update(m_fFrameTimer);
+         if (m_camera.moving())
          {
-            viewUpdated = true;
+            m_bViewUpdated = true;
          }
-         // Convert to clamped timer value
-         if (!paused)
+         // Convert to clamped m_fTimer value
+         if (!m_bPaused)
          {
-            timer += timerSpeed * frameTimer;
-            if (timer > 1.0)
+            m_fTimer += m_fTimerSpeed * m_fFrameTimer;
+            if (m_fTimer > 1.0)
             {
-               timer -= 1.0f;
+               m_fTimer -= 1.0f;
             }
          }
          float fpsTimer = std::chrono::duration<double, std::milli>(tEnd - lastTimestamp).count();
@@ -477,12 +477,12 @@ namespace vulkan
          updateOverlay();
       }
 #elif defined(VK_USE_PLATFORM_DIRECTFB_EXT)
-      while (!quit)
+      while (!m_bQuit)
       {
          auto tStart = std::chrono::high_resolution_clock::now();
-         if (viewUpdated)
+         if (m_bViewUpdated)
          {
-            viewUpdated = false;
+            m_bViewUpdated = false;
          }
          DFBWindowEvent happening;
          while (!event_buffer->GetEvent(event_buffer, DFB_EVENT(&happening)))
@@ -493,19 +493,19 @@ namespace vulkan
          frameCounter++;
          auto tEnd = std::chrono::high_resolution_clock::now();
          auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
-         frameTimer = tDiff / 1000.0f;
-         camera.update(frameTimer);
-         if (camera.moving())
+         m_fFrameTimer = tDiff / 1000.0f;
+         m_camera.update(m_fFrameTimer);
+         if (m_camera.moving())
          {
-            viewUpdated = true;
+            m_bViewUpdated = true;
          }
-         // Convert to clamped timer value
-         if (!paused)
+         // Convert to clamped m_fTimer value
+         if (!m_bPaused)
          {
-            timer += timerSpeed * frameTimer;
-            if (timer > 1.0)
+            m_fTimer += m_fTimerSpeed * m_fFrameTimer;
+            if (m_fTimer > 1.0)
             {
-               timer -= 1.0f;
+               m_fTimer -= 1.0f;
             }
          }
          float fpsTimer = std::chrono::duration<double, std::milli>(tEnd - lastTimestamp).count();
@@ -518,15 +518,15 @@ namespace vulkan
          updateOverlay();
       }
 #elif defined(VK_USE_PLATFORM_WAYLAND_KHR)
-      while (!quit)
+      while (!m_bQuit)
       {
          auto tStart = std::chrono::high_resolution_clock::now();
-         if (viewUpdated)
+         if (m_bViewUpdated)
          {
-            viewUpdated = false;
+            m_bViewUpdated = false;
          }
 
-         while (!configured)
+         while (!m_bConfigured)
             wl_display_dispatch(display);
          while (wl_display_prepare_read(display) != 0)
             wl_display_dispatch_pending(display);
@@ -538,19 +538,19 @@ namespace vulkan
          frameCounter++;
          auto tEnd = std::chrono::high_resolution_clock::now();
          auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
-         frameTimer = tDiff / 1000.0f;
-         camera.update(frameTimer);
-         if (camera.moving())
+         m_fFrameTimer = tDiff / 1000.0f;
+         m_camera.update(m_fFrameTimer);
+         if (m_camera.moving())
          {
-            viewUpdated = true;
+            m_bViewUpdated = true;
          }
-         // Convert to clamped timer value
-         if (!paused)
+         // Convert to clamped m_fTimer value
+         if (!m_bPaused)
          {
-            timer += timerSpeed * frameTimer;
-            if (timer > 1.0)
+            m_fTimer += m_fTimerSpeed * m_fFrameTimer;
+            if (m_fTimer > 1.0)
             {
-               timer -= 1.0f;
+               m_fTimer -= 1.0f;
             }
          }
          float fpsTimer = std::chrono::duration<double, std::milli>(tEnd - lastTimestamp).count();
@@ -569,12 +569,12 @@ namespace vulkan
       }
 #elif defined(VK_USE_PLATFORM_XCB_KHR)
       xcb_flush(connection);
-      while (!quit)
+      while (!m_bQuit)
       {
          auto tStart = std::chrono::high_resolution_clock::now();
-         if (viewUpdated)
+         if (m_bViewUpdated)
          {
-            viewUpdated = false;
+            m_bViewUpdated = false;
          }
          xcb_generic_event_t* happening;
          while ((happening = xcb_poll_for_event(connection)))
@@ -586,19 +586,19 @@ namespace vulkan
          frameCounter++;
          auto tEnd = std::chrono::high_resolution_clock::now();
          auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
-         frameTimer = tDiff / 1000.0f;
-         camera.update(frameTimer);
-         if (camera.moving())
+         m_fFrameTimer = tDiff / 1000.0f;
+         m_camera.update(m_fFrameTimer);
+         if (m_camera.moving())
          {
-            viewUpdated = true;
+            m_bViewUpdated = true;
          }
-         // Convert to clamped timer value
-         if (!paused)
+         // Convert to clamped m_fTimer value
+         if (!m_bPaused)
          {
-            timer += timerSpeed * frameTimer;
-            if (timer > 1.0)
+            m_fTimer += m_fTimerSpeed * m_fFrameTimer;
+            if (m_fTimer > 1.0)
             {
-               timer -= 1.0f;
+               m_fTimer -= 1.0f;
             }
          }
          float fpsTimer = std::chrono::duration<double, std::milli>(tEnd - lastTimestamp).count();
@@ -618,28 +618,28 @@ namespace vulkan
          updateOverlay();
       }
 #elif defined(VK_USE_PLATFORM_HEADLESS_EXT)
-      while (!quit)
+      while (!m_bQuit)
       {
          auto tStart = std::chrono::high_resolution_clock::now();
-         if (viewUpdated)
+         if (m_bViewUpdated)
          {
-            viewUpdated = false;
+            m_bViewUpdated = false;
          }
          render();
          frameCounter++;
          auto tEnd = std::chrono::high_resolution_clock::now();
          auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
-         frameTimer = tDiff / 1000.0f;
-         camera.update(frameTimer);
-         if (camera.moving())
+         m_fFrameTimer = tDiff / 1000.0f;
+         m_camera.update(m_fFrameTimer);
+         if (m_camera.moving())
          {
-            viewUpdated = true;
+            m_bViewUpdated = true;
          }
-         // Convert to clamped timer value
-         timer += timerSpeed * frameTimer;
-         if (timer > 1.0)
+         // Convert to clamped m_fTimer value
+         m_fTimer += m_fTimerSpeed * m_fFrameTimer;
+         if (m_fTimer > 1.0)
          {
-            timer -= 1.0f;
+            m_fTimer -= 1.0f;
          }
          float fpsTimer = std::chrono::duration<double, std::milli>(tEnd - lastTimestamp).count();
          if (fpsTimer > 1000.0f)
@@ -653,10 +653,10 @@ namespace vulkan
 #elif (defined(VK_USE_PLATFORM_MACOS_MVK) || defined(VK_USE_PLATFORM_METAL_EXT)) && defined(VK_EXAMPLE_XCODE_GENERATED)
       [NSApp run];
 #elif defined(VK_USE_PLATFORM_SCREEN_QNX)
-      while (!quit) {
+      while (!m_bQuit) {
          handleEvent();
 
-         if (prepared) {
+         if (m_bPrepared) {
             nextFrame();
          }
       }
@@ -674,7 +674,7 @@ namespace vulkan
 
       // The overlay does not need to be updated with each frame, so we limit the update rate
       // Not only does this save performance but it also makes display of fast changig values like fps more stable
-      ui.updateTimer -= frameTimer;
+      ui.updateTimer -= m_fFrameTimer;
       if (ui.updateTimer >= 0.0f) {
          return;
       }
@@ -683,13 +683,13 @@ namespace vulkan
 
       ImGuiIO& io = ImGui::GetIO();
 
-      io.DisplaySize = ImVec2((float)width, (float)height);
-      io.DeltaTime = frameTimer;
+      io.DisplaySize = ImVec2((float)m_iWidth, (float)m_iHeight);
+      io.DeltaTime = m_fFrameTimer;
 
-      io.MousePos = ImVec2(mouseState.position.x, mouseState.position.y);
-      io.MouseDown[0] = mouseState.buttons.left && ui.visible;
-      io.MouseDown[1] = mouseState.buttons.right && ui.visible;
-      io.MouseDown[2] = mouseState.buttons.middle && ui.visible;
+      io.MousePos = ImVec2(m_mousestate.position.x, m_mousestate.position.y);
+      io.MouseDown[0] = m_mousestate.m_buttons.left && ui.visible;
+      io.MouseDown[1] = m_mousestate.m_buttons.right && ui.visible;
+      io.MouseDown[2] = m_mousestate.m_buttons.middle && ui.visible;
 
       ImGui::NewFrame();
 
@@ -721,8 +721,8 @@ namespace vulkan
       }
 
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
-      if (mouseState.buttons.left) {
-         mouseState.buttons.left = false;
+      if (m_mousestate.m_buttons.left) {
+         m_mousestate.m_buttons.left = false;
       }
 #endif
    }
@@ -730,8 +730,8 @@ namespace vulkan
    void base_application_with_swap_chain::drawUI(const VkCommandBuffer commandBuffer)
    {
       if (settings.overlay && ui.visible) {
-         const VkViewport viewport = vks::initializers::viewport((float)width, (float)height, 0.0f, 1.0f);
-         const VkRect2D scissor = vks::initializers::rect2D(width, height, 0, 0);
+         const VkViewport viewport = vks::initializers::viewport((float)m_iWidth, (float)m_iHeight, 0.0f, 1.0f);
+         const VkRect2D scissor = vks::initializers::rect2D(m_iWidth, m_iHeight, 0, 0);
          vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
          vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
@@ -742,7 +742,7 @@ namespace vulkan
    void base_application_with_swap_chain::prepareFrame()
    {
       // Acquire the next image from the swap chain
-      VkResult result = m_swapchain.acquireNextImage(semaphores.presentComplete, &currentBuffer);
+      VkResult result = m_swapchain.acquireNextImage(semaphores.m_vksemaphorePresentComplete, &m_uiCurrentBuffer);
       // Recreate the swapchain if it's no longer compatible with the surface (OUT_OF_DATE)
       // SRS - If no longer optimal (VK_SUBOPTIMAL_KHR), wait until submitFrame() in case number of swapchain images will change on resize
       if ((result == VK_ERROR_OUT_OF_DATE_KHR) || (result == VK_SUBOPTIMAL_KHR)) {
@@ -758,7 +758,7 @@ namespace vulkan
 
    void base_application_with_swap_chain::submitFrame()
    {
-      VkResult result = m_swapchain.queuePresent(queue, currentBuffer, semaphores.renderComplete);
+      VkResult result = m_swapchain.queuePresent(queue, m_uiCurrentBuffer, semaphores.m_vksemaphoreRenderComplete);
       // Recreate the swapchain if it's no longer compatible with the surface (OUT_OF_DATE) or no longer optimal for presentation (SUBOPTIMAL)
       if ((result == VK_ERROR_OUT_OF_DATE_KHR) || (result == VK_SUBOPTIMAL_KHR)) {
          windowResize();
@@ -799,16 +799,16 @@ namespace vulkan
       //	commandLineParser.add("validation"_ansi, { "-v"_ansi, "--validation"_ansi }, 0, "Enable validation layers"_ansi);
       //	commandLineParser.add("vsync"_ansi, { "-vs"_ansi, "--vsync"_ansi }, 0, "Enable V-Sync"_ansi);
       //	commandLineParser.add("fullscreen"_ansi, { "-f"_ansi, "--fullscreen"_ansi }, 0, "Start in fullscreen mode"_ansi);
-      //	commandLineParser.add("width"_ansi, { "-w"_ansi, "--width"_ansi }, 1, "Set window width"_ansi);
-      //	commandLineParser.add("height"_ansi, { "-h"_ansi, "--height"_ansi }, 1, "Set window height"_ansi);
+      //	commandLineParser.add("m_iWidth"_ansi, { "-w"_ansi, "--m_iWidth"_ansi }, 1, "Set window m_iWidth"_ansi);
+      //	commandLineParser.add("m_iHeight"_ansi, { "-h"_ansi, "--m_iHeight"_ansi }, 1, "Set window m_iHeight"_ansi);
       //	commandLineParser.add("shaders"_ansi, { "-s"_ansi, "--shaders"_ansi }, 1, "Select shader type to use (glsl or hlsl)"_ansi);
       //	commandLineParser.add("gpuselection"_ansi, { "-g"_ansi, "--gpu"_ansi }, 1, "Select GPU to run on"_ansi);
       //	commandLineParser.add("gpulist"_ansi, { "-gl"_ansi, "--listgpus"_ansi }, 0, "Display a list of available Vulkan devices"_ansi);
-      //	commandLineParser.add("benchmark"_ansi, { "-b"_ansi, "--benchmark"_ansi }, 0, "Run example in benchmark mode"_ansi);
-      //	commandLineParser.add("benchmarkwarmup"_ansi, { "-bw"_ansi, "--benchwarmup"_ansi }, 1, "Set warmup time for benchmark mode in seconds"_ansi);
-      //	commandLineParser.add("benchmarkruntime"_ansi, { "-br"_ansi, "--benchruntime"_ansi }, 1, "Set duration time for benchmark mode in seconds"_ansi);
-      //	commandLineParser.add("benchmarkresultfile"_ansi, { "-bf"_ansi, "--benchfilename"_ansi }, 1, "Set file name for benchmark results"_ansi);
-      //	commandLineParser.add("benchmarkresultframes"_ansi, { "-bt"_ansi, "--benchframetimes"_ansi }, 0, "Save frame times to benchmark results file"_ansi);
+      //	commandLineParser.add("m_benchmark"_ansi, { "-b"_ansi, "--m_benchmark"_ansi }, 0, "Run example in m_benchmark mode"_ansi);
+      //	commandLineParser.add("benchmarkwarmup"_ansi, { "-bw"_ansi, "--benchwarmup"_ansi }, 1, "Set warmup time for m_benchmark mode in seconds"_ansi);
+      //	commandLineParser.add("benchmarkruntime"_ansi, { "-br"_ansi, "--benchruntime"_ansi }, 1, "Set duration time for m_benchmark mode in seconds"_ansi);
+      //	commandLineParser.add("benchmarkresultfile"_ansi, { "-bf"_ansi, "--benchfilename"_ansi }, 1, "Set file name for m_benchmark results"_ansi);
+      //	commandLineParser.add("benchmarkresultframes"_ansi, { "-bt"_ansi, "--benchframetimes"_ansi }, 0, "Save frame times to m_benchmark results file"_ansi);
       //	commandLineParser.add("benchmarkframes"_ansi, { "-bfs"_ansi, "--benchmarkframes"_ansi }, 1, "Only render the given number of frames"_ansi);
       //
       //	commandLineParser.parse(args);
@@ -826,11 +826,11 @@ namespace vulkan
       //	if (commandLineParser.isSet("vsync"_ansi)) {
       //		settings.vsync = true;
       //	}
-      //	if (commandLineParser.isSet("height"_ansi)) {
-      //		height = commandLineParser.getValueAsInt("height"_ansi, height);
+      //	if (commandLineParser.isSet("m_iHeight"_ansi)) {
+      //		m_iHeight = commandLineParser.getValueAsInt("m_iHeight"_ansi, m_iHeight);
       //	}
-      //	if (commandLineParser.isSet("width"_ansi)) {
-      //		width = commandLineParser.getValueAsInt("width"_ansi, width);
+      //	if (commandLineParser.isSet("m_iWidth"_ansi)) {
+      //		m_iWidth = commandLineParser.getValueAsInt("m_iWidth"_ansi, m_iWidth);
       //	}
       //	if (commandLineParser.isSet("fullscreen"_ansi)) {
       //		settings.fullscreen = true;
@@ -844,24 +844,24 @@ namespace vulkan
       //			shaderDir = value;
       //		}
       //	}
-      //	if (commandLineParser.isSet("benchmark"_ansi)) {
-      //		benchmark.active = true;
+      //	if (commandLineParser.isSet("m_benchmark"_ansi)) {
+      //		m_benchmark.active = true;
       //		vks::tools::errorModeSilent = true;
       //	}
       //	if (commandLineParser.isSet("benchmarkwarmup"_ansi)) {
-      //		benchmark.warmup = commandLineParser.getValueAsInt("benchmarkwarmup"_ansi, 0);
+      //		m_benchmark.warmup = commandLineParser.getValueAsInt("benchmarkwarmup"_ansi, 0);
       //	}
       //	if (commandLineParser.isSet("benchmarkruntime"_ansi)) {
-      //		benchmark.duration = commandLineParser.getValueAsInt("benchmarkruntime"_ansi, benchmark.duration);
+      //		m_benchmark.duration = commandLineParser.getValueAsInt("benchmarkruntime"_ansi, m_benchmark.duration);
       //	}
       //	if (commandLineParser.isSet("benchmarkresultfile"_ansi)) {
-      //		benchmark.filename = commandLineParser.getValueAsString("benchmarkresultfile"_ansi, benchmark.filename);
+      //		m_benchmark.filename = commandLineParser.getValueAsString("benchmarkresultfile"_ansi, m_benchmark.filename);
       //	}
       //	if (commandLineParser.isSet("benchmarkresultframes"_ansi)) {
-      //		benchmark.outputFrameTimes = true;
+      //		m_benchmark.outputFrameTimes = true;
       //	}
       //	if (commandLineParser.isSet("benchmarkframes"_ansi)) {
-      //		benchmark.outputFrames = commandLineParser.getValueAsInt("benchmarkframes"_ansi, benchmark.outputFrames);
+      //		m_benchmark.outputFrames = commandLineParser.getValueAsInt("benchmarkframes"_ansi, m_benchmark.outputFrames);
       //	}
 
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
@@ -890,21 +890,21 @@ namespace vulkan
    {
       // Clean up Vulkan resources
       m_swapchain.cleanup();
-      if (descriptorPool != VK_NULL_HANDLE)
+      if (m_vkdescriptorpool != VK_NULL_HANDLE)
       {
-         vkDestroyDescriptorPool(device, descriptorPool, nullptr);
+         vkDestroyDescriptorPool(device, m_vkdescriptorpool, nullptr);
       }
       destroyCommandBuffers();
-      if (renderPass != VK_NULL_HANDLE)
+      if (m_vkrenderpass != VK_NULL_HANDLE)
       {
-         vkDestroyRenderPass(device, renderPass, nullptr);
+         vkDestroyRenderPass(device, m_vkrenderpass, nullptr);
       }
-      for (uint32_t i = 0; i < frameBuffers.size(); i++)
+      for (uint32_t i = 0; i < m_vkframebuffers.size(); i++)
       {
-         vkDestroyFramebuffer(device, frameBuffers[i], nullptr);
+         vkDestroyFramebuffer(device, m_vkframebuffers[i], nullptr);
       }
 
-      for (auto& shaderModule : shaderModules)
+      for (auto& shaderModule : m_vkshadermodules)
       {
          vkDestroyShaderModule(device, shaderModule, nullptr);
       }
@@ -912,13 +912,13 @@ namespace vulkan
       vkDestroyImage(device, depthStencil.image, nullptr);
       vkFreeMemory(device, depthStencil.memory, nullptr);
 
-      vkDestroyPipelineCache(device, pipelineCache, nullptr);
+      vkDestroyPipelineCache(device, m_vkpipelinecache, nullptr);
 
       vkDestroyCommandPool(device, cmdPool, nullptr);
 
-      vkDestroySemaphore(device, semaphores.presentComplete, nullptr);
-      vkDestroySemaphore(device, semaphores.renderComplete, nullptr);
-      for (auto& fence : waitFences) {
+      vkDestroySemaphore(device, semaphores.m_vksemaphorePresentComplete, nullptr);
+      vkDestroySemaphore(device, semaphores.m_vksemaphoreRenderComplete, nullptr);
+      for (auto& fence : m_vkfencesWait) {
          vkDestroyFence(device, fence, nullptr);
       }
 
@@ -1071,7 +1071,7 @@ namespace vulkan
       // Find a suitable depth and/or stencil format
       VkBool32 validFormat{ false };
       // Samples that make use of stencil will require a depth + stencil format, so we select from a different list
-      if (requiresStencil) {
+      if (m_bRequiresStencil) {
          validFormat = vks::tools::getSupportedDepthStencilFormat(physicalDevice, &depthFormat);
       }
       else {
@@ -1085,10 +1085,10 @@ namespace vulkan
       VkSemaphoreCreateInfo semaphoreCreateInfo = vks::initializers::semaphoreCreateInfo();
       // Create a semaphore used to synchronize image presentation
       // Ensures that the image is displayed before we start submitting ___new commands to the queue
-      VK_CHECK_RESULT(vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr, &semaphores.presentComplete));
+      VK_CHECK_RESULT(vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr, &semaphores.m_vksemaphorePresentComplete));
       // Create a semaphore used to synchronize command submission
       // Ensures that the image is not presented until all commands have been submitted and executed
-      VK_CHECK_RESULT(vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr, &semaphores.renderComplete));
+      VK_CHECK_RESULT(vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr, &semaphores.m_vksemaphoreRenderComplete));
 
       // Set up submit info structure
       // Semaphores will stay the same during application lifetime
@@ -1096,9 +1096,9 @@ namespace vulkan
       submitInfo = vks::initializers::submitInfo();
       submitInfo.pWaitDstStageMask = &submitPipelineStages;
       submitInfo.waitSemaphoreCount = 1;
-      submitInfo.pWaitSemaphores = &semaphores.presentComplete;
+      submitInfo.pWaitSemaphores = &semaphores.m_vksemaphorePresentComplete;
       submitInfo.signalSemaphoreCount = 1;
-      submitInfo.pSignalSemaphores = &semaphores.renderComplete;
+      submitInfo.pSignalSemaphores = &semaphores.m_vksemaphoreRenderComplete;
 
       return true;
    }
@@ -1174,13 +1174,13 @@ namespace vulkan
 
       if (settings.fullscreen)
       {
-         if ((width != (uint32_t)screenWidth) && (height != (uint32_t)screenHeight))
+         if ((m_iWidth != (uint32_t)screenWidth) && (m_iHeight != (uint32_t)screenHeight))
          {
             DEVMODE dmScreenSettings;
             memset(&dmScreenSettings, 0, sizeof(dmScreenSettings));
             dmScreenSettings.dmSize = sizeof(dmScreenSettings);
-            dmScreenSettings.dmPelsWidth = width;
-            dmScreenSettings.dmPelsHeight = height;
+            dmScreenSettings.dmPelsWidth = m_iWidth;
+            dmScreenSettings.dmPelsHeight = m_iHeight;
             dmScreenSettings.dmBitsPerPel = 32;
             dmScreenSettings.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
             if (ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL)
@@ -1194,8 +1194,8 @@ namespace vulkan
                   return nullptr;
                }
             }
-            screenWidth = width;
-            screenHeight = height;
+            screenWidth = m_iWidth;
+            screenHeight = m_iHeight;
          }
 
       }
@@ -1217,8 +1217,8 @@ namespace vulkan
       RECT windowRect = {
          0L,
          0L,
-         settings.fullscreen ? (long)screenWidth : (long)width,
-         settings.fullscreen ? (long)screenHeight : (long)height
+         settings.fullscreen ? (long)screenWidth : (long)m_iWidth,
+         settings.fullscreen ? (long)screenHeight : (long)m_iHeight
       };
 
       AdjustWindowRectEx(&windowRect, dwStyle, FALSE, dwExStyle);
@@ -1264,7 +1264,7 @@ namespace vulkan
       switch (uMsg)
       {
       case WM_CLOSE:
-         prepared = false;
+         m_bPrepared = false;
          DestroyWindow(hWnd);
          PostQuitMessage(0);
          break;
@@ -1275,18 +1275,18 @@ namespace vulkan
          switch (wParam)
          {
          case KEY_P:
-            paused = !paused;
+            m_bPaused = !m_bPaused;
             break;
          case KEY_F1:
             ui.visible = !ui.visible;
             ui.updated = true;
             break;
          case KEY_F2:
-            if (camera.type == Camera::CameraType::lookat) {
-               camera.type = Camera::CameraType::firstperson;
+            if (m_camera.type == Camera::CameraType::lookat) {
+               m_camera.type = Camera::CameraType::firstperson;
             }
             else {
-               camera.type = Camera::CameraType::lookat;
+               m_camera.type = Camera::CameraType::lookat;
             }
             break;
          case KEY_ESCAPE:
@@ -1294,21 +1294,21 @@ namespace vulkan
             break;
          }
 
-         if (camera.type == Camera::firstperson)
+         if (m_camera.type == Camera::firstperson)
          {
             switch (wParam)
             {
             case KEY_W:
-               camera.keys.up = true;
+               m_camera.keys.up = true;
                break;
             case KEY_S:
-               camera.keys.down = true;
+               m_camera.keys.down = true;
                break;
             case KEY_A:
-               camera.keys.left = true;
+               m_camera.keys.left = true;
                break;
             case KEY_D:
-               camera.keys.right = true;
+               m_camera.keys.right = true;
                break;
             }
          }
@@ -1316,51 +1316,51 @@ namespace vulkan
          keyPressed((uint32_t)wParam);
          break;
       case WM_KEYUP:
-         if (camera.type == Camera::firstperson)
+         if (m_camera.type == Camera::firstperson)
          {
             switch (wParam)
             {
             case KEY_W:
-               camera.keys.up = false;
+               m_camera.keys.up = false;
                break;
             case KEY_S:
-               camera.keys.down = false;
+               m_camera.keys.down = false;
                break;
             case KEY_A:
-               camera.keys.left = false;
+               m_camera.keys.left = false;
                break;
             case KEY_D:
-               camera.keys.right = false;
+               m_camera.keys.right = false;
                break;
             }
          }
          break;
       case WM_LBUTTONDOWN:
-         mouseState.position = glm::vec2((float)LOWORD(lParam), (float)HIWORD(lParam));
-         mouseState.buttons.left = true;
+         m_mousestate.position = glm::vec2((float)LOWORD(lParam), (float)HIWORD(lParam));
+         m_mousestate.m_buttons.left = true;
          break;
       case WM_RBUTTONDOWN:
-         mouseState.position = glm::vec2((float)LOWORD(lParam), (float)HIWORD(lParam));
-         mouseState.buttons.right = true;
+         m_mousestate.position = glm::vec2((float)LOWORD(lParam), (float)HIWORD(lParam));
+         m_mousestate.m_buttons.right = true;
          break;
       case WM_MBUTTONDOWN:
-         mouseState.position = glm::vec2((float)LOWORD(lParam), (float)HIWORD(lParam));
-         mouseState.buttons.middle = true;
+         m_mousestate.position = glm::vec2((float)LOWORD(lParam), (float)HIWORD(lParam));
+         m_mousestate.m_buttons.middle = true;
          break;
       case WM_LBUTTONUP:
-         mouseState.buttons.left = false;
+         m_mousestate.m_buttons.left = false;
          break;
       case WM_RBUTTONUP:
-         mouseState.buttons.right = false;
+         m_mousestate.m_buttons.right = false;
          break;
       case WM_MBUTTONUP:
-         mouseState.buttons.middle = false;
+         m_mousestate.m_buttons.middle = false;
          break;
       case WM_MOUSEWHEEL:
       {
          short wheelDelta = GET_WHEEL_DELTA_WPARAM(wParam);
-         camera.translate(glm::vec3(0.0f, 0.0f, (float)wheelDelta * 0.005f));
-         viewUpdated = true;
+         m_camera.translate(glm::vec3(0.0f, 0.0f, (float)wheelDelta * 0.005f));
+         m_bViewUpdated = true;
          break;
       }
       case WM_MOUSEMOVE:
@@ -1369,12 +1369,12 @@ namespace vulkan
          break;
       }
       case WM_SIZE:
-         if ((prepared) && (wParam != SIZE_MINIMIZED))
+         if ((m_bPrepared) && (wParam != SIZE_MINIMIZED))
          {
-            if ((resizing) || ((wParam == SIZE_MAXIMIZED) || (wParam == SIZE_RESTORED)))
+            if ((m_bResizing) || ((wParam == SIZE_MAXIMIZED) || (wParam == SIZE_RESTORED)))
             {
-               destWidth = LOWORD(lParam);
-               destHeight = HIWORD(lParam);
+               m_iDestWidth = LOWORD(lParam);
+               m_iDestHeight = HIWORD(lParam);
                windowResize();
             }
          }
@@ -1387,10 +1387,10 @@ namespace vulkan
          break;
       }
       case WM_ENTERSIZEMOVE:
-         resizing = true;
+         m_bResizing = true;
          break;
       case WM_EXITSIZEMOVE:
-         resizing = false;
+         m_bResizing = false;
          break;
       }
 
@@ -1406,11 +1406,11 @@ namespace vulkan
          switch (eventSource) {
          case AINPUT_SOURCE_JOYSTICK: {
             // Left thumbstick
-            vulkanExample->gamePadState.axisLeft.x = AMotionEvent_getAxisValue(happening, AMOTION_EVENT_AXIS_X, 0);
-            vulkanExample->gamePadState.axisLeft.y = AMotionEvent_getAxisValue(happening, AMOTION_EVENT_AXIS_Y, 0);
+            vulkanExample->m_gamepadstate.axisLeft.x = AMotionEvent_getAxisValue(happening, AMOTION_EVENT_AXIS_X, 0);
+            vulkanExample->m_gamepadstate.axisLeft.y = AMotionEvent_getAxisValue(happening, AMOTION_EVENT_AXIS_Y, 0);
             // Right thumbstick
-            vulkanExample->gamePadState.axisRight.x = AMotionEvent_getAxisValue(happening, AMOTION_EVENT_AXIS_Z, 0);
-            vulkanExample->gamePadState.axisRight.y = AMotionEvent_getAxisValue(happening, AMOTION_EVENT_AXIS_RZ, 0);
+            vulkanExample->m_gamepadstate.axisRight.x = AMotionEvent_getAxisValue(happening, AMOTION_EVENT_AXIS_Z, 0);
+            vulkanExample->m_gamepadstate.axisRight.y = AMotionEvent_getAxisValue(happening, AMOTION_EVENT_AXIS_RZ, 0);
             break;
          }
 
@@ -1424,7 +1424,7 @@ namespace vulkan
                vulkanExample->touchPos.y = AMotionEvent_getY(happening, 0);
                vulkanExample->touchTimer = 0.0;
                vulkanExample->touchDown = false;
-               vulkanExample->camera.keys.up = false;
+               vulkanExample->m_camera.keys.up = false;
 
                // Detect single tap
                long long eventTime = AMotionEvent_getEventTime(happening);
@@ -1434,7 +1434,7 @@ namespace vulkan
                   float x = AMotionEvent_getX(happening, 0) - vulkanExample->touchPos.x;
                   float y = AMotionEvent_getY(happening, 0) - vulkanExample->touchPos.y;
                   if ((x * x + y * y) < deadZone) {
-                     vulkanExample->mouseState.buttons.left = true;
+                     vulkanExample->m_mousestate.m_buttons.left = true;
                   }
                };
 
@@ -1458,8 +1458,8 @@ namespace vulkan
                }
                vulkanExample->touchPos.x = AMotionEvent_getX(happening, 0);
                vulkanExample->touchPos.y = AMotionEvent_getY(happening, 0);
-               vulkanExample->mouseState.position.x = AMotionEvent_getX(happening, 0);
-               vulkanExample->mouseState.position.y = AMotionEvent_getY(happening, 0);
+               vulkanExample->m_mousestate.position.x = AMotionEvent_getX(happening, 0);
+               vulkanExample->m_mousestate.position.y = AMotionEvent_getY(happening, 0);
                break;
             }
             case AMOTION_EVENT_ACTION_MOVE: {
@@ -1472,11 +1472,11 @@ namespace vulkan
                   int32_t eventX = AMotionEvent_getX(happening, 0);
                   int32_t eventY = AMotionEvent_getY(happening, 0);
 
-                  float deltaX = (float)(vulkanExample->touchPos.y - eventY) * vulkanExample->camera.rotationSpeed * 0.5f;
-                  float deltaY = (float)(vulkanExample->touchPos.x - eventX) * vulkanExample->camera.rotationSpeed * 0.5f;
+                  float deltaX = (float)(vulkanExample->touchPos.y - eventY) * vulkanExample->m_camera.rotationSpeed * 0.5f;
+                  float deltaY = (float)(vulkanExample->touchPos.x - eventX) * vulkanExample->m_camera.rotationSpeed * 0.5f;
 
-                  vulkanExample->camera.rotate(glm::vec3(deltaX, 0.0f, 0.0f));
-                  vulkanExample->camera.rotate(glm::vec3(0.0f, -deltaY, 0.0f));
+                  vulkanExample->m_camera.rotate(glm::vec3(deltaX, 0.0f, 0.0f));
+                  vulkanExample->m_camera.rotate(glm::vec3(0.0f, -deltaY, 0.0f));
 
                   vulkanExample->touchPos.x = eventX;
                   vulkanExample->touchPos.y = eventY;
@@ -1527,7 +1527,7 @@ namespace vulkan
             break;
          case AKEYCODE_P:
          case AKEYCODE_BUTTON_START:
-            vulkanExample->paused = !vulkanExample->paused;
+            vulkanExample->m_bPaused = !vulkanExample->m_bPaused;
             break;
          default:
             vulkanExample->keyPressed(keyCode);		// handle example-specific key press happenings
@@ -1560,7 +1560,7 @@ namespace vulkan
          {
             if (vulkanExample->initVulkan()) {
                vulkanExample->prepare();
-               assert(vulkanExample->prepared);
+               assert(vulkanExample->m_bPrepared);
             }
             else {
                LOGE("Could not initialize Vulkan, exiting!"_ansi);
@@ -1583,7 +1583,7 @@ namespace vulkan
       case APP_CMD_TERM_WINDOW:
          // Window is hidden or closed, clean up resources
          LOGD("APP_CMD_TERM_WINDOW"_ansi);
-         if (vulkanExample->prepared) {
+         if (vulkanExample->m_bPrepared) {
             vulkanExample->m_swapchain.cleanup();
          }
          break;
@@ -1615,13 +1615,13 @@ namespace vulkan
       dispatch_queue_t concurrentQueue = dispatch_get_global_queue(QOS_CLASS_USER_INTERACTIVE, 0);
       dispatch_group_async(concurrentGroup, concurrentQueue, ^ {
 
-         while (!vulkanExample->quit) {
+         while (!vulkanExample->m_bQuit) {
             vulkanExample->displayLinkOutputCb();
          }
          });
 
       // SRS - When benchmarking, set up termination notification on main thread when concurrent queue completes
-      if (vulkanExample->benchmark.active) {
+      if (vulkanExample->m_benchmark.active) {
          dispatch_queue_t notifyQueue = dispatch_get_main_queue();
          dispatch_group_notify(concurrentGroup, notifyQueue, ^ { [NSApp terminate : nil] ; });
       }
@@ -1632,10 +1632,10 @@ namespace vulkan
       return YES;
    }
 
-   // SRS - Tell rendering loop to quit, then wait for concurrent queue to terminate before deleting vulkanExample
+   // SRS - Tell rendering loop to m_bQuit, then wait for concurrent queue to terminate before deleting vulkanExample
    - (void)applicationWillTerminate:(NSNotification*)aNotification
    {
-      vulkanExample->quit = YES;
+      vulkanExample->m_bQuit = YES;
       dispatch_group_wait(concurrentGroup, DISPATCH_TIME_FOREVER);
       vkDeviceWaitIdle(vulkanExample->m_pvulkandevice->logicalDevice);
       delete(vulkanExample);
@@ -1719,7 +1719,7 @@ namespace vulkan
       switch (happening.keyCode)
       {
       case KEY_P:
-         vulkanExample->paused = !vulkanExample->paused;
+         vulkanExample->m_bPaused = !vulkanExample->m_bPaused;
          break;
       case KEY_1:										// support keyboards with no function keys
       case KEY_F1:
@@ -1731,16 +1731,16 @@ namespace vulkan
          [NSApp terminate : nil] ;
          break;
       case KEY_W:
-         vulkanExample->camera.keys.up = true;
+         vulkanExample->m_camera.keys.up = true;
          break;
       case KEY_S:
-         vulkanExample->camera.keys.down = true;
+         vulkanExample->m_camera.keys.down = true;
          break;
       case KEY_A:
-         vulkanExample->camera.keys.left = true;
+         vulkanExample->m_camera.keys.left = true;
          break;
       case KEY_D:
-         vulkanExample->camera.keys.right = true;
+         vulkanExample->m_camera.keys.right = true;
          break;
       default:
          vulkanExample->keyPressed(happening.keyCode);	// handle example-specific key press happenings
@@ -1753,16 +1753,16 @@ namespace vulkan
       switch (happening.keyCode)
       {
       case KEY_W:
-         vulkanExample->camera.keys.up = false;
+         vulkanExample->m_camera.keys.up = false;
          break;
       case KEY_S:
-         vulkanExample->camera.keys.down = false;
+         vulkanExample->m_camera.keys.down = false;
          break;
       case KEY_A:
-         vulkanExample->camera.keys.left = false;
+         vulkanExample->m_camera.keys.left = false;
          break;
       case KEY_D:
-         vulkanExample->camera.keys.right = false;
+         vulkanExample->m_camera.keys.right = false;
          break;
       default:
          break;
@@ -1773,44 +1773,44 @@ namespace vulkan
    {
       NSPoint location = [happening locationInWindow];
       NSPoint point = [self convertPoint : location fromView : nil];
-      point.y = self.frame.size.height - point.y;
+      point.y = self.frame.size.m_iHeight - point.y;
       return point;
    }
 
    - (void)mouseDown:(NSEvent*)happening
    {
       auto point = [self getMouseLocalPoint : happening];
-      vulkanExample->mouseState.position = glm::vec2(point.x, point.y);
-      vulkanExample->mouseState.buttons.left = true;
+      vulkanExample->m_mousestate.position = glm::vec2(point.x, point.y);
+      vulkanExample->m_mousestate.m_buttons.left = true;
    }
 
    - (void)mouseUp:(NSEvent*)happening
    {
-      vulkanExample->mouseState.buttons.left = false;
+      vulkanExample->m_mousestate.m_buttons.left = false;
    }
 
    - (void)rightMouseDown : (NSEvent*)happening
    {
       auto point = [self getMouseLocalPoint : happening];
-      vulkanExample->mouseState.position = glm::vec2(point.x, point.y);
-      vulkanExample->mouseState.buttons.right = true;
+      vulkanExample->m_mousestate.position = glm::vec2(point.x, point.y);
+      vulkanExample->m_mousestate.m_buttons.right = true;
    }
 
    - (void)rightMouseUp:(NSEvent*)happening
    {
-      vulkanExample->mouseState.buttons.right = false;
+      vulkanExample->m_mousestate.m_buttons.right = false;
    }
 
    - (void)otherMouseDown : (NSEvent*)happening
    {
       auto point = [self getMouseLocalPoint : happening];
-      vulkanExample->mouseState.position = glm::vec2(point.x, point.y);
-      vulkanExample->mouseState.buttons.middle = true;
+      vulkanExample->m_mousestate.position = glm::vec2(point.x, point.y);
+      vulkanExample->m_mousestate.m_buttons.middle = true;
    }
 
    - (void)otherMouseUp:(NSEvent*)happening
    {
-      vulkanExample->mouseState.buttons.middle = false;
+      vulkanExample->m_mousestate.m_buttons.middle = false;
    }
 
    - (void)mouseDragged : (NSEvent*)happening
@@ -1840,18 +1840,18 @@ namespace vulkan
    - (void)scrollWheel:(NSEvent*)happening
    {
       short wheelDelta = [happening deltaY];
-      vulkanExample->camera.translate(glm::vec3(0.0f, 0.0f,
-         -(float)wheelDelta * 0.05f * vulkanExample->camera.movementSpeed));
-      vulkanExample->viewUpdated = true;
+      vulkanExample->m_camera.translate(glm::vec3(0.0f, 0.0f,
+         -(float)wheelDelta * 0.05f * vulkanExample->m_camera.movementSpeed));
+      vulkanExample->m_bViewUpdated = true;
    }
 
-   // SRS - Window resizing already handled by windowResize() in base_application_with_swap_chain::submitFrame()
+   // SRS - Window m_bResizing already handled by windowResize() in base_application_with_swap_chain::submitFrame()
    //	   - handling window resize happenings here is redundant and can cause thread interaction problems
    /*
    - (NSSize)windowWillResize:(NSWindow *)sender toSize:(NSSize)frameSize
    {
       CVDisplayLinkStop(displayLink);
-      vulkanExample->windowWillResize(frameSize.width, frameSize.height);
+      vulkanExample->windowWillResize(frameSize.m_iWidth, frameSize.m_iHeight);
       return frameSize;
    }
 
@@ -1895,7 +1895,7 @@ namespace vulkan
       nsAppDelegate->vulkanExample = this;
       [NSApp setDelegate : nsAppDelegate] ;
 
-      const auto kContentRect = NSMakeRect(0.0f, 0.0f, width, height);
+      const auto kContentRect = NSMakeRect(0.0f, 0.0f, m_iWidth, m_iHeight);
       const auto kWindowStyle = NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskResizable;
 
       auto window = [[NSWindow alloc]initWithContentRect:kContentRect
@@ -1930,17 +1930,17 @@ namespace vulkan
    void base_application_with_swap_chain::displayLinkOutputCb()
    {
 #if defined(VK_EXAMPLE_XCODE_GENERATED)
-      if (benchmark.active) {
-         benchmark.run([=] { render(); }, m_pvulkandevice->properties);
-         if (benchmark.filename != ""_ansi) {
-            benchmark.saveResults();
+      if (m_benchmark.active) {
+         m_benchmark.run([=] { render(); }, m_pvulkandevice->properties);
+         if (m_benchmark.filename != ""_ansi) {
+            m_benchmark.saveResults();
          }
-         quit = true;	// SRS - quit NSApp rendering loop when benchmarking complete
+         m_bQuit = true;	// SRS - m_bQuit NSApp rendering loop when benchmarking complete
          return;
       }
 #endif
 
-      if (prepared)
+      if (m_bPrepared)
          nextFrame();
    }
 
@@ -1951,18 +1951,18 @@ namespace vulkan
 
    void base_application_with_swap_chain::windowWillResize(float x, float y)
    {
-      resizing = true;
-      if (prepared)
+      m_bResizing = true;
+      if (m_bPrepared)
       {
-         destWidth = x;
-         destHeight = y;
+         m_iDestWidth = x;
+         m_iDestHeight = y;
          windowResize();
       }
    }
 
    void base_application_with_swap_chain::windowDidResize()
    {
-      resizing = false;
+      m_bResizing = false;
    }
 #elif defined(_DIRECT2DISPLAY)
 #elif defined(VK_USE_PLATFORM_DIRECTFB_EXT)
@@ -2006,21 +2006,21 @@ namespace vulkan
 
       if (settings.fullscreen)
       {
-         width = layer_config.width;
-         height = layer_config.height;
+         m_iWidth = layer_config.m_iWidth;
+         m_iHeight = layer_config.m_iHeight;
       }
       else
       {
-         if (layer_config.width > width)
-            posx = (layer_config.width - width) / 2;
-         if (layer_config.height > height)
-            posy = (layer_config.height - height) / 2;
+         if (layer_config.m_iWidth > m_iWidth)
+            posx = (layer_config.m_iWidth - m_iWidth) / 2;
+         if (layer_config.m_iHeight > m_iHeight)
+            posy = (layer_config.m_iHeight - m_iHeight) / 2;
       }
 
       DFBWindowDescription desc;
       desc.flags = (DFBWindowDescriptionFlags)(DWDESC_WIDTH | DWDESC_HEIGHT | DWDESC_POSX | DWDESC_POSY);
-      desc.width = width;
-      desc.height = height;
+      desc.m_iWidth = m_iWidth;
+      desc.m_iHeight = m_iHeight;
       desc.posx = posx;
       desc.posy = posy;
       ret = layer->CreateWindow(layer, &desc, &window);
@@ -2063,7 +2063,7 @@ namespace vulkan
       switch (happening->type)
       {
       case DWET_CLOSE:
-         quit = true;
+         m_bQuit = true;
          break;
       case DWET_MOTION:
          handleMouseMove(happening->x, happening->y);
@@ -2072,13 +2072,13 @@ namespace vulkan
          switch (happening->button)
          {
          case DIBI_LEFT:
-            mouseState.buttons.left = true;
+            m_mousestate.m_buttons.left = true;
             break;
          case DIBI_MIDDLE:
-            mouseState.buttons.middle = true;
+            m_mousestate.m_buttons.middle = true;
             break;
          case DIBI_RIGHT:
-            mouseState.buttons.right = true;
+            m_mousestate.m_buttons.right = true;
             break;
          default:
             break;
@@ -2088,13 +2088,13 @@ namespace vulkan
          switch (happening->button)
          {
          case DIBI_LEFT:
-            mouseState.buttons.left = false;
+            m_mousestate.m_buttons.left = false;
             break;
          case DIBI_MIDDLE:
-            mouseState.buttons.middle = false;
+            m_mousestate.m_buttons.middle = false;
             break;
          case DIBI_RIGHT:
-            mouseState.buttons.right = false;
+            m_mousestate.m_buttons.right = false;
             break;
          default:
             break;
@@ -2104,19 +2104,19 @@ namespace vulkan
          switch (happening->key_symbol)
          {
          case KEY_W:
-            camera.keys.up = true;
+            m_camera.keys.up = true;
             break;
          case KEY_S:
-            camera.keys.down = true;
+            m_camera.keys.down = true;
             break;
          case KEY_A:
-            camera.keys.left = true;
+            m_camera.keys.left = true;
             break;
          case KEY_D:
-            camera.keys.right = true;
+            m_camera.keys.right = true;
             break;
          case KEY_P:
-            paused = !paused;
+            m_bPaused = !m_bPaused;
             break;
          case KEY_F1:
             ui.visible = !ui.visible;
@@ -2130,19 +2130,19 @@ namespace vulkan
          switch (happening->key_symbol)
          {
          case KEY_W:
-            camera.keys.up = false;
+            m_camera.keys.up = false;
             break;
          case KEY_S:
-            camera.keys.down = false;
+            m_camera.keys.down = false;
             break;
          case KEY_A:
-            camera.keys.left = false;
+            m_camera.keys.left = false;
             break;
          case KEY_D:
-            camera.keys.right = false;
+            m_camera.keys.right = false;
             break;
          case KEY_ESCAPE:
-            quit = true;
+            m_bQuit = true;
             break;
          default:
             break;
@@ -2150,8 +2150,8 @@ namespace vulkan
          keyPressed(happening->key_symbol);
          break;
       case DWET_SIZE:
-         destWidth = happening->w;
-         destHeight = happening->h;
+         m_iDestWidth = happening->w;
+         m_iDestHeight = happening->h;
          windowResize();
          break;
       default:
@@ -2210,13 +2210,13 @@ namespace vulkan
       switch (button)
       {
       case BTN_LEFT:
-         mouseState.buttons.left = !!state;
+         m_mousestate.m_buttons.left = !!state;
          break;
       case BTN_MIDDLE:
-         mouseState.buttons.middle = !!state;
+         m_mousestate.m_buttons.middle = !!state;
          break;
       case BTN_RIGHT:
-         mouseState.buttons.right = !!state;
+         m_mousestate.m_buttons.right = !!state;
          break;
       default:
          break;
@@ -2238,8 +2238,8 @@ namespace vulkan
       switch (axis)
       {
       case REL_X:
-         camera.translate(glm::vec3(0.0f, 0.0f, d * 0.005f));
-         viewUpdated = true;
+         m_camera.translate(glm::vec3(0.0f, 0.0f, d * 0.005f));
+         m_bViewUpdated = true;
          break;
       default:
          break;
@@ -2277,20 +2277,20 @@ namespace vulkan
       switch (key)
       {
       case KEY_W:
-         camera.keys.up = !!state;
+         m_camera.keys.up = !!state;
          break;
       case KEY_S:
-         camera.keys.down = !!state;
+         m_camera.keys.down = !!state;
          break;
       case KEY_A:
-         camera.keys.left = !!state;
+         m_camera.keys.left = !!state;
          break;
       case KEY_D:
-         camera.keys.right = !!state;
+         m_camera.keys.right = !!state;
          break;
       case KEY_P:
          if (state)
-            paused = !paused;
+            m_bPaused = !m_bPaused;
          break;
       case KEY_F1:
          if (state) {
@@ -2299,7 +2299,7 @@ namespace vulkan
          }
          break;
       case KEY_ESCAPE:
-         quit = true;
+         m_bQuit = true;
          break;
       }
 
@@ -2419,13 +2419,13 @@ namespace vulkan
       }
    }
 
-   void base_application_with_swap_chain::setSize(int width, int height)
+   void base_application_with_swap_chain::setSize(int m_iWidth, int m_iHeight)
    {
-      if (width <= 0 || height <= 0)
+      if (m_iWidth <= 0 || m_iHeight <= 0)
          return;
 
-      destWidth = width;
-      destHeight = height;
+      m_iDestWidth = m_iWidth;
+      m_iDestHeight = m_iHeight;
 
       windowResize();
    }
@@ -2437,7 +2437,7 @@ namespace vulkan
       base_application_with_swap_chain* base = (base_application_with_swap_chain*)data;
 
       xdg_surface_ack_configure(surface, serial);
-      base->configured = true;
+      base->m_bConfigured = true;
    }
 
    static const struct xdg_surface_listener xdg_surface_listener = {
@@ -2447,12 +2447,12 @@ namespace vulkan
 
    static void
       xdg_toplevel_handle_configure(void* data, struct xdg_toplevel* toplevel,
-         int32_t width, int32_t height,
+         int32_t m_iWidth, int32_t m_iHeight,
          struct wl_array* states)
    {
       base_application_with_swap_chain* base = (base_application_with_swap_chain*)data;
 
-      base->setSize(width, height);
+      base->setSize(m_iWidth, m_iHeight);
    }
 
    static void
@@ -2460,7 +2460,7 @@ namespace vulkan
    {
       base_application_with_swap_chain* base = (base_application_with_swap_chain*)data;
 
-      base->quit = true;
+      base->m_bQuit = true;
    }
 
 
@@ -2513,14 +2513,14 @@ namespace vulkan
 
       if (settings.fullscreen)
       {
-         width = destWidth = screen->width_in_pixels;
-         height = destHeight = screen->height_in_pixels;
+         m_iWidth = m_iDestWidth = screen->width_in_pixels;
+         m_iHeight = m_iDestHeight = screen->height_in_pixels;
       }
 
       xcb_create_window(connection,
          XCB_COPY_FROM_PARENT,
          window, screen->root,
-         0, 0, width, height, 0,
+         0, 0, m_iWidth, m_iHeight, 0,
          XCB_WINDOW_CLASS_INPUT_OUTPUT,
          screen->root_visual,
          value_mask, value_list);
@@ -2603,7 +2603,7 @@ namespace vulkan
       case XCB_CLIENT_MESSAGE:
          if ((*(xcb_client_message_event_t*)happening).data.data32[0] ==
             (*atom_wm_delete_window).atom) {
-            quit = true;
+            m_bQuit = true;
          }
          break;
       case XCB_MOTION_NOTIFY:
@@ -2617,22 +2617,22 @@ namespace vulkan
       {
          xcb_button_press_event_t* press = (xcb_button_press_event_t*)happening;
          if (press->detail == XCB_BUTTON_INDEX_1)
-            mouseState.buttons.left = true;
+            m_mousestate.m_buttons.left = true;
          if (press->detail == XCB_BUTTON_INDEX_2)
-            mouseState.buttons.middle = true;
+            m_mousestate.m_buttons.middle = true;
          if (press->detail == XCB_BUTTON_INDEX_3)
-            mouseState.buttons.right = true;
+            m_mousestate.m_buttons.right = true;
       }
       break;
       case XCB_BUTTON_RELEASE:
       {
          xcb_button_press_event_t* press = (xcb_button_press_event_t*)happening;
          if (press->detail == XCB_BUTTON_INDEX_1)
-            mouseState.buttons.left = false;
+            m_mousestate.m_buttons.left = false;
          if (press->detail == XCB_BUTTON_INDEX_2)
-            mouseState.buttons.middle = false;
+            m_mousestate.m_buttons.middle = false;
          if (press->detail == XCB_BUTTON_INDEX_3)
-            mouseState.buttons.right = false;
+            m_mousestate.m_buttons.right = false;
       }
       break;
       case XCB_KEY_PRESS:
@@ -2641,19 +2641,19 @@ namespace vulkan
          switch (keyEvent->detail)
          {
          case KEY_W:
-            camera.keys.up = true;
+            m_camera.keys.up = true;
             break;
          case KEY_S:
-            camera.keys.down = true;
+            m_camera.keys.down = true;
             break;
          case KEY_A:
-            camera.keys.left = true;
+            m_camera.keys.left = true;
             break;
          case KEY_D:
-            camera.keys.right = true;
+            m_camera.keys.right = true;
             break;
          case KEY_P:
-            paused = !paused;
+            m_bPaused = !m_bPaused;
             break;
          case KEY_F1:
             ui.visible = !ui.visible;
@@ -2668,35 +2668,35 @@ namespace vulkan
          switch (keyEvent->detail)
          {
          case KEY_W:
-            camera.keys.up = false;
+            m_camera.keys.up = false;
             break;
          case KEY_S:
-            camera.keys.down = false;
+            m_camera.keys.down = false;
             break;
          case KEY_A:
-            camera.keys.left = false;
+            m_camera.keys.left = false;
             break;
          case KEY_D:
-            camera.keys.right = false;
+            m_camera.keys.right = false;
             break;
          case KEY_ESCAPE:
-            quit = true;
+            m_bQuit = true;
             break;
          }
          keyPressed(keyEvent->detail);
       }
       break;
       case XCB_DESTROY_NOTIFY:
-         quit = true;
+         m_bQuit = true;
          break;
       case XCB_CONFIGURE_NOTIFY:
       {
          const xcb_configure_notify_happening_t* cfgEvent = (const xcb_configure_notify_happening_t*)happening;
-         if ((prepared) && ((cfgEvent->width != width) || (cfgEvent->height != height)))
+         if ((m_bPrepared) && ((cfgEvent->m_iWidth != m_iWidth) || (cfgEvent->m_iHeight != m_iHeight)))
          {
-            destWidth = cfgEvent->width;
-            destHeight = cfgEvent->height;
-            if ((destWidth > 0) && (destHeight > 0))
+            m_iDestWidth = cfgEvent->m_iWidth;
+            m_iDestHeight = cfgEvent->m_iHeight;
+            if ((m_iDestWidth > 0) && (m_iDestHeight > 0))
             {
                windowResize();
             }
@@ -2718,12 +2718,12 @@ namespace vulkan
       int keyflags;
       int rc;
 
-      while (!screen_get_event(screen_context, screen_event, paused ? ~0 : 0)) {
+      while (!screen_get_event(screen_context, screen_event, m_bPaused ? ~0 : 0)) {
          rc = screen_get_event_property_iv(screen_event, SCREEN_PROPERTY_TYPE, &val);
          if (rc) {
             printf("Cannot get SCREEN_PROPERTY_TYPE of the happening! (%s)\n"_ansi, strerror(errno));
             fflush(stdout);
-            quit = true;
+            m_bQuit = true;
             break;
          }
          if (val == SCREEN_EVENT_NONE) {
@@ -2735,55 +2735,55 @@ namespace vulkan
             if (rc) {
                printf("Cannot get SCREEN_PROPERTY_FLAGS of the happening! (%s)\n"_ansi, strerror(errno));
                fflush(stdout);
-               quit = true;
+               m_bQuit = true;
                break;
             }
             rc = screen_get_event_property_iv(screen_event, SCREEN_PROPERTY_SYM, &val);
             if (rc) {
                printf("Cannot get SCREEN_PROPERTY_SYM of the happening! (%s)\n"_ansi, strerror(errno));
                fflush(stdout);
-               quit = true;
+               m_bQuit = true;
                break;
             }
             if ((keyflags & KEY_SYM_VALID) == KEY_SYM_VALID) {
                switch (val) {
                case KEYCODE_ESCAPE:
-                  quit = true;
+                  m_bQuit = true;
                   break;
                case KEYCODE_W:
                   if (keyflags & KEY_DOWN) {
-                     camera.keys.up = true;
+                     m_camera.keys.up = true;
                   }
                   else {
-                     camera.keys.up = false;
+                     m_camera.keys.up = false;
                   }
                   break;
                case KEYCODE_S:
                   if (keyflags & KEY_DOWN) {
-                     camera.keys.down = true;
+                     m_camera.keys.down = true;
                   }
                   else {
-                     camera.keys.down = false;
+                     m_camera.keys.down = false;
                   }
                   break;
                case KEYCODE_A:
                   if (keyflags & KEY_DOWN) {
-                     camera.keys.left = true;
+                     m_camera.keys.left = true;
                   }
                   else {
-                     camera.keys.left = false;
+                     m_camera.keys.left = false;
                   }
                   break;
                case KEYCODE_D:
                   if (keyflags & KEY_DOWN) {
-                     camera.keys.right = true;
+                     m_camera.keys.right = true;
                   }
                   else {
-                     camera.keys.right = false;
+                     m_camera.keys.right = false;
                   }
                   break;
                case KEYCODE_P:
-                  paused = !paused;
+                  m_bPaused = !m_bPaused;
                   break;
                case KEYCODE_F1:
                   ui.visible = !ui.visible;
@@ -2805,14 +2805,14 @@ namespace vulkan
             if (rc) {
                printf("Cannot get SCREEN_PROPERTY_WINDOW of the happening! (%s)\n"_ansi, strerror(errno));
                fflush(stdout);
-               quit = true;
+               m_bQuit = true;
                break;
             }
             rc = screen_get_event_property_iv(screen_event, SCREEN_PROPERTY_NAME, &val);
             if (rc) {
                printf("Cannot get SCREEN_PROPERTY_NAME of the happening! (%s)\n"_ansi, strerror(errno));
                fflush(stdout);
-               quit = true;
+               m_bQuit = true;
                break;
             }
             if (win == screen_window) {
@@ -2822,11 +2822,11 @@ namespace vulkan
                   if (rc) {
                      printf("Cannot get SCREEN_PROPERTY_SIZE of the window in the happening! (%s)\n"_ansi, strerror(errno));
                      fflush(stdout);
-                     quit = true;
+                     m_bQuit = true;
                      break;
                   }
-                  width = size[0];
-                  height = size[1];
+                  m_iWidth = size[0];
+                  m_iHeight = size[1];
                   windowResize();
                   break;
                default:
@@ -2840,37 +2840,37 @@ namespace vulkan
             if (rc) {
                printf("Cannot get SCREEN_PROPERTY_BUTTONS of the happening! (%s)\n"_ansi, strerror(errno));
                fflush(stdout);
-               quit = true;
+               m_bQuit = true;
                break;
             }
             if ((mouse_buttons & SCREEN_LEFT_MOUSE_BUTTON) == 0) {
                if ((val & SCREEN_LEFT_MOUSE_BUTTON) == SCREEN_LEFT_MOUSE_BUTTON) {
-                  mouseState.buttons.left = true;
+                  m_mousestate.m_buttons.left = true;
                }
             }
             else {
                if ((val & SCREEN_LEFT_MOUSE_BUTTON) == 0) {
-                  mouseState.buttons.left = false;
+                  m_mousestate.m_buttons.left = false;
                }
             }
             if ((mouse_buttons & SCREEN_RIGHT_MOUSE_BUTTON) == 0) {
                if ((val & SCREEN_RIGHT_MOUSE_BUTTON) == SCREEN_RIGHT_MOUSE_BUTTON) {
-                  mouseState.buttons.right = true;
+                  m_mousestate.m_buttons.right = true;
                }
             }
             else {
                if ((val & SCREEN_RIGHT_MOUSE_BUTTON) == 0) {
-                  mouseState.buttons.right = false;
+                  m_mousestate.m_buttons.right = false;
                }
             }
             if ((mouse_buttons & SCREEN_MIDDLE_MOUSE_BUTTON) == 0) {
                if ((val & SCREEN_MIDDLE_MOUSE_BUTTON) == SCREEN_MIDDLE_MOUSE_BUTTON) {
-                  mouseState.buttons.middle = true;
+                  m_mousestate.m_buttons.middle = true;
                }
             }
             else {
                if ((val & SCREEN_MIDDLE_MOUSE_BUTTON) == 0) {
-                  mouseState.buttons.middle = false;
+                  m_mousestate.m_buttons.middle = false;
                }
             }
             mouse_buttons = val;
@@ -2879,19 +2879,19 @@ namespace vulkan
             if (rc) {
                printf("Cannot get SCREEN_PROPERTY_MOUSE_WHEEL of the happening! (%s)\n"_ansi, strerror(errno));
                fflush(stdout);
-               quit = true;
+               m_bQuit = true;
                break;
             }
             if (val != 0) {
-               camera.translate(glm::vec3(0.0f, 0.0f, (float)val * 0.005f));
-               viewUpdated = true;
+               m_camera.translate(glm::vec3(0.0f, 0.0f, (float)val * 0.005f));
+               m_bViewUpdated = true;
             }
 
             rc = screen_get_event_property_iv(screen_event, SCREEN_PROPERTY_POSITION, pos);
             if (rc) {
                printf("Cannot get SCREEN_PROPERTY_DISPLACEMENT of the happening! (%s)\n"_ansi, strerror(errno));
                fflush(stdout);
-               quit = true;
+               m_bQuit = true;
                break;
             }
             if ((pos[0] != 0) || (pos[1] != 0)) {
@@ -2944,19 +2944,19 @@ namespace vulkan
          exit(EXIT_FAILURE);
       }
 
-      if ((width == 0) || (height == 0) || (settings.fullscreen) || use_window_size) {
+      if ((m_iWidth == 0) || (m_iHeight == 0) || (settings.fullscreen) || use_window_size) {
          rc = screen_get_window_property_iv(screen_window, SCREEN_PROPERTY_SIZE, size);
          if (rc) {
             printf("Cannot obtain current window size!\n"_ansi);
             fflush(stdout);
             exit(EXIT_FAILURE);
          }
-         width = size[0];
-         height = size[1];
+         m_iWidth = size[0];
+         m_iHeight = size[1];
       }
       else {
-         size[0] = width;
-         size[1] = height;
+         size[0] = m_iWidth;
+         size[1] = m_iHeight;
          rc = screen_set_window_property_iv(screen_window, SCREEN_PROPERTY_SIZE, size);
          if (rc) {
             printf("Cannot set window size!\n"_ansi);
@@ -3008,8 +3008,8 @@ namespace vulkan
    {
       // Wait fences to sync command buffer access
       VkFenceCreateInfo fenceCreateInfo = vks::initializers::fenceCreateInfo(VK_FENCE_CREATE_SIGNALED_BIT);
-      waitFences.resize(m_drawCmdBuffers.size());
-      for (auto& fence : waitFences) {
+      m_vkfencesWait.resize(m_vkcommandbuffersDraw.size());
+      for (auto& fence : m_vkfencesWait) {
          VK_CHECK_RESULT(vkCreateFence(device, &fenceCreateInfo, nullptr, &fence));
       }
    }
@@ -3029,7 +3029,7 @@ namespace vulkan
       imageCI.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
       imageCI.imageType = VK_IMAGE_TYPE_2D;
       imageCI.format = depthFormat;
-      imageCI.extent = { width, height, 1 };
+      imageCI.extent = { m_iWidth, m_iHeight, 1 };
       imageCI.mipLevels = 1;
       imageCI.arrayLayers = 1;
       imageCI.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -3074,19 +3074,19 @@ namespace vulkan
       VkFramebufferCreateInfo frameBufferCreateInfo = {};
       frameBufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
       frameBufferCreateInfo.pNext = NULL;
-      frameBufferCreateInfo.renderPass = renderPass;
+      frameBufferCreateInfo.m_vkrenderpass = m_vkrenderpass;
       frameBufferCreateInfo.attachmentCount = 2;
       frameBufferCreateInfo.pAttachments = attachments;
-      frameBufferCreateInfo.width = width;
-      frameBufferCreateInfo.height = height;
+      frameBufferCreateInfo.m_iWidth = m_iWidth;
+      frameBufferCreateInfo.m_iHeight = m_iHeight;
       frameBufferCreateInfo.layers = 1;
 
       // Create frame buffers for every swap chain image
-      frameBuffers.resize(m_swapchain.imageCount);
-      for (uint32_t i = 0; i < frameBuffers.size(); i++)
+      m_vkframebuffers.resize(m_swapchain.imageCount);
+      for (uint32_t i = 0; i < m_vkframebuffers.size(); i++)
       {
          attachments[0] = m_swapchain.buffers[i].view;
-         VK_CHECK_RESULT(vkCreateFramebuffer(device, &frameBufferCreateInfo, nullptr, &frameBuffers[i]));
+         VK_CHECK_RESULT(vkCreateFramebuffer(device, &frameBufferCreateInfo, nullptr, &m_vkframebuffers[i]));
       }
    }
 
@@ -3159,7 +3159,7 @@ namespace vulkan
       renderPassInfo.dependencyCount = static_cast<uint32_t>(dependencies.size());
       renderPassInfo.pDependencies = dependencies.data();
 
-      VK_CHECK_RESULT(vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass));
+      VK_CHECK_RESULT(vkCreateRenderPass(device, &renderPassInfo, nullptr, &m_vkrenderpass));
    }
 
    void base_application_with_swap_chain::getEnabledFeatures() {}
@@ -3168,19 +3168,19 @@ namespace vulkan
 
    void base_application_with_swap_chain::windowResize()
    {
-      if (!prepared)
+      if (!m_bPrepared)
       {
          return;
       }
-      prepared = false;
-      resized = true;
+      m_bPrepared = false;
+      m_bResized = true;
 
       // Ensure all operations on the device have been finished before destroying resources
       vkDeviceWaitIdle(device);
 
       // Recreate swap chain
-      width = destWidth;
-      height = destHeight;
+      m_iWidth = m_iDestWidth;
+      m_iHeight = m_iDestHeight;
       setupSwapChain();
 
       // Recreate the frame buffers
@@ -3188,14 +3188,14 @@ namespace vulkan
       vkDestroyImage(device, depthStencil.image, nullptr);
       vkFreeMemory(device, depthStencil.memory, nullptr);
       setupDepthStencil();
-      for (uint32_t i = 0; i < frameBuffers.size(); i++) {
-         vkDestroyFramebuffer(device, frameBuffers[i], nullptr);
+      for (uint32_t i = 0; i < m_vkframebuffers.size(); i++) {
+         vkDestroyFramebuffer(device, m_vkframebuffers[i], nullptr);
       }
       setupFrameBuffer();
 
-      if ((width > 0.0f) && (height > 0.0f)) {
+      if ((m_iWidth > 0.0f) && (m_iHeight > 0.0f)) {
          if (settings.overlay) {
-            ui.resize(width, height);
+            ui.resize(m_iWidth, m_iHeight);
          }
       }
 
@@ -3206,27 +3206,27 @@ namespace vulkan
       buildCommandBuffers();
 
       // SRS - Recreate fences in case number of swapchain images has changed on resize
-      for (auto& fence : waitFences) {
+      for (auto& fence : m_vkfencesWait) {
          vkDestroyFence(device, fence, nullptr);
       }
       createSynchronizationPrimitives();
 
       vkDeviceWaitIdle(device);
 
-      if ((width > 0.0f) && (height > 0.0f)) {
-         camera.updateAspectRatio((float)width / (float)height);
+      if ((m_iWidth > 0.0f) && (m_iHeight > 0.0f)) {
+         m_camera.updateAspectRatio((float)m_iWidth / (float)m_iHeight);
       }
 
       // Notify derived class
       windowResized();
 
-      prepared = true;
+      m_bPrepared = true;
    }
 
    void base_application_with_swap_chain::handleMouseMove(int32_t x, int32_t y)
    {
-      int32_t dx = (int32_t)mouseState.position.x - x;
-      int32_t dy = (int32_t)mouseState.position.y - y;
+      int32_t dx = (int32_t)m_mousestate.position.x - x;
+      int32_t dy = (int32_t)m_mousestate.position.y - y;
 
       bool handled = false;
 
@@ -3237,23 +3237,23 @@ namespace vulkan
       mouseMoved((float)x, (float)y, handled);
 
       if (handled) {
-         mouseState.position = glm::vec2((float)x, (float)y);
+         m_mousestate.position = glm::vec2((float)x, (float)y);
          return;
       }
 
-      if (mouseState.buttons.left) {
-         camera.rotate(glm::vec3(dy * camera.rotationSpeed, -dx * camera.rotationSpeed, 0.0f));
-         viewUpdated = true;
+      if (m_mousestate.m_buttons.left) {
+         m_camera.rotate(glm::vec3(dy * m_camera.rotationSpeed, -dx * m_camera.rotationSpeed, 0.0f));
+         m_bViewUpdated = true;
       }
-      if (mouseState.buttons.right) {
-         camera.translate(glm::vec3(-0.0f, 0.0f, dy * .005f));
-         viewUpdated = true;
+      if (m_mousestate.m_buttons.right) {
+         m_camera.translate(glm::vec3(-0.0f, 0.0f, dy * .005f));
+         m_bViewUpdated = true;
       }
-      if (mouseState.buttons.middle) {
-         camera.translate(glm::vec3(-dx * 0.005f, -dy * 0.005f, 0.0f));
-         viewUpdated = true;
+      if (m_mousestate.m_buttons.middle) {
+         m_camera.translate(glm::vec3(-dx * 0.005f, -dy * 0.005f, 0.0f));
+         m_bViewUpdated = true;
       }
-      mouseState.position = glm::vec2((float)x, (float)y);
+      m_mousestate.position = glm::vec2((float)x, (float)y);
    }
 
    void base_application_with_swap_chain::windowResized() {}
@@ -3275,7 +3275,7 @@ namespace vulkan
 #elif defined(VK_USE_PLATFORM_XCB_KHR)
       m_swapchain.initSurface(connection, window);
 #elif (defined(_DIRECT2DISPLAY) || defined(VK_USE_PLATFORM_HEADLESS_EXT))
-      m_swapchain.initSurface(width, height);
+      m_swapchain.initSurface(m_iWidth, m_iHeight);
 #elif defined(VK_USE_PLATFORM_SCREEN_QNX)
       m_swapchain.initSurface(screen_context, screen_window);
 #endif
@@ -3283,7 +3283,7 @@ namespace vulkan
 
    void base_application_with_swap_chain::setupSwapChain()
    {
-      m_swapchain.create(&width, &height, settings.vsync, settings.fullscreen);
+      m_swapchain.create(&m_iWidth, &m_iHeight, settings.vsync, settings.fullscreen);
    }
 
    void base_application_with_swap_chain::OnUpdateUIOverlay(vulkan::ui_overlay* overlay) {}

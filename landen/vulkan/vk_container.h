@@ -58,11 +58,11 @@ namespace vkc
 		//void createWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
 	public:
 
-		//static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
+		//static void framebufferResizeCallback(GLFWwindow* window, int m_iWidth, int m_iHeight);
 		void initWindow();
 
-		int m_width;
-		int m_height;
+		int m_iWidth;
+		int m_iHeight;
 		bool framebufferResized = false;
 
 

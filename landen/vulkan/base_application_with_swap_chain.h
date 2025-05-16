@@ -8,28 +8,30 @@
 
 #pragma once
 
-#ifdef _WIN32
-#pragma comment(linker, "/subsystem:windows")
-#include <windows.h>
-#include <fcntl.h>
-#include <io.h>
-#include <ShellScalingAPI.h>
-#elif defined(VK_USE_PLATFORM_ANDROID_KHR)
-#include <android/native_activity.h>
-#include <android/asset_manager.h>
-#include <android_native_app_glue.h>
-#include <sys/system_properties.h>
-#include "VulkanAndroid.h"
-#elif defined(VK_USE_PLATFORM_DIRECTFB_EXT)
-#include <directfb.h>
-#elif defined(VK_USE_PLATFORM_WAYLAND_KHR)
-#include <wayland-client.h>
-#include "xdg-shell-client-protocol.h"
-#elif defined(_DIRECT2DISPLAY)
-//
-#elif defined(VK_USE_PLATFORM_XCB_KHR)
-#include <xcb/xcb.h>
-#endif
+//#ifdef _WIN32
+//#pragma comment(linker, "/subsystem:windows")
+//#include <windows.h>
+//#include <fcntl.h>
+//#include <io.h>
+//#include <ShellScalingAPI.h>
+//#elif defined(VK_USE_PLATFORM_ANDROID_KHR)
+//#include <android/native_activity.h>
+//#include <android/asset_manager.h>
+//#include <android_native_app_glue.h>
+//#include <sys/system_properties.h>
+//#include "VulkanAndroid.h"
+//#elif defined(VK_USE_PLATFORM_DIRECTFB_EXT)
+//#include <directfb.h>
+//#elif defined(VK_USE_PLATFORM_WAYLAND_KHR)
+//#include <wayland-client.h>
+//#include "xdg-shell-client-protocol.h"
+//#elif defined(_DIRECT2DISPLAY)
+////
+//#elif defined(VK_USE_PLATFORM_XCB_KHR)
+//#include <xcb/xcb.h>
+//#endif
+
+#include "application.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -57,12 +59,12 @@
 #include <numeric>
 #include <array>
 
-#include "vulkan/vulkan.h"
+#include "_vulkan.h"
 
 //#include "CommandLineParser.hpp"
 #include "keycodes.h"
-#include "VulkanTools.h"
-#include "VulkanDebug.h"
+#include "tools.h"
+#include "debug.h"
 #include "ui_overlay.h"
 #include "swap_chain.h"
 #include "buffer.h"
@@ -70,8 +72,8 @@
 #include "texture.h"
 
 #include "VulkanInitializers.h"
-#include "camera.hpp"
-#include "benchmark.hpp"
+#include "m_camera.hpp"
+#include "m_benchmark.hpp"
 
 
 namespace vulkan
@@ -81,154 +83,154 @@ namespace vulkan
    class base_application_with_swap_chain
    {
    public:
-      std::string getWindowTitle();
-      uint32_t destWidth;
-      uint32_t destHeight;
-      bool resizing = false;
-      void handleMouseMove(int32_t x, int32_t y);
-      void nextFrame();
-      void updateOverlay();
-      void createPipelineCache();
-      void createCommandPool();
-      void createSynchronizationPrimitives();
-      void initSwapchain();
-      void setupSwapChain();
-      void createCommandBuffers();
-      void destroyCommandBuffers();
-      std::string shaderDir = "glsl"_ansi;
-   protected:
+      //std::string getWindowTitle();
+      ////uint32_t m_iDestWidth;
+      ////uint32_t m_iDestHeight;
+      ////bool m_bResizing = false;
+      //void handleMouseMove(int32_t x, int32_t y);
+      //void nextFrame();
+      //void updateOverlay();
+      //void createPipelineCache();
+      //void createCommandPool();
+      //void createSynchronizationPrimitives();
+      //void initSwapchain();
+      //void setupSwapChain();
+      //void createCommandBuffers();
+      //void destroyCommandBuffers();
+      //std::string shaderDir = "glsl"_ansi;
+   //protected:
       // Returns the path to the root of the glsl or hlsl shader directory.
-      std::string getShadersPath() const;
+      // std::string getShadersPath() const;
 
-      // Frame counter to display fps
-      uint32_t frameCounter = 0;
-      uint32_t lastFPS = 0;
-      std::chrono::time_point<std::chrono::high_resolution_clock> lastTimestamp, tPrevEnd;
-      // Vulkan instance, stores all per-application states
-      VkInstance instance{ VK_NULL_HANDLE };
-      std::vector<std::string> supportedInstanceExtensions;
-      // Physical device (GPU) that Vulkan will use
-      VkPhysicalDevice physicalDevice{ VK_NULL_HANDLE };
-      // Stores physical device properties (for e.g. checking device limits)
-      VkPhysicalDeviceProperties deviceProperties{};
-      // Stores the features available on the selected physical device (for e.g. checking if a feature is available)
-      VkPhysicalDeviceFeatures deviceFeatures{};
-      // Stores all available memory (type) properties for the physical device
-      VkPhysicalDeviceMemoryProperties deviceMemoryProperties{};
-      /** @brief Set of physical device features to be enabled for this example (must be set in the derived constructor) */
-      VkPhysicalDeviceFeatures enabledFeatures{};
-      /** @brief Set of device extensions to be enabled for this example (must be set in the derived constructor) */
-      std::vector<const char*> enabledDeviceExtensions;
-      std::vector<const char*> enabledInstanceExtensions;
-      /** @brief Optional pNext structure for passing extension structures to device creation */
-      void* deviceCreatepNextChain = nullptr;
-      /** @brief Logical device, application's view of the physical device (GPU) */
-      VkDevice device{ VK_NULL_HANDLE };
-      // Handle to the device graphics queue that command buffers are submitted to
-      VkQueue queue{ VK_NULL_HANDLE };
-      // Depth buffer format (selected during Vulkan initialization)
-      VkFormat depthFormat;
-      // Command buffer pool
-      VkCommandPool cmdPool{ VK_NULL_HANDLE };
-      /** @brief Pipeline stages used to wait at for graphics queue submissions */
-      VkPipelineStageFlags submitPipelineStages = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-      // Contains command buffers and semaphores to be presented to the queue
-      VkSubmitInfo submitInfo;
-      std::vector<VkCommandBuffer> m_drawCmdBuffers;
-      // Command buffers used for rendering
-      std::vector<VkCommandBuffer> drawCmrequiresStencildBuffers;
-      // Global render pass for frame buffer writes
-      VkRenderPass renderPass{ VK_NULL_HANDLE };
-      // List of available frame buffers (same as number of swap chain images)
-      std::vector<VkFramebuffer>frameBuffers;
-      // Active frame buffer index
-      uint32_t currentBuffer = 0;
-      // Descriptor set pool
-      VkDescriptorPool descriptorPool{ VK_NULL_HANDLE };
-      // List of shader modules created (stored for cleanup)
-      std::vector<VkShaderModule> shaderModules;
-      // Pipeline cache object
-      VkPipelineCache pipelineCache{ VK_NULL_HANDLE };
-      // Wraps the swap chain to present images (framebuffers) to the windowing system
-      vulkan::swap_chain m_swapchain;
-      // Synchronization semaphores
-      struct {
-         // Swap chain image presentation
-         VkSemaphore presentComplete;
-         // Command buffer submission and execution
-         VkSemaphore renderComplete;
-      } semaphores;
-      std::vector<VkFence> waitFences;
-      bool requiresStencil{ false };
-   public:
-      bool prepared = false;
-      bool resized = false;
-      bool viewUpdated = false;
-      uint32_t width = 1280;
-      uint32_t height = 720;
+   //   // Frame counter to display fps
+   //   uint32_t frameCounter = 0;
+   //   uint32_t lastFPS = 0;
+   //   std::chrono::time_point<std::chrono::high_resolution_clock> lastTimestamp, tPrevEnd;
+   //   // Vulkan instance, stores all per-application states
+   //   //VkInstance instance{ VK_NULL_HANDLE };
+   //   //std::vector<std::string> supportedInstanceExtensions;
+   //   // Physical device (GPU) that Vulkan will use
+   //   VkPhysicalDevice physicalDevice{ VK_NULL_HANDLE };
+   //   // Stores physical device properties (for e.g. checking device limits)
+   //   VkPhysicalDeviceProperties deviceProperties{};
+   //   // Stores the features available on the selected physical device (for e.g. checking if a feature is available)
+   //   VkPhysicalDeviceFeatures deviceFeatures{};
+   //   // Stores all available memory (type) properties for the physical device
+   //   VkPhysicalDeviceMemoryProperties deviceMemoryProperties{};
+   //   /** @brief Set of physical device features to be enabled for this example (must be set in the derived constructor) */
+   //   VkPhysicalDeviceFeatures enabledFeatures{};
+   //   /** @brief Set of device extensions to be enabled for this example (must be set in the derived constructor) */
+   //   //std::vector<const char*> enabledDeviceExtensions;
+   //   //std::vector<const char*> enabledInstanceExtensions;
+   //   /** @brief Optional pNext structure for passing extension structures to device creation */
+   //   void* deviceCreatepNextChain = nullptr;
+   //   /** @brief Logical device, application's view of the physical device (GPU) */
+   //   VkDevice device{ VK_NULL_HANDLE };
+   //   // Handle to the device graphics queue that command buffers are submitted to
+   //   VkQueue queue{ VK_NULL_HANDLE };
+   //   // Depth buffer format (selected during Vulkan initialization)
+   //   VkFormat depthFormat;
+   //   // Command buffer pool
+   //   VkCommandPool cmdPool{ VK_NULL_HANDLE };
+   //   /** @brief Pipeline stages used to wait at for graphics queue submissions */
+   //   VkPipelineStageFlags submitPipelineStages = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+   //   // Contains command buffers and semaphores to be presented to the queue
+   //   VkSubmitInfo submitInfo;
+   //   std::vector<VkCommandBuffer> m_vkcommandbuffersDraw;
+   //   // Command buffers used for rendering
+   //   std::vector<VkCommandBuffer> m_vkcommandbuffersStencil;
+   //   // Global render pass for frame buffer writes
+   //   VkRenderPass m_vkrenderpass{ VK_NULL_HANDLE };
+   //   // List of available frame buffers (same as number of swap chain images)
+   //   std::vector<VkFramebuffer>m_vkframebuffers;
+   //   // Active frame buffer index
+   //   uint32_t m_uiCurrentBuffer = 0;
+   //   // Descriptor set pool
+   //   VkDescriptorPool m_vkdescriptorpool{ VK_NULL_HANDLE };
+   //   // List of shader modules created (stored for cleanup)
+   //   std::vector<VkShaderModule> m_vkshadermodules;
+   //   // Pipeline cache object
+   //   VkPipelineCache m_vkpipelinecache{ VK_NULL_HANDLE };
+   //   // Wraps the swap chain to present images (framebuffers) to the windowing system
+   //   vulkan::swap_chain m_swapchain;
+   //   // Synchronization semaphores
+   //   struct {
+   //      // Swap chain image presentation
+   //      VkSemaphore m_vksemaphorePresentComplete;
+   //      // Command buffer submission and execution
+   //      VkSemaphore m_vksemaphoreRenderComplete;
+   //   } semaphores;
+   //   std::vector<VkFence> m_vkfencesWait;
+   //   bool m_bRequiresStencil{ false };
+   //public:
+   //   bool m_bPrepared = false;
+   //   bool m_bResized = false;
+   //   bool m_bViewUpdated = false;
+   //   uint32_t m_iWidth = 1280;
+   //   uint32_t m_iHeight = 720;
 
-      vulkan::ui_overlay ui;
-      //CommandLineParser commandLineParser;
+   //   vulkan::ui_overlay ui;
+   //   //CommandLineParser commandLineParser;
 
-      /** @brief Last frame time measured using a high performance timer (if available) */
-      float frameTimer = 1.0f;
+   //   /** @brief Last frame time measured using a high performance m_fTimer (if available) */
+   //   float m_fFrameTimer = 1.0f;
 
-      vks::Benchmark benchmark;
+   //   vks::Benchmark m_benchmark;
 
-      /** @brief Encapsulated physical and logical vulkan device */
-      ::vulkan::device* m_pvulkandevice = nullptr;
+   //   /** @brief Encapsulated physical and logical vulkan device */
+   //   ::vulkan::device* m_pvulkandevice = nullptr;
 
-      /** @brief Example settings that can be changed e.g. by command line arguments */
-      struct Settings {
-         /** @brief Activates validation layers (and message output) when set to true */
-         bool validation = false;
-         /** @brief Set to true if fullscreen mode has been requested via command line */
-         bool fullscreen = false;
-         /** @brief Set to true if v-sync will be forced for the swapchain */
-         bool vsync = false;
-         /** @brief Enable UI overlay */
-         bool overlay = true;
-      } settings;
+   //   /** @brief Example settings that can be changed e.g. by command line arguments */
+   //   struct Settings {
+   //      /** @brief Activates validation layers (and message output) when set to true */
+   //      bool validation = false;
+   //      /** @brief Set to true if fullscreen mode has been requested via command line */
+   //      bool fullscreen = false;
+   //      /** @brief Set to true if v-sync will be forced for the swapchain */
+   //      bool vsync = false;
+   //      /** @brief Enable UI overlay */
+   //      bool overlay = true;
+   //   } settings;
 
-      /** @brief State of gamepad input (only used on Android) */
-      struct {
-         glm::vec2 axisLeft = glm::vec2(0.0f);
-         glm::vec2 axisRight = glm::vec2(0.0f);
-      } gamePadState;
+   //   /** @brief State of gamepad input (only used on Android) */
+   //   struct {
+   //      glm::vec2 axisLeft = glm::vec2(0.0f);
+   //      glm::vec2 axisRight = glm::vec2(0.0f);
+   //   } m_gamepadstate;
 
-      /** @brief State of mouse/touch input */
-      struct {
-         struct {
-            bool left = false;
-            bool right = false;
-            bool middle = false;
-         } buttons;
-         glm::vec2 position;
-      } mouseState;
+   //   /** @brief State of mouse/touch input */
+   //   struct {
+   //      struct {
+   //         bool left = false;
+   //         bool right = false;
+   //         bool middle = false;
+   //      } m_buttons;
+   //      glm::vec2 position;
+   //   } m_mousestate;
 
-      VkClearColorValue defaultClearColor = { { 0.025f, 0.025f, 0.025f, 1.0f } };
+   //   VkClearColorValue defaultClearColor = { { 0.025f, 0.025f, 0.025f, 1.0f } };
 
-      static std::vector<const char*> args;
+   //   static std::vector<const char*> args;
 
-      // Defines a frame rate independent timer value clamped from -1.0...1.0
-      // For use in animations, rotations, etc.
-      float timer = 0.0f;
-      // Multiplier for speeding up (or slowing down) the global timer
-      float timerSpeed = 0.25f;
-      bool paused = false;
+   //   // Defines a frame rate independent m_fTimer value clamped from -1.0...1.0
+   //   // For use in animations, rotations, etc.
+   //   float m_fTimer = 0.0f;
+   //   // Multiplier for speeding up (or slowing down) the global m_fTimer
+   //   float m_fTimerSpeed = 0.25f;
+   //   bool m_bPaused = false;
 
-      Camera camera;
+   //   Camera m_camera;
 
-      ::string m_strTitle = "Vulkan Example"_ansi;
-      ::string m_strWindowClassName = "vulkanExample"_ansi;
-      uint32_t apiVersion = VK_API_VERSION_1_0;
+   //   //::string m_strTitle = "Vulkan Example"_ansi;
+   //   //::string m_strWindowClassName = "vulkanExample"_ansi;
+   //   // uint32_t apiVersion = VK_API_VERSION_1_0;
 
-      /** @brief Default depth stencil attachment used by the default render pass */
-      struct {
-         VkImage image;
-         VkDeviceMemory memory;
-         VkImageView view;
-      } depthStencil{};
+   //   /** @brief Default depth stencil attachment used by the default render pass */
+   //   struct {
+   //      VkImage image;
+   //      VkDeviceMemory memory;
+   //      VkImageView view;
+   //   } depthStencil{};
 
       // OS specific
 #if defined(_WIN32)
@@ -250,10 +252,10 @@ namespace vulkan
       CAMetalLayer* metalLayer;
 #endif
 #if defined(VK_EXAMPLE_XCODE_GENERATED)
-      bool quit = false;
+      bool m_bQuit = false;
 #endif
 #elif defined(VK_USE_PLATFORM_DIRECTFB_EXT)
-      bool quit = false;
+      bool m_bQuit = false;
       IDirectFB* dfb = nullptr;
       IDirectFBDisplayLayer* layer = nullptr;
       IDirectFBWindow* window = nullptr;
@@ -270,24 +272,24 @@ namespace vulkan
       wl_surface* surface = nullptr;
       struct xdg_surface* xdg_surface;
       struct xdg_toplevel* xdg_toplevel;
-      bool quit = false;
-      bool configured = false;
+      bool m_bQuit = false;
+      bool m_bConfigured = false;
 
 #elif defined(_DIRECT2DISPLAY)
-      bool quit = false;
+      bool m_bQuit = false;
 #elif defined(VK_USE_PLATFORM_XCB_KHR)
-      bool quit = false;
+      bool m_bQuit = false;
       xcb_connection_t* connection;
       xcb_screen_t* screen;
       xcb_window_t window;
       xcb_intern_atom_reply_t* atom_wm_delete_window;
 #elif defined(VK_USE_PLATFORM_HEADLESS_EXT)
-      bool quit = false;
+      bool m_bQuit = false;
 #elif defined(VK_USE_PLATFORM_SCREEN_QNX)
       screen_context_t screen_context = nullptr;
       screen_window_t screen_window = nullptr;
       screen_event_t screen_event = nullptr;
-      bool quit = false;
+      bool m_bQuit = false;
 #endif
 
       /** @brief Default base class constructor */
@@ -316,7 +318,7 @@ namespace vulkan
 #elif defined(VK_USE_PLATFORM_WAYLAND_KHR)
       struct xdg_surface* setupWindow();
       void initWaylandConnection();
-      void setSize(int width, int height);
+      void setSize(int m_iWidth, int m_iHeight);
       static void registryGlobalCb(void* data, struct wl_registry* registry,
          uint32_t name, const char* interface, uint32_t version);
       void registryGlobal(struct wl_registry* registry, uint32_t name,
@@ -374,9 +376,9 @@ namespace vulkan
       virtual void render() = 0;
       /** @brief (Virtual) Called after a key was pressed, can be used to do custom key handling */
       virtual void keyPressed(uint32_t);
-      /** @brief (Virtual) Called after the mouse cursor moved and before internal happenings (like camera rotation) is handled */
+      /** @brief (Virtual) Called after the mouse cursor moved and before internal happenings (like m_camera rotation) is handled */
       virtual void mouseMoved(double x, double y, bool& handled);
-      /** @brief (Virtual) Called when the window has been resized, can be used by the sample application to recreate resources */
+      /** @brief (Virtual) Called when the window has been m_bResized, can be used by the sample application to recreate resources */
       virtual void windowResized();
       /** @brief (Virtual) Called when resources have been recreated that require a rebuild of the command buffers (e.g. frame buffer), to be implemented by the sample application */
       virtual void buildCommandBuffers();

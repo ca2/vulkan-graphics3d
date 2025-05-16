@@ -6,13 +6,13 @@
 * This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)
 */
 #include "framework.h"
-#include "VulkanExampleRenderHeadless.h"
+#include "headless_rendering_application.h"
 #include "acme/_operating_system.h"
-#include "VulkanTools.h"
-#include "benchmark.hpp"
-#include "camera.hpp"
+#include "tools.h"
+#include "m_benchmark.hpp"
+#include "m_camera.hpp"
 //#include "VulkanSwapChain.h"
-#include "VulkanglTFModel.h"
+#include "gltf_model.h"
 #include "ui_overlay.h"
 #include "shared.h"
 #define FB_DIM 512
@@ -43,7 +43,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <vulkan/vulkan.h>
-#include "VulkanTools.h"
+#include "tools.h"
 
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
 android_app * androidapp;
@@ -76,14 +76,14 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugMessageCallback(
 #define FB_DIM 512
 #define FB_COLOR_FORMAT VK_FORMAT_R8G8B8A8_UNORM
 
-VulkanExampleRenderHeadless::VulkanExampleRenderHeadless(mouseState * pmousestate)
+headless_rendering_application::headless_rendering_application(m_mousestate * pmousestate)
 {
    m_pmousestate = pmousestate;
 
 }
 
-VulkanExample5::VulkanExample5(mouseState * pmousestate):
-VulkanExampleRenderHeadless(pmousestate)
+VulkanExample5::VulkanExample5(m_mousestate * pmousestate):
+headless_rendering_application(pmousestate)
 {
    //m_pmousestate = pmousestate;
    LOG("Running headless rendering example\n"_ansi);
@@ -309,8 +309,8 @@ VulkanExampleRenderHeadless(pmousestate)
          //   VkImageCreateInfo image = vks::initializers::imageCreateInfo();
          //   image.imageType = VK_IMAGE_TYPE_2D;
          //   image.format = colorFormat;
-         //   image.extent.width = m_width;
-         //   image.extent.height = m_height;
+         //   image.extent.m_iWidth = m_width;
+         //   image.extent.m_iHeight = m_height;
          //   image.extent.depth = 1;
          //   image.mipLevels = 1;
          //   image.arrayLayers = 1;
@@ -426,18 +426,18 @@ VulkanExampleRenderHeadless(pmousestate)
          //   renderPassInfo.pSubpasses = &subpassDescription;
          //   renderPassInfo.dependencyCount = static_cast<uint32_t>(dependencies.size());
          //   renderPassInfo.pDependencies = dependencies.data();
-         //   VK_CHECK_RESULT(vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass));
+         //   VK_CHECK_RESULT(vkCreateRenderPass(device, &renderPassInfo, nullptr, &m_vkrenderpass));
 
          //   VkImageView attachments[2];
          //   attachments[0] = colorAttachment.view;
          //   attachments[1] = depthAttachment.view;
 
          //   VkFramebufferCreateInfo framebufferCreateInfo = vks::initializers::framebufferCreateInfo();
-         //   framebufferCreateInfo.renderPass = renderPass;
+         //   framebufferCreateInfo.m_vkrenderpass = m_vkrenderpass;
          //   framebufferCreateInfo.attachmentCount = 2;
          //   framebufferCreateInfo.pAttachments = attachments;
-         //   framebufferCreateInfo.width = m_width;
-         //   framebufferCreateInfo.height = m_height;
+         //   framebufferCreateInfo.m_iWidth = m_width;
+         //   framebufferCreateInfo.m_iHeight = m_height;
          //   framebufferCreateInfo.layers = 1;
          //   VK_CHECK_RESULT(vkCreateFramebuffer(device, &framebufferCreateInfo, nullptr, &framebuffer));
          //}
@@ -465,7 +465,7 @@ VulkanExampleRenderHeadless(pmousestate)
    //
    //         VkPipelineCacheCreateInfo pipelineCacheCreateInfo = {};
    //         pipelineCacheCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
-   //         VK_CHECK_RESULT(vkCreatePipelineCache(device, &pipelineCacheCreateInfo, nullptr, &pipelineCache));
+   //         VK_CHECK_RESULT(vkCreatePipelineCache(device, &pipelineCacheCreateInfo, nullptr, &m_vkpipelinecache));
    //
    //         // Create pipeline
    //         VkPipelineInputAssemblyStateCreateInfo inputAssemblyState =
@@ -497,7 +497,7 @@ VulkanExampleRenderHeadless(pmousestate)
    //            vks::initializers::pipelineDynamicStateCreateInfo(dynamicStateEnables);
    //
    //         VkGraphicsPipelineCreateInfo pipelineCreateInfo =
-   //            vks::initializers::pipelineCreateInfo(pipelineLayout, renderPass);
+   //            vks::initializers::pipelineCreateInfo(pipelineLayout, m_vkrenderpass);
    //
    //         std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages{};
    //
@@ -549,8 +549,8 @@ VulkanExampleRenderHeadless(pmousestate)
    //         shaderStages[0].module = vks::tools::loadShader((shadersPath + "triangle.vert.spv"_ansi).c_str(), device);
    //         shaderStages[1].module = vks::tools::loadShader((shadersPath + "triangle.frag.spv"_ansi).c_str(), device);
    //#endif
-   //         shaderModules = { shaderStages[0].module, shaderStages[1].module };
-   //         VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, pipelineCache, 1, &pipelineCreateInfo, nullptr, &pipeline));
+   //         m_vkshadermodules = { shaderStages[0].module, shaderStages[1].module };
+   //         VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, m_vkpipelinecache, 1, &pipelineCreateInfo, nullptr, &pipeline));
    //      }
 
          ///*
@@ -573,26 +573,26 @@ VulkanExampleRenderHeadless(pmousestate)
 
          //   VkRenderPassBeginInfo renderPassBeginInfo = {};
          //   renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-         //   renderPassBeginInfo.renderArea.extent.width = m_width;
-         //   renderPassBeginInfo.renderArea.extent.height = m_height;
+         //   renderPassBeginInfo.renderArea.extent.m_iWidth = m_width;
+         //   renderPassBeginInfo.renderArea.extent.m_iHeight = m_height;
          //   renderPassBeginInfo.clearValueCount = 2;
          //   renderPassBeginInfo.pClearValues = clearValues;
-         //   renderPassBeginInfo.renderPass = renderPass;
+         //   renderPassBeginInfo.m_vkrenderpass = m_vkrenderpass;
          //   renderPassBeginInfo.framebuffer = framebuffer;
 
          //   vkCmdBeginRenderPass(commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
          //   VkViewport viewport = {};
-         //   viewport.height = (float)m_height;
-         //   viewport.width = (float)m_width;
+         //   viewport.m_iHeight = (float)m_height;
+         //   viewport.m_iWidth = (float)m_width;
          //   viewport.minDepth = (float)0.0f;
          //   viewport.maxDepth = (float)1.0f;
          //   vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 
          //   // Update dynamic scissor state
          //   VkRect2D scissor = {};
-         //   scissor.extent.width = m_width;
-         //   scissor.extent.height = m_height;
+         //   scissor.extent.m_iWidth = m_width;
+         //   scissor.extent.m_iHeight = m_height;
          //   vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
          //   vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
@@ -627,7 +627,7 @@ VulkanExampleRenderHeadless(pmousestate)
 }
 
 
-VulkanExampleRenderHeadless::~VulkanExampleRenderHeadless()
+headless_rendering_application::~headless_rendering_application()
 {
 
    if (m_device)
@@ -647,7 +647,7 @@ VulkanExampleRenderHeadless::~VulkanExampleRenderHeadless()
          vkDestroyImage(m_device, m_offscreenPass.depth.image, nullptr);
          vkFreeMemory(m_device, m_offscreenPass.depth.mem, nullptr);
 
-         vkDestroyRenderPass(m_device, m_offscreenPass.renderPass, nullptr);
+         vkDestroyRenderPass(m_device, m_offscreenPass.m_vkrenderpass, nullptr);
          vkDestroySampler(m_device, m_offscreenPass.sampler, nullptr);
          vkDestroyFramebuffer(m_device, m_offscreenPass.frameBuffer, nullptr);
 
@@ -708,7 +708,7 @@ VulkanExample5::~VulkanExample5()
 
 }
 
-   VkResult VulkanExampleRenderHeadless::createInstance()
+   VkResult headless_rendering_application::createInstance()
    {
       
       std::vector<const char *> instanceExtensions = { VK_KHR_SURFACE_EXTENSION_NAME };
@@ -822,21 +822,21 @@ VulkanExample5::~VulkanExample5()
    }
 
    
-   void VulkanExampleRenderHeadless::getEnabledFeatures()
+   void headless_rendering_application::getEnabledFeatures()
    {
    
 
    }
 
    
-   void VulkanExampleRenderHeadless::getEnabledExtensions()
+   void headless_rendering_application::getEnabledExtensions()
    {
    
 
    }
 
 
-   bool VulkanExampleRenderHeadless::initVulkan()
+   bool headless_rendering_application::initVulkan()
    {
       // Instead of checking for the command line switch, validation can be forced via a define
 #if defined(_VALIDATION)
@@ -949,10 +949,10 @@ VulkanExample5::~VulkanExample5()
       //VkSemaphoreCreateInfo semaphoreCreateInfo = vks::initializers::semaphoreCreateInfo();
       //// Create a semaphore used to synchronize image presentation
       //// Ensures that the image is displayed before we start submitting ___new commands to the queue
-      //VK_CHECK_RESULT(vkCreateSemaphore(m_device, &semaphoreCreateInfo, nullptr, &m_semaphores.presentComplete));
+      //VK_CHECK_RESULT(vkCreateSemaphore(m_device, &semaphoreCreateInfo, nullptr, &m_semaphores.m_vksemaphorePresentComplete));
       //// Create a semaphore used to synchronize command submission
       //// Ensures that the image is not presented until all commands have been submitted and executed
-      //VK_CHECK_RESULT(vkCreateSemaphore(m_device, &semaphoreCreateInfo, nullptr, &m_semaphores.renderComplete));
+      //VK_CHECK_RESULT(vkCreateSemaphore(m_device, &semaphoreCreateInfo, nullptr, &m_semaphores.m_vksemaphoreRenderComplete));
 
       // Set up submit info structure
       // Semaphores will stay the same during application lifetime
@@ -960,9 +960,9 @@ VulkanExample5::~VulkanExample5()
       //m_submitInfo = vks::initializers::submitInfo();
       //m_submitInfo.pWaitDstStageMask = &m_submitPipelineStages;
       //m_submitInfo.waitSemaphoreCount = 1;
-      //m_submitInfo.pWaitSemaphores = &m_semaphores.presentComplete;
+      //m_submitInfo.pWaitSemaphores = &m_semaphores.m_vksemaphorePresentComplete;
       //m_submitInfo.signalSemaphoreCount = 1;
-      //m_submitInfo.pSignalSemaphores = &m_semaphores.renderComplete;
+      //m_submitInfo.pSignalSemaphores = &m_semaphores.m_vksemaphoreRenderComplete;
 
       return true;
    }
@@ -1012,7 +1012,7 @@ VulkanExample5::~VulkanExample5()
    /*
       Submit command buffer to a queue and wait for fence until queue operations have been finished
    */
-   void VulkanExampleRenderHeadless::submitWork(VkCommandBuffer cmdBuffer, VkQueue queue)
+   void headless_rendering_application::submitWork(VkCommandBuffer cmdBuffer, VkQueue queue)
    {
       VkSubmitInfo submitInfo = vks::initializers::submitInfo();
       submitInfo.commandBufferCount = 1;
@@ -1029,14 +1029,14 @@ VulkanExample5::~VulkanExample5()
 
    
 
-   void VulkanExampleRenderHeadless::renderLoop2(const ::function < void(void *, int, int, int)> & callback)
+   void headless_rendering_application::renderLoop2(const ::function < void(void *, int, int, int)> & callback)
    {
       // SRS - for non-apple plaforms, handle benchmarking here within base_application_with_swap_chain::renderLoop()
       //     - for macOS, handle benchmarking within NSApp rendering loop via displayLinkOutputCb()
 #if !(defined(VK_USE_PLATFORM_IOS_MVK) || defined(VK_USE_PLATFORM_MACOS_MVK) || defined(VK_USE_PLATFORM_METAL_EXT))
       if (m_benchmark.active) {
 #if defined(VK_USE_PLATFORM_WAYLAND_KHR)
-         while (!configured)
+         while (!m_bConfigured)
             wl_display_dispatch(display);
          while (wl_display_prepare_read(display) != 0)
             wl_display_dispatch_pending(display);
@@ -1054,8 +1054,8 @@ VulkanExample5::~VulkanExample5()
       }
 #endif
 
-      //destWidth = width;
-      //destHeight = height;
+      //m_iDestWidth = m_iWidth;
+      //m_iDestHeight = m_iHeight;
       m_lastTimestamp = std::chrono::high_resolution_clock::now();
       m_tPrevEnd = m_lastTimestamp;
 #if defined(_WIN32)
@@ -1070,7 +1070,7 @@ VulkanExample5::~VulkanExample5()
       //         break;
       //      }
       //   }
-      //   if (prepared && !IsIconic(window)) {
+      //   if (m_bPrepared && !IsIconic(window)) {
       while (::task_get_run())
       {
          nextFrame(callback);
@@ -1113,22 +1113,22 @@ VulkanExample5::~VulkanExample5()
          }
 
          // Render frame
-         if (prepared)
+         if (m_bPrepared)
          {
             auto tStart = std::chrono::high_resolution_clock::now();
             render();
             frameCounter++;
             auto tEnd = std::chrono::high_resolution_clock::now();
             auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
-            frameTimer = tDiff / 1000.0f;
-            camera.update(frameTimer);
-            // Convert to clamped timer value
-            if (!paused)
+            m_fFrameTimer = tDiff / 1000.0f;
+            m_camera.update(m_fFrameTimer);
+            // Convert to clamped m_fTimer value
+            if (!m_bPaused)
             {
-               timer += timerSpeed * frameTimer;
-               if (timer > 1.0)
+               m_fTimer += m_fTimerSpeed * m_fFrameTimer;
+               if (m_fTimer > 1.0)
                {
-                  timer -= 1.0f;
+                  m_fTimer -= 1.0f;
                }
             }
             float fpsTimer = std::chrono::duration<double, std::milli>(tEnd - lastTimestamp).count();
@@ -1145,65 +1145,65 @@ VulkanExample5::~VulkanExample5()
 
             // Check touch state (for movement)
             if (touchDown) {
-               touchTimer += frameTimer;
+               touchTimer += m_fFrameTimer;
             }
             if (touchTimer >= 1.0) {
-               camera.keys.up = true;
+               m_camera.keys.up = true;
             }
 
             // Check gamepad state
             const float deadZone = 0.0015f;
-            if (camera.type != Camera::CameraType::firstperson)
+            if (m_camera.type != Camera::CameraType::firstperson)
             {
                // Rotate
-               if (std::abs(gamePadState.axisLeft.x) > deadZone)
+               if (std::abs(m_gamepadstate.axisLeft.x) > deadZone)
                {
-                  camera.rotate(glm::vec3(0.0f, gamePadState.axisLeft.x * 0.5f, 0.0f));
+                  m_camera.rotate(glm::vec3(0.0f, m_gamepadstate.axisLeft.x * 0.5f, 0.0f));
                   updateView = true;
                }
-               if (std::abs(gamePadState.axisLeft.y) > deadZone)
+               if (std::abs(m_gamepadstate.axisLeft.y) > deadZone)
                {
-                  camera.rotate(glm::vec3(gamePadState.axisLeft.y * 0.5f, 0.0f, 0.0f));
+                  m_camera.rotate(glm::vec3(m_gamepadstate.axisLeft.y * 0.5f, 0.0f, 0.0f));
                   updateView = true;
                }
                // Zoom
-               if (std::abs(gamePadState.axisRight.y) > deadZone)
+               if (std::abs(m_gamepadstate.axisRight.y) > deadZone)
                {
-                  camera.translate(glm::vec3(0.0f, 0.0f, gamePadState.axisRight.y * 0.01f));
+                  m_camera.translate(glm::vec3(0.0f, 0.0f, m_gamepadstate.axisRight.y * 0.01f));
                   updateView = true;
                }
             }
             else
             {
-               updateView = camera.updatePad(gamePadState.axisLeft, gamePadState.axisRight, frameTimer);
+               updateView = m_camera.updatePad(m_gamepadstate.axisLeft, m_gamepadstate.axisRight, m_fFrameTimer);
             }
          }
       }
 #elif defined(_DIRECT2DISPLAY)
-      while (!quit)
+      while (!m_bQuit)
       {
          auto tStart = std::chrono::high_resolution_clock::now();
-         if (viewUpdated)
+         if (m_bViewUpdated)
          {
-            viewUpdated = false;
+            m_bViewUpdated = false;
          }
          render();
          frameCounter++;
          auto tEnd = std::chrono::high_resolution_clock::now();
          auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
-         frameTimer = tDiff / 1000.0f;
-         camera.update(frameTimer);
-         if (camera.moving())
+         m_fFrameTimer = tDiff / 1000.0f;
+         m_camera.update(m_fFrameTimer);
+         if (m_camera.moving())
          {
-            viewUpdated = true;
+            m_bViewUpdated = true;
          }
-         // Convert to clamped timer value
-         if (!paused)
+         // Convert to clamped m_fTimer value
+         if (!m_bPaused)
          {
-            timer += timerSpeed * frameTimer;
-            if (timer > 1.0)
+            m_fTimer += m_fTimerSpeed * m_fFrameTimer;
+            if (m_fTimer > 1.0)
             {
-               timer -= 1.0f;
+               m_fTimer -= 1.0f;
             }
          }
          float fpsTimer = std::chrono::duration<double, std::milli>(tEnd - lastTimestamp).count();
@@ -1216,12 +1216,12 @@ VulkanExample5::~VulkanExample5()
          updateOverlay();
       }
 #elif defined(VK_USE_PLATFORM_DIRECTFB_EXT)
-      while (!quit)
+      while (!m_bQuit)
       {
          auto tStart = std::chrono::high_resolution_clock::now();
-         if (viewUpdated)
+         if (m_bViewUpdated)
          {
-            viewUpdated = false;
+            m_bViewUpdated = false;
          }
          DFBWindowEvent happening;
          while (!event_buffer->GetEvent(event_buffer, DFB_EVENT(&happening)))
@@ -1232,19 +1232,19 @@ VulkanExample5::~VulkanExample5()
          frameCounter++;
          auto tEnd = std::chrono::high_resolution_clock::now();
          auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
-         frameTimer = tDiff / 1000.0f;
-         camera.update(frameTimer);
-         if (camera.moving())
+         m_fFrameTimer = tDiff / 1000.0f;
+         m_camera.update(m_fFrameTimer);
+         if (m_camera.moving())
          {
-            viewUpdated = true;
+            m_bViewUpdated = true;
          }
-         // Convert to clamped timer value
-         if (!paused)
+         // Convert to clamped m_fTimer value
+         if (!m_bPaused)
          {
-            timer += timerSpeed * frameTimer;
-            if (timer > 1.0)
+            m_fTimer += m_fTimerSpeed * m_fFrameTimer;
+            if (m_fTimer > 1.0)
             {
-               timer -= 1.0f;
+               m_fTimer -= 1.0f;
             }
          }
          float fpsTimer = std::chrono::duration<double, std::milli>(tEnd - lastTimestamp).count();
@@ -1257,15 +1257,15 @@ VulkanExample5::~VulkanExample5()
          updateOverlay();
       }
 #elif defined(VK_USE_PLATFORM_WAYLAND_KHR)
-      while (!quit)
+      while (!m_bQuit)
       {
          auto tStart = std::chrono::high_resolution_clock::now();
-         if (viewUpdated)
+         if (m_bViewUpdated)
          {
-            viewUpdated = false;
+            m_bViewUpdated = false;
          }
 
-         while (!configured)
+         while (!m_bConfigured)
             wl_display_dispatch(display);
          while (wl_display_prepare_read(display) != 0)
             wl_display_dispatch_pending(display);
@@ -1277,19 +1277,19 @@ VulkanExample5::~VulkanExample5()
          frameCounter++;
          auto tEnd = std::chrono::high_resolution_clock::now();
          auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
-         frameTimer = tDiff / 1000.0f;
-         camera.update(frameTimer);
-         if (camera.moving())
+         m_fFrameTimer = tDiff / 1000.0f;
+         m_camera.update(m_fFrameTimer);
+         if (m_camera.moving())
          {
-            viewUpdated = true;
+            m_bViewUpdated = true;
          }
-         // Convert to clamped timer value
-         if (!paused)
+         // Convert to clamped m_fTimer value
+         if (!m_bPaused)
          {
-            timer += timerSpeed * frameTimer;
-            if (timer > 1.0)
+            m_fTimer += m_fTimerSpeed * m_fFrameTimer;
+            if (m_fTimer > 1.0)
             {
-               timer -= 1.0f;
+               m_fTimer -= 1.0f;
             }
          }
          float fpsTimer = std::chrono::duration<double, std::milli>(tEnd - lastTimestamp).count();
@@ -1308,12 +1308,12 @@ VulkanExample5::~VulkanExample5()
       }
 #elif defined(VK_USE_PLATFORM_XCB_KHR)
       xcb_flush(connection);
-      while (!quit)
+      while (!m_bQuit)
       {
          auto tStart = std::chrono::high_resolution_clock::now();
-         if (viewUpdated)
+         if (m_bViewUpdated)
          {
-            viewUpdated = false;
+            m_bViewUpdated = false;
          }
          xcb_generic_event_t * happening;
          while ((happening = xcb_poll_for_event(connection)))
@@ -1325,19 +1325,19 @@ VulkanExample5::~VulkanExample5()
          frameCounter++;
          auto tEnd = std::chrono::high_resolution_clock::now();
          auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
-         frameTimer = tDiff / 1000.0f;
-         camera.update(frameTimer);
-         if (camera.moving())
+         m_fFrameTimer = tDiff / 1000.0f;
+         m_camera.update(m_fFrameTimer);
+         if (m_camera.moving())
          {
-            viewUpdated = true;
+            m_bViewUpdated = true;
          }
-         // Convert to clamped timer value
-         if (!paused)
+         // Convert to clamped m_fTimer value
+         if (!m_bPaused)
          {
-            timer += timerSpeed * frameTimer;
-            if (timer > 1.0)
+            m_fTimer += m_fTimerSpeed * m_fFrameTimer;
+            if (m_fTimer > 1.0)
             {
-               timer -= 1.0f;
+               m_fTimer -= 1.0f;
             }
          }
          float fpsTimer = std::chrono::duration<double, std::milli>(tEnd - lastTimestamp).count();
@@ -1357,28 +1357,28 @@ VulkanExample5::~VulkanExample5()
          updateOverlay();
       }
 #elif defined(VK_USE_PLATFORM_HEADLESS_EXT)
-      while (!quit)
+      while (!m_bQuit)
       {
          auto tStart = std::chrono::high_resolution_clock::now();
-         if (viewUpdated)
+         if (m_bViewUpdated)
          {
-            viewUpdated = false;
+            m_bViewUpdated = false;
          }
          render();
          frameCounter++;
          auto tEnd = std::chrono::high_resolution_clock::now();
          auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
-         frameTimer = tDiff / 1000.0f;
-         camera.update(frameTimer);
-         if (camera.moving())
+         m_fFrameTimer = tDiff / 1000.0f;
+         m_camera.update(m_fFrameTimer);
+         if (m_camera.moving())
          {
-            viewUpdated = true;
+            m_bViewUpdated = true;
          }
-         // Convert to clamped timer value
-         timer += timerSpeed * frameTimer;
-         if (timer > 1.0)
+         // Convert to clamped m_fTimer value
+         m_fTimer += m_fTimerSpeed * m_fFrameTimer;
+         if (m_fTimer > 1.0)
          {
-            timer -= 1.0f;
+            m_fTimer -= 1.0f;
          }
          float fpsTimer = std::chrono::duration<double, std::milli>(tEnd - lastTimestamp).count();
          if (fpsTimer > 1000.0f)
@@ -1392,10 +1392,10 @@ VulkanExample5::~VulkanExample5()
 #elif (defined(VK_USE_PLATFORM_MACOS_MVK) || defined(VK_USE_PLATFORM_METAL_EXT)) && defined(VK_EXAMPLE_XCODE_GENERATED)
       [NSApp run];
 #elif defined(VK_USE_PLATFORM_SCREEN_QNX)
-      while (!quit) {
+      while (!m_bQuit) {
          handleEvent();
 
-         if (prepared) {
+         if (m_bPrepared) {
             nextFrame();
          }
       }
@@ -1407,7 +1407,7 @@ VulkanExample5::~VulkanExample5()
    }
 
 
-      void VulkanExampleRenderHeadless::sample(const ::function < void(void *, int, int, int)> & callback)
+      void headless_rendering_application::sample(const ::function < void(void *, int, int, int)> & callback)
       {
 
 
@@ -1420,8 +1420,8 @@ VulkanExample5::~VulkanExample5()
             VkImageCreateInfo imgCreateInfo(vks::initializers::imageCreateInfo());
             imgCreateInfo.imageType = VK_IMAGE_TYPE_2D;
             imgCreateInfo.format = VK_FORMAT_R8G8B8A8_UNORM;
-            imgCreateInfo.extent.width = m_width;
-            imgCreateInfo.extent.height = m_height;
+            imgCreateInfo.extent.m_iWidth = m_width;
+            imgCreateInfo.extent.m_iHeight = m_height;
             imgCreateInfo.extent.depth = 1;
             imgCreateInfo.arrayLayers = 1;
             imgCreateInfo.mipLevels = 1;
@@ -1469,8 +1469,8 @@ VulkanExample5::~VulkanExample5()
             imageCopyRegion.srcSubresource.layerCount = 1;
             imageCopyRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
             imageCopyRegion.dstSubresource.layerCount = 1;
-            imageCopyRegion.extent.width = m_width;
-            imageCopyRegion.extent.height = m_height;
+            imageCopyRegion.extent.m_iWidth = m_width;
+            imageCopyRegion.extent.m_iHeight = m_height;
             imageCopyRegion.extent.depth = 1;
 
             vkCmdCopyImage(
@@ -1574,7 +1574,7 @@ VulkanExample5::~VulkanExample5()
          //}
          //file.close();
 
-         //LOG("Framebuffer image saved to %s\n"_ansi, filename);
+         //LOG("frame_buffer image saved to %s\n"_ansi, filename);
 
          // Clean up resources
          vkUnmapMemory(m_device, dstImageMemory);
@@ -1587,7 +1587,7 @@ VulkanExample5::~VulkanExample5()
       }
 
       /** @brief Adds the drawing commands for the ImGui overlay to the given command buffer */
-      void VulkanExampleRenderHeadless::drawUI(const VkCommandBuffer commandBuffer)
+      void headless_rendering_application::drawUI(const VkCommandBuffer commandBuffer)
       {
 
          if (m_settings.overlay && m_ui.visible) {
@@ -1602,7 +1602,7 @@ VulkanExample5::~VulkanExample5()
       }
 
 
-   void VulkanExampleRenderHeadless::buildCommandBuffers()
+   void headless_rendering_application::buildCommandBuffers()
    {
    }
 
@@ -1611,9 +1611,9 @@ VulkanExample5::~VulkanExample5()
    {
       VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
 
-      for (int32_t i = 0; i < m_drawCmdBuffers.size(); ++i)
+      for (int32_t i = 0; i < m_vkcommandbuffersDraw.size(); ++i)
       {
-         VK_CHECK_RESULT(vkBeginCommandBuffer(m_drawCmdBuffers[i], &cmdBufInfo));
+         VK_CHECK_RESULT(vkBeginCommandBuffer(m_vkcommandbuffersDraw[i], &cmdBufInfo));
 
          /*
             First render pass: Offscreen rendering
@@ -1624,27 +1624,27 @@ VulkanExample5::~VulkanExample5()
             clearValues[1].depthStencil = { 1.0f, 0 };
 
             VkRenderPassBeginInfo renderPassBeginInfo = vks::initializers::renderPassBeginInfo();
-            renderPassBeginInfo.renderPass = m_offscreenPass.renderPass;
+            renderPassBeginInfo.m_vkrenderpass = m_offscreenPass.m_vkrenderpass;
             renderPassBeginInfo.framebuffer = m_offscreenPass.frameBuffer;
-            renderPassBeginInfo.renderArea.extent.width = m_offscreenPass.width;
-            renderPassBeginInfo.renderArea.extent.height = m_offscreenPass.height;
+            renderPassBeginInfo.renderArea.extent.m_iWidth = m_offscreenPass.m_iWidth;
+            renderPassBeginInfo.renderArea.extent.m_iHeight = m_offscreenPass.m_iHeight;
             renderPassBeginInfo.clearValueCount = 2;
             renderPassBeginInfo.pClearValues = clearValues;
 
-            vkCmdBeginRenderPass(m_drawCmdBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+            vkCmdBeginRenderPass(m_vkcommandbuffersDraw[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-            VkViewport viewport = vks::initializers::viewport((float)m_offscreenPass.width, (float)m_offscreenPass.height, 0.0f, 1.0f);
-            vkCmdSetViewport(m_drawCmdBuffers[i], 0, 1, &viewport);
+            VkViewport viewport = vks::initializers::viewport((float)m_offscreenPass.m_iWidth, (float)m_offscreenPass.m_iHeight, 0.0f, 1.0f);
+            vkCmdSetViewport(m_vkcommandbuffersDraw[i], 0, 1, &viewport);
 
-            VkRect2D scissor = vks::initializers::rect2D(m_offscreenPass.width, m_offscreenPass.height, 0, 0);
-            vkCmdSetScissor(m_drawCmdBuffers[i], 0, 1, &scissor);
+            VkRect2D scissor = vks::initializers::rect2D(m_offscreenPass.m_iWidth, m_offscreenPass.m_iHeight, 0, 0);
+            vkCmdSetScissor(m_vkcommandbuffersDraw[i], 0, 1, &scissor);
 
             // Mirrored scene
-            vkCmdBindDescriptorSets(m_drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelineLayouts.shaded, 0, 1, &m_descriptorSets.offscreen, 0, NULL);
-            vkCmdBindPipeline(m_drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelines.shadedOffscreen);
-            m_models.example.draw(m_drawCmdBuffers[i]);
+            vkCmdBindDescriptorSets(m_vkcommandbuffersDraw[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelineLayouts.shaded, 0, 1, &m_descriptorSets.offscreen, 0, NULL);
+            vkCmdBindPipeline(m_vkcommandbuffersDraw[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelines.shadedOffscreen);
+            m_models.example.draw(m_vkcommandbuffersDraw[i]);
 
-            vkCmdEndRenderPass(m_drawCmdBuffers[i]);
+            vkCmdEndRenderPass(m_vkcommandbuffersDraw[i]);
          }
 
          /*
@@ -1660,50 +1660,50 @@ VulkanExample5::~VulkanExample5()
             clearValues[1].depthStencil = { 1.0f, 0 };
 
             VkRenderPassBeginInfo renderPassBeginInfo = vks::initializers::renderPassBeginInfo();
-            renderPassBeginInfo.renderPass = m_renderPass;
+            renderPassBeginInfo.m_vkrenderpass = m_renderPass;
             renderPassBeginInfo.framebuffer = m_frameBuffers[i];
-            renderPassBeginInfo.renderArea.extent.width = m_width;
-            renderPassBeginInfo.renderArea.extent.height = m_height;
+            renderPassBeginInfo.renderArea.extent.m_iWidth = m_width;
+            renderPassBeginInfo.renderArea.extent.m_iHeight = m_height;
             renderPassBeginInfo.clearValueCount = 2;
             renderPassBeginInfo.pClearValues = clearValues;
 
-            vkCmdBeginRenderPass(m_drawCmdBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+            vkCmdBeginRenderPass(m_vkcommandbuffersDraw[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
             VkViewport viewport = vks::initializers::viewport((float)m_width, (float)m_height, 0.0f, 1.0f);
-            vkCmdSetViewport(m_drawCmdBuffers[i], 0, 1, &viewport);
+            vkCmdSetViewport(m_vkcommandbuffersDraw[i], 0, 1, &viewport);
 
             VkRect2D scissor = vks::initializers::rect2D(m_width, m_height, 0, 0);
-            vkCmdSetScissor(m_drawCmdBuffers[i], 0, 1, &scissor);
+            vkCmdSetScissor(m_vkcommandbuffersDraw[i], 0, 1, &scissor);
 
             if (m_debugDisplay)
             {
                // Display the offscreen render target
-               vkCmdBindDescriptorSets(m_drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelineLayouts.textured, 0, 1, &m_descriptorSets.mirror, 0, nullptr);
-               vkCmdBindPipeline(m_drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelines.debug);
-               vkCmdDraw(m_drawCmdBuffers[i], 3, 1, 0, 0);
+               vkCmdBindDescriptorSets(m_vkcommandbuffersDraw[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelineLayouts.textured, 0, 1, &m_descriptorSets.mirror, 0, nullptr);
+               vkCmdBindPipeline(m_vkcommandbuffersDraw[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelines.debug);
+               vkCmdDraw(m_vkcommandbuffersDraw[i], 3, 1, 0, 0);
             }
             else {
                // Render the scene
                // Reflection plane
-               vkCmdBindDescriptorSets(m_drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelineLayouts.textured, 0, 1, &m_descriptorSets.mirror, 0, nullptr);
-               vkCmdBindPipeline(m_drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelines.mirror);
-               m_models.plane.draw(m_drawCmdBuffers[i]);
+               vkCmdBindDescriptorSets(m_vkcommandbuffersDraw[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelineLayouts.textured, 0, 1, &m_descriptorSets.mirror, 0, nullptr);
+               vkCmdBindPipeline(m_vkcommandbuffersDraw[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelines.mirror);
+               m_models.plane.draw(m_vkcommandbuffersDraw[i]);
                // Model
-               vkCmdBindDescriptorSets(m_drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelineLayouts.shaded, 0, 1, &m_descriptorSets.model, 0, nullptr);
-               vkCmdBindPipeline(m_drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelines.shaded);
-               m_models.example.draw(m_drawCmdBuffers[i]);
+               vkCmdBindDescriptorSets(m_vkcommandbuffersDraw[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelineLayouts.shaded, 0, 1, &m_descriptorSets.model, 0, nullptr);
+               vkCmdBindPipeline(m_vkcommandbuffersDraw[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelines.shaded);
+               m_models.example.draw(m_vkcommandbuffersDraw[i]);
             }
 
-            drawUI(m_drawCmdBuffers[i]);
+            drawUI(m_vkcommandbuffersDraw[i]);
 
-            vkCmdEndRenderPass(m_drawCmdBuffers[i]);
+            vkCmdEndRenderPass(m_vkcommandbuffersDraw[i]);
          }
 
-         VK_CHECK_RESULT(vkEndCommandBuffer(m_drawCmdBuffers[i]));
+         VK_CHECK_RESULT(vkEndCommandBuffer(m_vkcommandbuffersDraw[i]));
       }
    }
 
-   void VulkanExampleRenderHeadless::nextFrame(const ::function < void(void *, int, int, int)> & callback)
+   void headless_rendering_application::nextFrame(const ::function < void(void *, int, int, int)> & callback)
    {
       auto tStart = std::chrono::high_resolution_clock::now();
       if (m_viewUpdated)
@@ -1726,7 +1726,7 @@ VulkanExample5::~VulkanExample5()
       {
          m_viewUpdated = true;
       }
-      // Convert to clamped timer value
+      // Convert to clamped m_fTimer value
       if (!m_paused)
       {
          m_fTimer += m_fTimerSpeed * m_frameTimer;
@@ -1752,7 +1752,7 @@ VulkanExample5::~VulkanExample5()
 
       updateOverlay();
    }
-   void VulkanExampleRenderHeadless::OnUpdateUIOverlay(vulkan::ui_overlay * overlay)
+   void headless_rendering_application::OnUpdateUIOverlay(vulkan::ui_overlay * overlay)
    {
       if (overlay->header("Settings"_ansi)) {
          if (overlay->checkBox("Display render target"_ansi, &m_debugDisplay)) {
@@ -1761,7 +1761,7 @@ VulkanExample5::~VulkanExample5()
       }
    }
 
-   void VulkanExampleRenderHeadless::updateOverlay()
+   void headless_rendering_application::updateOverlay()
    {
       if (!m_settings.overlay)
          return;
@@ -1781,9 +1781,9 @@ VulkanExample5::~VulkanExample5()
       io.DeltaTime = m_frameTimer;
 
       io.MousePos = ImVec2(m_pmousestate->position.x, m_pmousestate->position.y);
-      io.MouseDown[0] = m_pmousestate->buttons.left && m_ui.visible;
-      io.MouseDown[1] = m_pmousestate->buttons.right && m_ui.visible;
-      io.MouseDown[2] = m_pmousestate->buttons.middle && m_ui.visible;
+      io.MouseDown[0] = m_pmousestate->m_buttons.left && m_ui.visible;
+      io.MouseDown[1] = m_pmousestate->m_buttons.right && m_ui.visible;
+      io.MouseDown[2] = m_pmousestate->m_buttons.middle && m_ui.visible;
 
       ImGui::NewFrame();
 
@@ -1815,14 +1815,14 @@ VulkanExample5::~VulkanExample5()
       }
 
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
-      if (mouseState.buttons.left) {
-         mouseState.buttons.left = false;
+      if (m_mousestate.m_buttons.left) {
+         m_mousestate.m_buttons.left = false;
       }
 #endif
    }
 
 
-   void VulkanExampleRenderHeadless::loadAssets()
+   void headless_rendering_application::loadAssets()
    {
       
 
@@ -1850,7 +1850,7 @@ VulkanExample5::~VulkanExample5()
    }
 
 
-   void VulkanExampleRenderHeadless::setupDescriptors()
+   void headless_rendering_application::setupDescriptors()
    {
       // Pool
       std::vector<VkDescriptorPoolSize> poolSizes = {
@@ -1931,7 +1931,7 @@ VulkanExample5::~VulkanExample5()
 //#elif defined(VK_USE_PLATFORM_XCB_KHR)
 //      swapChain.initSurface(connection, window);
 //#elif (defined(_DIRECT2DISPLAY) || defined(VK_USE_PLATFORM_HEADLESS_EXT))
-//      swapChain.initSurface(width, height);
+//      swapChain.initSurface(m_iWidth, m_iHeight);
 //#elif defined(VK_USE_PLATFORM_SCREEN_QNX)
 //      swapChain.initSurface(screen_context, screen_window);
 //#endif
@@ -1953,7 +1953,7 @@ VulkanExample5::~VulkanExample5()
    //}
 
 
-   void VulkanExampleRenderHeadless::createTransferCommandPool()
+   void headless_rendering_application::createTransferCommandPool()
    {
       // Create a default command pool for graphics command buffers
       m_commandPoolTransfer = m_pvulkandevice->createCommandPool(m_pvulkandevice->queueFamilyIndices.transfer);
@@ -1961,25 +1961,25 @@ VulkanExample5::~VulkanExample5()
    }
 
 
-   void VulkanExampleRenderHeadless::createCommandBuffers()
+   void headless_rendering_application::createCommandBuffers()
    {
       // Create one command buffer for each swap chain image
-//      m_drawCmdBuffers.resize(m_swapchain.imageCount);
-      m_drawCmdBuffers.resize(1);
-      VkCommandBufferAllocateInfo cmdBufAllocateInfo = vks::initializers::commandBufferAllocateInfo(m_pvulkandevice->commandPool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, static_cast<uint32_t>(m_drawCmdBuffers.size()));
-      VK_CHECK_RESULT(vkAllocateCommandBuffers(m_device, &cmdBufAllocateInfo, m_drawCmdBuffers.data()));
+//      m_vkcommandbuffersDraw.resize(m_swapchain.imageCount);
+      m_vkcommandbuffersDraw.resize(1);
+      VkCommandBufferAllocateInfo cmdBufAllocateInfo = vks::initializers::commandBufferAllocateInfo(m_pvulkandevice->commandPool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, static_cast<uint32_t>(m_vkcommandbuffersDraw.size()));
+      VK_CHECK_RESULT(vkAllocateCommandBuffers(m_device, &cmdBufAllocateInfo, m_vkcommandbuffersDraw.data()));
    }
 
-   void VulkanExampleRenderHeadless::createSynchronizationPrimitives()
+   void headless_rendering_application::createSynchronizationPrimitives()
    {
       // Wait fences to sync command buffer access
       VkFenceCreateInfo fenceCreateInfo = vks::initializers::fenceCreateInfo(VK_FENCE_CREATE_SIGNALED_BIT);
-      m_waitFences.resize(m_drawCmdBuffers.size());
+      m_waitFences.resize(m_vkcommandbuffersDraw.size());
       for (auto & fence : m_waitFences) {
          VK_CHECK_RESULT(vkCreateFence(m_device, &fenceCreateInfo, nullptr, &fence));
       }
    }
-   void VulkanExampleRenderHeadless::setupDepthStencil()
+   void headless_rendering_application::setupDepthStencil()
    {
       VkImageCreateInfo imageCI{};
       imageCI.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -2020,7 +2020,7 @@ VulkanExample5::~VulkanExample5()
       VK_CHECK_RESULT(vkCreateImageView(m_device, &imageViewCI, nullptr, &m_depthStencil.view));
    }
 
-   void VulkanExampleRenderHeadless::setupRenderPass()
+   void headless_rendering_application::setupRenderPass()
    {
       std::array<VkAttachmentDescription, 2> attachments = {};
       // Color attachment
@@ -2093,7 +2093,7 @@ VulkanExample5::~VulkanExample5()
 
       VK_CHECK_RESULT(vkCreateRenderPass(m_device, &renderPassInfo, nullptr, &m_renderPass));
    }
-   void VulkanExampleRenderHeadless::createPipelineCache()
+   void headless_rendering_application::createPipelineCache()
    {
       VkPipelineCacheCreateInfo pipelineCacheCreateInfo = {};
       pipelineCacheCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
@@ -2104,7 +2104,7 @@ VulkanExample5::~VulkanExample5()
    //VkDeviceMemory m_devicememoryRender[1];
    //VkImageView m_imageviewRender[1];
 
-   void VulkanExampleRenderHeadless::setupFrameBuffer()
+   void headless_rendering_application::setupFrameBuffer()
    {
 
 
@@ -2117,8 +2117,8 @@ VulkanExample5::~VulkanExample5()
       VkImageCreateInfo image = vks::initializers::imageCreateInfo();
       image.imageType = VK_IMAGE_TYPE_2D;
       image.format = FB_COLOR_FORMAT;
-      image.extent.width = m_width;
-      image.extent.height = m_height;
+      image.extent.m_iWidth = m_width;
+      image.extent.m_iHeight = m_height;
       image.extent.depth = 1;
       image.mipLevels = 1;
       image.arrayLayers = 1;
@@ -2176,16 +2176,16 @@ VulkanExample5::~VulkanExample5()
       //VK_CHECK_RESULT(vkBindImageMemory(device, offscreenPass.depth.image, offscreenPass.depth.mem, 0));
 
 //      //// Create frame buffers for every swap chain image
-//// frameBuffers.resize(swapChain.imageCount);
-//      frameBuffers.resize(1);
-//      for (uint32_t i = 0; i < frameBuffers.size(); i++)
+//// m_vkframebuffers.resize(swapChain.imageCount);
+//      m_vkframebuffers.resize(1);
+//      for (uint32_t i = 0; i < m_vkframebuffers.size(); i++)
 //      {
 //         // Color attachment
 //         VkImageCreateInfo image = vks::initializers::imageCreateInfo();
 //         image.imageType = VK_IMAGE_TYPE_2D;
 //         image.format = FB_COLOR_FORMAT;
-//         image.extent.width = offscreenPass.width;
-//         image.extent.height = offscreenPass.height;
+//         image.extent.m_iWidth = offscreenPass.m_iWidth;
+//         image.extent.m_iHeight = offscreenPass.m_iHeight;
 //         image.extent.depth = 1;
 //         image.mipLevels = 1;
 //         image.arrayLayers = 1;
@@ -2208,7 +2208,7 @@ VulkanExample5::~VulkanExample5()
 //      }
 //      // Get the swap chain buffers containing the image and imageview
 //      //buffers.resize(imageCount);
-//      for (uint32_t i = 0; i < frameBuffers.size(); i++)
+//      for (uint32_t i = 0; i < m_vkframebuffers.size(); i++)
 //      {
 //         VkImageViewCreateInfo colorAttachmentView = {};
 //         colorAttachmentView.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -2270,11 +2270,11 @@ VulkanExample5::~VulkanExample5()
       VkFramebufferCreateInfo frameBufferCreateInfo = {};
       frameBufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
       frameBufferCreateInfo.pNext = NULL;
-      frameBufferCreateInfo.renderPass = m_renderPass;
+      frameBufferCreateInfo.m_vkrenderpass = m_renderPass;
       frameBufferCreateInfo.attachmentCount = 2;
       frameBufferCreateInfo.pAttachments = attachments;
-      frameBufferCreateInfo.width = m_width;
-      frameBufferCreateInfo.height = m_height;
+      frameBufferCreateInfo.m_iWidth = m_width;
+      frameBufferCreateInfo.m_iHeight = m_height;
       frameBufferCreateInfo.layers = 1;
 
       m_frameBuffers.resize(1);
@@ -2285,13 +2285,13 @@ VulkanExample5::~VulkanExample5()
    }
 
 
-   ::string VulkanExampleRenderHeadless::getShadersPath() const
+   ::string headless_rendering_application::getShadersPath() const
    {
       return "M:/Vulkan-Assets-main/shaders/glsl/"_ansi;
    }
 
    /** @brief Loads a SPIR-V shader file for the given shader stage */
-   VkPipelineShaderStageCreateInfo VulkanExampleRenderHeadless::loadShader(const ::string fileName, VkShaderStageFlagBits stage)
+   VkPipelineShaderStageCreateInfo headless_rendering_application::loadShader(const ::string fileName, VkShaderStageFlagBits stage)
    {
       VkPipelineShaderStageCreateInfo shaderStage = {};
       shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -2307,7 +2307,7 @@ VulkanExample5::~VulkanExample5()
       return shaderStage;
    }
 
-   void VulkanExampleRenderHeadless::_prepare()
+   void headless_rendering_application::_prepare()
    {
       //initSwapchain();
       //createCommandPool();
@@ -2329,7 +2329,7 @@ VulkanExample5::~VulkanExample5()
          };
          m_ui.prepareResources();
          VkFormat colorFormat = VK_FORMAT_R8G8B8A8_UNORM;
-         //ui.preparePipeline(pipelineCache, renderPass, swapChain.colorFormat, depthFormat);
+         //ui.preparePipeline(m_vkpipelinecache, m_vkrenderpass, swapChain.colorFormat, depthFormat);
          m_ui.preparePipeline(m_pipelineCache, m_renderPass, colorFormat, m_depthFormat);
       }
    }
@@ -2337,10 +2337,10 @@ VulkanExample5::~VulkanExample5()
 
    // Setup the offscreen framebuffer for rendering the mirrored scene
 // The color attachment of this framebuffer will then be used to sample from in the fragment shader of the final pass
-   void VulkanExampleRenderHeadless::prepareOffscreen()
+   void headless_rendering_application::prepareOffscreen()
    {
-      m_offscreenPass.width = FB_DIM;
-      m_offscreenPass.height = FB_DIM;
+      m_offscreenPass.m_iWidth = FB_DIM;
+      m_offscreenPass.m_iHeight = FB_DIM;
 
       // Find a suitable depth format
       VkFormat fbDepthFormat;
@@ -2351,8 +2351,8 @@ VulkanExample5::~VulkanExample5()
       VkImageCreateInfo image = vks::initializers::imageCreateInfo();
       image.imageType = VK_IMAGE_TYPE_2D;
       image.format = FB_COLOR_FORMAT;
-      image.extent.width = m_offscreenPass.width;
-      image.extent.height = m_offscreenPass.height;
+      image.extent.m_iWidth = m_offscreenPass.m_iWidth;
+      image.extent.m_iHeight = m_offscreenPass.m_iHeight;
       image.extent.depth = 1;
       image.mipLevels = 1;
       image.arrayLayers = 1;
@@ -2485,18 +2485,18 @@ VulkanExample5::~VulkanExample5()
       renderPassInfo.dependencyCount = static_cast<uint32_t>(dependencies.size());
       renderPassInfo.pDependencies = dependencies.data();
 
-      VK_CHECK_RESULT(vkCreateRenderPass(m_device, &renderPassInfo, nullptr, &m_offscreenPass.renderPass));
+      VK_CHECK_RESULT(vkCreateRenderPass(m_device, &renderPassInfo, nullptr, &m_offscreenPass.m_vkrenderpass));
 
       VkImageView attachments[2];
       attachments[0] = m_offscreenPass.color.view;
       attachments[1] = m_offscreenPass.depth.view;
 
       VkFramebufferCreateInfo fbufCreateInfo = vks::initializers::framebufferCreateInfo();
-      fbufCreateInfo.renderPass = m_offscreenPass.renderPass;
+      fbufCreateInfo.m_vkrenderpass = m_offscreenPass.m_vkrenderpass;
       fbufCreateInfo.attachmentCount = 2;
       fbufCreateInfo.pAttachments = attachments;
-      fbufCreateInfo.width = m_offscreenPass.width;
-      fbufCreateInfo.height = m_offscreenPass.height;
+      fbufCreateInfo.m_iWidth = m_offscreenPass.m_iWidth;
+      fbufCreateInfo.m_iHeight = m_offscreenPass.m_iHeight;
       fbufCreateInfo.layers = 1;
 
       VK_CHECK_RESULT(vkCreateFramebuffer(m_device, &fbufCreateInfo, nullptr, &m_offscreenPass.frameBuffer));
@@ -2508,7 +2508,7 @@ VulkanExample5::~VulkanExample5()
    }
 
 
-   void VulkanExampleRenderHeadless::prepare()
+   void headless_rendering_application::prepare()
    {
       _prepare();
       loadAssets();
@@ -2521,7 +2521,7 @@ VulkanExample5::~VulkanExample5()
    }
 
 
-   void VulkanExampleRenderHeadless::preparePipelines()
+   void headless_rendering_application::preparePipelines()
    {
       // Layouts
       VkPipelineLayoutCreateInfo pipelineLayoutInfo = vks::initializers::pipelineLayoutCreateInfo(&m_descriptorSetLayouts.shaded, 1);
@@ -2577,13 +2577,13 @@ VulkanExample5::~VulkanExample5()
       // Offscreen
       // Flip cull mode
       rasterizationState.cullMode = VK_CULL_MODE_FRONT_BIT;
-      pipelineCI.renderPass = m_offscreenPass.renderPass;
+      pipelineCI.m_vkrenderpass = m_offscreenPass.m_vkrenderpass;
       VK_CHECK_RESULT(vkCreateGraphicsPipelines(m_device, m_pipelineCache, 1, &pipelineCI, nullptr, &m_pipelines.shadedOffscreen));
 
    }
 
    // Prepare and initialize uniform buffer containing shader uniforms
-   void VulkanExampleRenderHeadless::prepareUniformBuffers()
+   void headless_rendering_application::prepareUniformBuffers()
    {
       // Mesh vertex shader uniform buffer block
       VK_CHECK_RESULT(m_pvulkandevice->createBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &m_uniformBuffers.vsShared, sizeof(UniformData)));
@@ -2600,7 +2600,7 @@ VulkanExample5::~VulkanExample5()
       updateUniformBufferOffscreen();
    }
 
-   void VulkanExampleRenderHeadless::updateUniformBuffers()
+   void headless_rendering_application::updateUniformBuffers()
    {
       m_uniformData.projection = m_camera.matrices.perspective;
       m_uniformData.view = m_camera.matrices.view;
@@ -2616,7 +2616,7 @@ VulkanExample5::~VulkanExample5()
       memcpy(m_uniformBuffers.vsMirror.mapped, &m_uniformData, sizeof(UniformData));
    }
 
-   void VulkanExampleRenderHeadless::updateUniformBufferOffscreen()
+   void headless_rendering_application::updateUniformBufferOffscreen()
    {
       m_uniformData.projection = m_camera.matrices.perspective;
       m_uniformData.view = m_camera.matrices.view;
@@ -2631,7 +2631,7 @@ VulkanExample5::~VulkanExample5()
    //void prepareFrame()
    //{
    //   // Acquire the next image from the swap chain
-   //   VkResult result = m_swapchain.acquireNextImage(m_semaphores.presentComplete, &m_currentBuffer);
+   //   VkResult result = m_swapchain.acquireNextImage(m_semaphores.m_vksemaphorePresentComplete, &m_currentBuffer);
    //   // Recreate the swapchain if it's no longer compatible with the surface (OUT_OF_DATE)
    //   // SRS - If no longer optimal (VK_SUBOPTIMAL_KHR), wait until submitFrame() in case number of swapchain images will change on resize
    //   if ((result == VK_ERROR_OUT_OF_DATE_KHR) || (result == VK_SUBOPTIMAL_KHR)) {
@@ -2647,7 +2647,7 @@ VulkanExample5::~VulkanExample5()
 
    //void submitFrame()
    //{
-   //   VkResult result = m_swapchain.queuePresent(queue, m_currentBuffer, m_semaphores.renderComplete);
+   //   VkResult result = m_swapchain.queuePresent(queue, m_currentBuffer, m_semaphores.m_vksemaphoreRenderComplete);
    //   // Recreate the swapchain if it's no longer compatible with the surface (OUT_OF_DATE) or no longer optimal for presentation (SUBOPTIMAL)
    //   if ((result == VK_ERROR_OUT_OF_DATE_KHR) || (result == VK_SUBOPTIMAL_KHR)) {
    //      //windowResize();
@@ -2662,19 +2662,19 @@ VulkanExample5::~VulkanExample5()
    //}
 
 
-   void VulkanExampleRenderHeadless::draw(const ::function < void(void *, int, int, int)> & callback)
+   void headless_rendering_application::draw(const ::function < void(void *, int, int, int)> & callback)
    {
       //prepareFrame();
       //m_submitInfo.commandBufferCount = 1;
-      //m_submitInfo.pCommandBuffers = &m_drawCmdBuffers[m_currentBuffer];
-      submitWork(m_drawCmdBuffers[m_currentBuffer], m_queue);
+      //m_submitInfo.pCommandBuffers = &m_vkcommandbuffersDraw[m_currentBuffer];
+      submitWork(m_vkcommandbuffersDraw[m_currentBuffer], m_queue);
       vkDeviceWaitIdle(m_device);
       //VK_CHECK_RESULT(vkQueueSubmit(m_queue, 1, &m_submitInfo, VK_NULL_HANDLE));
       sample(callback);
       //submitFrame();
    }
 
-   void VulkanExampleRenderHeadless::render(const ::function < void(void *, int, int, int)> & callback)
+   void headless_rendering_application::render(const ::function < void(void *, int, int, int)> & callback)
    {
       if (!m_prepared)
          return;
@@ -2714,7 +2714,7 @@ void android_main(android_app * state) {
    }
 }
 #else
-int run_vulkan_example5(mouseState * pmousestate, const ::function < void(void *, int, int, int)> & callback) 
+int run_vulkan_example5(m_mousestate * pmousestate, const ::function < void(void *, int, int, int)> & callback) 
 {
    VulkanExample5 * vulkanExample = ___new VulkanExample5(pmousestate);
    vulkanExample->initVulkan();

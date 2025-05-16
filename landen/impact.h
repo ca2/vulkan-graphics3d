@@ -163,10 +163,10 @@ namespace vulkan_land_landen
       //memory m_memory;
       //int m_i;
 
-      mouseState m_mousestate;
-      ::image::image_pointer m_pimage;
+      mouse_state                   m_mousestate;
+      ::image::image_pointer        m_pimage;
 
-      ::particle_pointer         m_pparticleImageSynchronization;
+      ::particle_pointer            m_pparticleImageSynchronization;
 
 
 
@@ -210,7 +210,7 @@ namespace vulkan_land_landen
       DECLARE_MESSAGE_HANDLER(on_message_left_button_up);
       DECLARE_MESSAGE_HANDLER(on_message_mouse_leave);
 
-      void on_timer(timer * ptimer) override;
+      void on_timer(::timer * ptimer) override;
 
       void reset_mouse_last_position();
 
