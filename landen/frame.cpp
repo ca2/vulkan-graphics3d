@@ -55,7 +55,19 @@ namespace vulkan_land_landen
 
       ::pointer <::vulkan_land_landen::application> papp = m_papplication;
 
-      papp->m_ptask3dApp->set_finish();
+      if (papp)
+      {
+
+         auto ptask = papp->m_ptask3dApp;
+
+         if (ptask)
+         {
+
+            ptask->set_finish();
+
+         }
+
+      }
 
    }
 
