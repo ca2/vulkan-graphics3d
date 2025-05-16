@@ -1,14 +1,14 @@
 #pragma once
 
 
-#include "vulkan_example_base_no_swap_chain.h"
+#include "VulkanBaseApplicationNoSwapChain.h"
 #include "VulkanglTFModel.h"
 
 // Offscreen frame buffer properties
 #define FB_DIM 512
 #define FB_COLOR_FORMAT VK_FORMAT_R8G8B8A8_UNORM
 
-class VulkanOffscreenApplication : public VulkanExampleBaseNoSwapChain
+class VulkanOffscreenApplication : public VulkanBaseApplicationNoSwapChain
 {
 public:
    bool debugDisplay = false;

@@ -229,8 +229,8 @@ public:
        bool configured = false;
 
 
-       VulkanExampleBaseNoSwapChain();
-       ~VulkanExampleBaseNoSwapChain() override;
+       VulkanBaseApplicationNoSwapChain();
+       ~VulkanBaseApplicationNoSwapChain() override;
        /** @brief Setup the vulkan instance, enable required extensions and connect to the physical device (GPU) */
        bool initVulkan();
 

@@ -22,9 +22,9 @@ extern CAMetalLayer * layer;
 #endif
 #endif
 
-std::vector<const char *> VulkanExampleBaseNoSwapChain::args;
+std::vector<const char *> VulkanBaseApplicationNoSwapChain::args;
 
-VkResult VulkanExampleBaseNoSwapChain::createInstance()
+VkResult VulkanBaseApplicationNoSwapChain::createInstance()
 {
 
    std::vector<const char *> instanceExtensions = { VK_KHR_SURFACE_EXTENSION_NAME };
@@ -161,16 +161,16 @@ VkResult VulkanExampleBaseNoSwapChain::createInstance()
    return result;
 }
 
-void VulkanExampleBaseNoSwapChain::renderFrame()
+void VulkanBaseApplicationNoSwapChain::renderFrame()
 {
-   VulkanExampleBaseNoSwapChain::prepareFrame();
+   VulkanBaseApplicationNoSwapChain::prepareFrame();
    submitInfo.commandBufferCount = 1;
    submitInfo.pCommandBuffers = &m_drawCmdBuffers[currentBuffer];
    VK_CHECK_RESULT(vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE));
-   VulkanExampleBaseNoSwapChain::submitFrame();
+   VulkanBaseApplicationNoSwapChain::submitFrame();
 }
 
-std::string VulkanExampleBaseNoSwapChain::getWindowTitle()
+std::string VulkanBaseApplicationNoSwapChain::getWindowTitle()
 {
    std::string windowTitle{ m_strTitle + " - " + deviceProperties.deviceName };
    if (!settings.overlay) {
@@ -179,7 +179,7 @@ std::string VulkanExampleBaseNoSwapChain::getWindowTitle()
    return windowTitle;
 }
 
-void VulkanExampleBaseNoSwapChain::createCommandBuffers()
+void VulkanBaseApplicationNoSwapChain::createCommandBuffers()
 {
    // Create one command buffer for each swap chain image
    //m_drawCmdBuffers.resize(swapChain.imageCount);
@@ -188,24 +188,24 @@ void VulkanExampleBaseNoSwapChain::createCommandBuffers()
    VK_CHECK_RESULT(vkAllocateCommandBuffers(device, &cmdBufAllocateInfo, m_drawCmdBuffers.data()));
 }
 
-void VulkanExampleBaseNoSwapChain::destroyCommandBuffers()
+void VulkanBaseApplicationNoSwapChain::destroyCommandBuffers()
 {
    vkFreeCommandBuffers(device, cmdPool, static_cast<uint32_t>(m_drawCmdBuffers.size()), m_drawCmdBuffers.data());
 }
 
-std::string VulkanExampleBaseNoSwapChain::getShadersPath() const
+std::string VulkanBaseApplicationNoSwapChain::getShadersPath() const
 {
    return "matter://shaders/glsl/";
 }
 
-void VulkanExampleBaseNoSwapChain::createPipelineCache()
+void VulkanBaseApplicationNoSwapChain::createPipelineCache()
 {
    VkPipelineCacheCreateInfo pipelineCacheCreateInfo = {};
    pipelineCacheCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
    VK_CHECK_RESULT(vkCreatePipelineCache(device, &pipelineCacheCreateInfo, nullptr, &pipelineCache));
 }
 
-void VulkanExampleBaseNoSwapChain::prepare()
+void VulkanBaseApplicationNoSwapChain::prepare()
 {
    initSwapchain();
    createCommandPool();
@@ -228,7 +228,7 @@ void VulkanExampleBaseNoSwapChain::prepare()
    }
 }
 
-VkPipelineShaderStageCreateInfo VulkanExampleBaseNoSwapChain::loadShader(std::string fileName, VkShaderStageFlagBits stage)
+VkPipelineShaderStageCreateInfo VulkanBaseApplicationNoSwapChain::loadShader(std::string fileName, VkShaderStageFlagBits stage)
 {
    VkPipelineShaderStageCreateInfo shaderStage = {};
    shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -244,7 +244,7 @@ VkPipelineShaderStageCreateInfo VulkanExampleBaseNoSwapChain::loadShader(std::st
    return shaderStage;
 }
 
-void VulkanExampleBaseNoSwapChain::nextFrame(const ::function < void(void *, int, int, int)> & callback)
+void VulkanBaseApplicationNoSwapChain::nextFrame(const ::function < void(void *, int, int, int)> & callback)
 {
    auto tStart = std::chrono::high_resolution_clock::now();
    if (viewUpdated)
@@ -294,9 +294,9 @@ void VulkanExampleBaseNoSwapChain::nextFrame(const ::function < void(void *, int
    updateOverlay();
 }
 
-void VulkanExampleBaseNoSwapChain::renderLoop()
+void VulkanBaseApplicationNoSwapChain::renderLoop()
 {
-//    // SRS - for non-apple plaforms, handle benchmarking here within VulkanExampleBaseNoSwapChain::renderLoop()
+//    // SRS - for non-apple plaforms, handle benchmarking here within VulkanBaseApplicationNoSwapChain::renderLoop()
 //    //     - for macOS, handle benchmarking within NSApp rendering loop via displayLinkOutputCb()
 // #if !(defined(VK_USE_PLATFORM_IOS_MVK) || defined(VK_USE_PLATFORM_MACOS_MVK) || defined(VK_USE_PLATFORM_METAL_EXT))
 //    if (benchmark.active) {
@@ -665,7 +665,7 @@ void VulkanExampleBaseNoSwapChain::renderLoop()
    }
 }
 
-void VulkanExampleBaseNoSwapChain::updateOverlay()
+void VulkanBaseApplicationNoSwapChain::updateOverlay()
 {
    if (!settings.overlay)
       return;
@@ -725,7 +725,7 @@ void VulkanExampleBaseNoSwapChain::updateOverlay()
 #endif
 }
 
-void VulkanExampleBaseNoSwapChain::drawUI(const VkCommandBuffer commandBuffer)
+void VulkanBaseApplicationNoSwapChain::drawUI(const VkCommandBuffer commandBuffer)
 {
    if (settings.overlay && ui.visible) {
       const VkViewport viewport = vks::initializers::viewport((float)width, (float)height, 0.0f, 1.0f);
@@ -737,7 +737,7 @@ void VulkanExampleBaseNoSwapChain::drawUI(const VkCommandBuffer commandBuffer)
    }
 }
 
-void VulkanExampleBaseNoSwapChain::prepareFrame()
+void VulkanBaseApplicationNoSwapChain::prepareFrame()
 {
    //// Acquire the next image from the swap chain
    //VkResult result = swapChain.acquireNextImage(semaphores.presentComplete, &currentBuffer);
@@ -754,7 +754,7 @@ void VulkanExampleBaseNoSwapChain::prepareFrame()
    //}
 }
 
-void VulkanExampleBaseNoSwapChain::submitFrame()
+void VulkanBaseApplicationNoSwapChain::submitFrame()
 {
    //VkResult result = swapChain.queuePresent(queue, currentBuffer, semaphores.renderComplete);
    //// Recreate the swapchain if it's no longer compatible with the surface (OUT_OF_DATE) or no longer optimal for presentation (SUBOPTIMAL)
@@ -770,7 +770,7 @@ void VulkanExampleBaseNoSwapChain::submitFrame()
    VK_CHECK_RESULT(vkQueueWaitIdle(queue));
 }
 
-VulkanExampleBaseNoSwapChain::VulkanExampleBaseNoSwapChain()
+VulkanBaseApplicationNoSwapChain::VulkanBaseApplicationNoSwapChain()
 {
    m_pmousestate = nullptr;
 #if !defined(VK_USE_PLATFORM_ANDROID_KHR)
@@ -885,7 +885,7 @@ VulkanExampleBaseNoSwapChain::VulkanExampleBaseNoSwapChain()
 // #endif
 }
 
-VulkanExampleBaseNoSwapChain::~VulkanExampleBaseNoSwapChain()
+VulkanBaseApplicationNoSwapChain::~VulkanBaseApplicationNoSwapChain()
 {
    // Clean up Vulkan resources
    //swapChain.cleanup();
@@ -971,7 +971,7 @@ VulkanExampleBaseNoSwapChain::~VulkanExampleBaseNoSwapChain()
 // #endif
 }
 
-bool VulkanExampleBaseNoSwapChain::initVulkan()
+bool VulkanBaseApplicationNoSwapChain::initVulkan()
 {
    // Instead of checking for the command line switch, validation can be forced via a define
 #if defined(_VALIDATION)
@@ -1104,7 +1104,7 @@ bool VulkanExampleBaseNoSwapChain::initVulkan()
 
 // #if defined(_WIN32)
 // // Win32 : Sets up a console window and redirects standard output to it
-// void VulkanExampleBaseNoSwapChain::setupConsole(std::string title)
+// void VulkanBaseApplicationNoSwapChain::setupConsole(std::string title)
 // {
 //    AllocConsole();
 //    AttachConsole(GetCurrentProcessId());
@@ -1121,7 +1121,7 @@ bool VulkanExampleBaseNoSwapChain::initVulkan()
 //    SetConsoleTitle(::wstring(title.c_str()));
 // }
 //
-// void VulkanExampleBaseNoSwapChain::setupDPIAwareness()
+// void VulkanBaseApplicationNoSwapChain::setupDPIAwareness()
 // {
 //    typedef HRESULT * (__stdcall * SetProcessDpiAwarenessFunc)(PROCESS_DPI_AWARENESS);
 //
@@ -1140,7 +1140,7 @@ bool VulkanExampleBaseNoSwapChain::initVulkan()
 //    }
 // }
 //
-// HWND VulkanExampleBaseNoSwapChain::setupWindow(HINSTANCE hinstance, WNDPROC wndproc)
+// HWND VulkanBaseApplicationNoSwapChain::setupWindow(HINSTANCE hinstance, WNDPROC wndproc)
 // {
 //    this->windowInstance = hinstance;
 //
@@ -1258,7 +1258,7 @@ bool VulkanExampleBaseNoSwapChain::initVulkan()
 //    return window;
 // }
 //
-// //void VulkanExampleBaseNoSwapChain::handleMessages(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+// //void VulkanBaseApplicationNoSwapChain::handleMessages(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 // //{
 // //   switch (uMsg)
 // //   {
@@ -1396,9 +1396,9 @@ bool VulkanExampleBaseNoSwapChain::initVulkan()
 // //   OnHandleMessage(hWnd, uMsg, wParam, lParam);
 // //}
 // #elif defined(VK_USE_PLATFORM_ANDROID_KHR)
-// int32_t VulkanExampleBaseNoSwapChain::handleAppInput(struct android_app * app, AInputEvent * happening)
+// int32_t VulkanBaseApplicationNoSwapChain::handleAppInput(struct android_app * app, AInputEvent * happening)
 // {
-//    VulkanExampleBaseNoSwapChain * vulkanExample = reinterpret_cast<VulkanExampleBaseNoSwapChain *>(app->userData);
+//    VulkanBaseApplicationNoSwapChain * vulkanExample = reinterpret_cast<VulkanBaseApplicationNoSwapChain *>(app->userData);
 //    if (AInputEvent_getType(happening) == AINPUT_EVENT_TYPE_MOTION)
 //    {
 //       int32_t eventSource = AInputEvent_getSource(happening);
@@ -1544,10 +1544,10 @@ bool VulkanExampleBaseNoSwapChain::initVulkan()
 //    return 0;
 // }
 //
-// void VulkanExampleBaseNoSwapChain::handleAppCommand(android_app * app, int32_t cmd)
+// void VulkanBaseApplicationNoSwapChain::handleAppCommand(android_app * app, int32_t cmd)
 // {
 //    assert(app->userData != NULL);
-//    VulkanExampleBaseNoSwapChain * vulkanExample = reinterpret_cast<VulkanExampleBaseNoSwapChain *>(app->userData);
+//    VulkanBaseApplicationNoSwapChain * vulkanExample = reinterpret_cast<VulkanBaseApplicationNoSwapChain *>(app->userData);
 //    switch (cmd)
 //    {
 //    case APP_CMD_SAVE_STATE:
@@ -1598,7 +1598,7 @@ bool VulkanExampleBaseNoSwapChain::initVulkan()
 // @interface AppDelegate : NSObject<NSApplicationDelegate>
 // {
 //    @public
-//       VulkanExampleBaseNoSwapChain * vulkanExample;
+//       VulkanBaseApplicationNoSwapChain * vulkanExample;
 // }
 //
 // @end
@@ -1669,7 +1669,7 @@ bool VulkanExampleBaseNoSwapChain::initVulkan()
 // {
 //    @autoreleasepool
 //    {
-//       auto vulkanExample = static_cast<VulkanExampleBaseNoSwapChain *>(displayLinkContext);
+//       auto vulkanExample = static_cast<VulkanBaseApplicationNoSwapChain *>(displayLinkContext);
 //          vulkanExample->displayLinkOutputCb();
 //    }
 //    return kCVReturnSuccess;
@@ -1678,7 +1678,7 @@ bool VulkanExampleBaseNoSwapChain::initVulkan()
 // @interface View : NSView<NSWindowDelegate>
 // {
 //    @public
-//       VulkanExampleBaseNoSwapChain * vulkanExample;
+//       VulkanBaseApplicationNoSwapChain * vulkanExample;
 // }
 //
 // @end
@@ -1849,7 +1849,7 @@ bool VulkanExampleBaseNoSwapChain::initVulkan()
 //    vulkanExample->viewUpdated = true;
 // }
 //
-// // SRS - Window resizing already handled by windowResize() in VulkanExampleBaseNoSwapChain::submitFrame()
+// // SRS - Window resizing already handled by windowResize() in VulkanBaseApplicationNoSwapChain::submitFrame()
 // //	   - handling window resize happenings here is redundant and can cause thread interaction problems
 // /*
 // - (NSSize)windowWillResize:(NSWindow *)sender toSize:(NSSize)frameSize
@@ -1890,7 +1890,7 @@ bool VulkanExampleBaseNoSwapChain::initVulkan()
 // @end
 // #endif
 //
-// void * VulkanExampleBaseNoSwapChain::setupWindow(void * view)
+// void * VulkanBaseApplicationNoSwapChain::setupWindow(void * view)
 // {
 // #if defined(VK_EXAMPLE_XCODE_GENERATED)
 //    NSApp = [NSApplication sharedApplication];
@@ -1931,7 +1931,7 @@ bool VulkanExampleBaseNoSwapChain::initVulkan()
 //    return view;
 // }
 //
-// void VulkanExampleBaseNoSwapChain::displayLinkOutputCb()
+// void VulkanBaseApplicationNoSwapChain::displayLinkOutputCb()
 // {
 // #if defined(VK_EXAMPLE_XCODE_GENERATED)
 //    if (benchmark.active) {
@@ -1948,12 +1948,12 @@ bool VulkanExampleBaseNoSwapChain::initVulkan()
 //       nextFrame();
 // }
 //
-// void VulkanExampleBaseNoSwapChain::mouseDragged(float x, float y)
+// void VulkanBaseApplicationNoSwapChain::mouseDragged(float x, float y)
 // {
 //    handleMouseMove(static_cast<uint32_t>(x), static_cast<uint32_t>(y));
 // }
 //
-// void VulkanExampleBaseNoSwapChain::windowWillResize(float x, float y)
+// void VulkanBaseApplicationNoSwapChain::windowWillResize(float x, float y)
 // {
 //    resizing = true;
 //    if (prepared)
@@ -1964,13 +1964,13 @@ bool VulkanExampleBaseNoSwapChain::initVulkan()
 //    }
 // }
 //
-// void VulkanExampleBaseNoSwapChain::windowDidResize()
+// void VulkanBaseApplicationNoSwapChain::windowDidResize()
 // {
 //    resizing = false;
 // }
 // #elif defined(_DIRECT2DISPLAY)
 // #elif defined(VK_USE_PLATFORM_DIRECTFB_EXT)
-// IDirectFBSurface * VulkanExampleBaseNoSwapChain::setupWindow()
+// IDirectFBSurface * VulkanBaseApplicationNoSwapChain::setupWindow()
 // {
 //    DFBResult ret;
 //    int posx = 0, posy = 0;
@@ -2062,7 +2062,7 @@ bool VulkanExampleBaseNoSwapChain::initVulkan()
 //    return surface;
 // }
 //
-// void VulkanExampleBaseNoSwapChain::handleEvent(const DFBWindowEvent * happening)
+// void VulkanBaseApplicationNoSwapChain::handleEvent(const DFBWindowEvent * happening)
 // {
 //    switch (happening->type)
 //    {
@@ -2163,52 +2163,52 @@ bool VulkanExampleBaseNoSwapChain::initVulkan()
 //    }
 // }
 // #elif defined(VK_USE_PLATFORM_WAYLAND_KHR)
-// /*static*/void VulkanExampleBaseNoSwapChain::registryGlobalCb(void * data,
+// /*static*/void VulkanBaseApplicationNoSwapChain::registryGlobalCb(void * data,
 //       wl_registry * registry, uint32_t name, const char * interface,
 //       uint32_t version)
 // {
-//    VulkanExampleBaseNoSwapChain * self = reinterpret_cast<VulkanExampleBaseNoSwapChain *>(data);
+//    VulkanBaseApplicationNoSwapChain * self = reinterpret_cast<VulkanBaseApplicationNoSwapChain *>(data);
 //    self->registryGlobal(registry, name, interface, version);
 // }
 //
-// /*static*/void VulkanExampleBaseNoSwapChain::seatCapabilitiesCb(void * data, wl_seat * seat,
+// /*static*/void VulkanBaseApplicationNoSwapChain::seatCapabilitiesCb(void * data, wl_seat * seat,
 //       uint32_t caps)
 // {
-//    VulkanExampleBaseNoSwapChain * self = reinterpret_cast<VulkanExampleBaseNoSwapChain *>(data);
+//    VulkanBaseApplicationNoSwapChain * self = reinterpret_cast<VulkanBaseApplicationNoSwapChain *>(data);
 //    self->seatCapabilities(seat, caps);
 // }
 //
-// /*static*/void VulkanExampleBaseNoSwapChain::pointerEnterCb(void * data,
+// /*static*/void VulkanBaseApplicationNoSwapChain::pointerEnterCb(void * data,
 //       wl_pointer * pointer, uint32_t serial, wl_surface * surface,
 //       wl_fixed_t sx, wl_fixed_t sy)
 // {
 // }
 //
-// /*static*/void VulkanExampleBaseNoSwapChain::pointerLeaveCb(void * data,
+// /*static*/void VulkanBaseApplicationNoSwapChain::pointerLeaveCb(void * data,
 //       wl_pointer * pointer, uint32_t serial, wl_surface * surface)
 // {
 // }
 //
-// /*static*/void VulkanExampleBaseNoSwapChain::pointerMotionCb(void * data,
+// /*static*/void VulkanBaseApplicationNoSwapChain::pointerMotionCb(void * data,
 //       wl_pointer * pointer, uint32_t time, wl_fixed_t sx, wl_fixed_t sy)
 // {
-//    VulkanExampleBaseNoSwapChain * self = reinterpret_cast<VulkanExampleBaseNoSwapChain *>(data);
+//    VulkanBaseApplicationNoSwapChain * self = reinterpret_cast<VulkanBaseApplicationNoSwapChain *>(data);
 //    self->pointerMotion(pointer, time, sx, sy);
 // }
-// void VulkanExampleBaseNoSwapChain::pointerMotion(wl_pointer * pointer, uint32_t time, wl_fixed_t sx, wl_fixed_t sy)
+// void VulkanBaseApplicationNoSwapChain::pointerMotion(wl_pointer * pointer, uint32_t time, wl_fixed_t sx, wl_fixed_t sy)
 // {
 //    handleMouseMove(wl_fixed_to_int(sx), wl_fixed_to_int(sy));
 // }
 //
-// /*static*/void VulkanExampleBaseNoSwapChain::pointerButtonCb(void * data,
+// /*static*/void VulkanBaseApplicationNoSwapChain::pointerButtonCb(void * data,
 //       wl_pointer * pointer, uint32_t serial, uint32_t time, uint32_t button,
 //       uint32_t state)
 // {
-//    VulkanExampleBaseNoSwapChain * self = reinterpret_cast<VulkanExampleBaseNoSwapChain *>(data);
+//    VulkanBaseApplicationNoSwapChain * self = reinterpret_cast<VulkanBaseApplicationNoSwapChain *>(data);
 //    self->pointerButton(pointer, serial, time, button, state);
 // }
 //
-// void VulkanExampleBaseNoSwapChain::pointerButton(struct wl_pointer * pointer,
+// void VulkanBaseApplicationNoSwapChain::pointerButton(struct wl_pointer * pointer,
 //       uint32_t serial, uint32_t time, uint32_t button, uint32_t state)
 // {
 //    switch (button)
@@ -2227,15 +2227,15 @@ bool VulkanExampleBaseNoSwapChain::initVulkan()
 //    }
 // }
 //
-// /*static*/void VulkanExampleBaseNoSwapChain::pointerAxisCb(void * data,
+// /*static*/void VulkanBaseApplicationNoSwapChain::pointerAxisCb(void * data,
 //       wl_pointer * pointer, uint32_t time, uint32_t axis,
 //       wl_fixed_t value)
 // {
-//    VulkanExampleBaseNoSwapChain * self = reinterpret_cast<VulkanExampleBaseNoSwapChain *>(data);
+//    VulkanBaseApplicationNoSwapChain * self = reinterpret_cast<VulkanBaseApplicationNoSwapChain *>(data);
 //    self->pointerAxis(pointer, time, axis, value);
 // }
 //
-// void VulkanExampleBaseNoSwapChain::pointerAxis(wl_pointer * pointer, uint32_t time,
+// void VulkanBaseApplicationNoSwapChain::pointerAxis(wl_pointer * pointer, uint32_t time,
 //       uint32_t axis, wl_fixed_t value)
 // {
 //    double d = wl_fixed_to_double(value);
@@ -2250,32 +2250,32 @@ bool VulkanExampleBaseNoSwapChain::initVulkan()
 //    }
 // }
 //
-// /*static*/void VulkanExampleBaseNoSwapChain::keyboardKeymapCb(void * data,
+// /*static*/void VulkanBaseApplicationNoSwapChain::keyboardKeymapCb(void * data,
 //       struct wl_keyboard * keyboard, uint32_t format, int fd, uint32_t size)
 // {
 // }
 //
-// /*static*/void VulkanExampleBaseNoSwapChain::keyboardEnterCb(void * data,
+// /*static*/void VulkanBaseApplicationNoSwapChain::keyboardEnterCb(void * data,
 //       struct wl_keyboard * keyboard, uint32_t serial,
 //       struct wl_surface * surface, struct wl_array * keys)
 // {
 // }
 //
-// /*static*/void VulkanExampleBaseNoSwapChain::keyboardLeaveCb(void * data,
+// /*static*/void VulkanBaseApplicationNoSwapChain::keyboardLeaveCb(void * data,
 //       struct wl_keyboard * keyboard, uint32_t serial,
 //       struct wl_surface * surface)
 // {
 // }
 //
-// /*static*/void VulkanExampleBaseNoSwapChain::keyboardKeyCb(void * data,
+// /*static*/void VulkanBaseApplicationNoSwapChain::keyboardKeyCb(void * data,
 //       struct wl_keyboard * keyboard, uint32_t serial, uint32_t time,
 //       uint32_t key, uint32_t state)
 // {
-//    VulkanExampleBaseNoSwapChain * self = reinterpret_cast<VulkanExampleBaseNoSwapChain *>(data);
+//    VulkanBaseApplicationNoSwapChain * self = reinterpret_cast<VulkanBaseApplicationNoSwapChain *>(data);
 //    self->keyboardKey(keyboard, serial, time, key, state);
 // }
 //
-// void VulkanExampleBaseNoSwapChain::keyboardKey(struct wl_keyboard * keyboard,
+// void VulkanBaseApplicationNoSwapChain::keyboardKey(struct wl_keyboard * keyboard,
 //       uint32_t serial, uint32_t time, uint32_t key, uint32_t state)
 // {
 //    switch (key)
@@ -2311,13 +2311,13 @@ bool VulkanExampleBaseNoSwapChain::initVulkan()
 //       keyPressed(key);
 // }
 //
-// /*static*/void VulkanExampleBaseNoSwapChain::keyboardModifiersCb(void * data,
+// /*static*/void VulkanBaseApplicationNoSwapChain::keyboardModifiersCb(void * data,
 //       struct wl_keyboard * keyboard, uint32_t serial, uint32_t mods_depressed,
 //       uint32_t mods_latched, uint32_t mods_locked, uint32_t group)
 // {
 // }
 //
-// void VulkanExampleBaseNoSwapChain::seatCapabilities(wl_seat * seat, uint32_t caps)
+// void VulkanBaseApplicationNoSwapChain::seatCapabilities(wl_seat * seat, uint32_t caps)
 // {
 //    if ((caps & WL_SEAT_CAPABILITY_POINTER) && !pointer)
 //    {
@@ -2357,7 +2357,7 @@ bool VulkanExampleBaseNoSwapChain::initVulkan()
 //    xdg_wm_base_ping,
 // };
 //
-// void VulkanExampleBaseNoSwapChain::registryGlobal(wl_registry * registry, uint32_t name,
+// void VulkanBaseApplicationNoSwapChain::registryGlobal(wl_registry * registry, uint32_t name,
 //       const char * interface, uint32_t version)
 // {
 //    if (strcmp(interface, "wl_compositor"_ansi) == 0)
@@ -2382,12 +2382,12 @@ bool VulkanExampleBaseNoSwapChain::initVulkan()
 //    }
 // }
 //
-// /*static*/void VulkanExampleBaseNoSwapChain::registryGlobalRemoveCb(void * data,
+// /*static*/void VulkanBaseApplicationNoSwapChain::registryGlobalRemoveCb(void * data,
 //       struct wl_registry * registry, uint32_t name)
 // {
 // }
 //
-// void VulkanExampleBaseNoSwapChain::initWaylandConnection()
+// void VulkanBaseApplicationNoSwapChain::initWaylandConnection()
 // {
 //    display = wl_display_connect(NULL);
 //    if (!display)
@@ -2423,7 +2423,7 @@ bool VulkanExampleBaseNoSwapChain::initVulkan()
 //    }
 // }
 //
-// void VulkanExampleBaseNoSwapChain::setSize(int width, int height)
+// void VulkanBaseApplicationNoSwapChain::setSize(int width, int height)
 // {
 //    if (width <= 0 || height <= 0)
 //       return;
@@ -2438,7 +2438,7 @@ bool VulkanExampleBaseNoSwapChain::initVulkan()
 // xdg_surface_handle_configure(void * data, struct xdg_surface * surface,
 //               uint32_t serial)
 // {
-//    VulkanExampleBaseNoSwapChain * base = (VulkanExampleBaseNoSwapChain *)data;
+//    VulkanBaseApplicationNoSwapChain * base = (VulkanBaseApplicationNoSwapChain *)data;
 //
 //    xdg_surface_ack_configure(surface, serial);
 //    base->configured = true;
@@ -2454,7 +2454,7 @@ bool VulkanExampleBaseNoSwapChain::initVulkan()
 //                int32_t width, int32_t height,
 //                struct wl_array * states)
 // {
-//    VulkanExampleBaseNoSwapChain * base = (VulkanExampleBaseNoSwapChain *)data;
+//    VulkanBaseApplicationNoSwapChain * base = (VulkanBaseApplicationNoSwapChain *)data;
 //
 //    base->setSize(width, height);
 // }
@@ -2462,7 +2462,7 @@ bool VulkanExampleBaseNoSwapChain::initVulkan()
 // static void
 // xdg_toplevel_handle_close(void * data, struct xdg_toplevel * xdg_toplevel)
 // {
-//    VulkanExampleBaseNoSwapChain * base = (VulkanExampleBaseNoSwapChain *)data;
+//    VulkanBaseApplicationNoSwapChain * base = (VulkanBaseApplicationNoSwapChain *)data;
 //
 //    base->quit = true;
 // }
@@ -2474,7 +2474,7 @@ bool VulkanExampleBaseNoSwapChain::initVulkan()
 // };
 //
 //
-// struct xdg_surface * VulkanExampleBaseNoSwapChain::setupWindow()
+// struct xdg_surface * VulkanBaseApplicationNoSwapChain::setupWindow()
 // {
 //    surface = wl_compositor_create_surface(compositor);
 //    xdg_surface = xdg_wm_base_get_xdg_surface(shell, surface);
@@ -2498,7 +2498,7 @@ bool VulkanExampleBaseNoSwapChain::initVulkan()
 // }
 //
 // // Set up a window using XCB and request happening types
-// xcb_window_t VulkanExampleBaseNoSwapChain::setupWindow()
+// xcb_window_t VulkanBaseApplicationNoSwapChain::setupWindow()
 // {
 //    uint32_t value_mask, value_list[32];
 //
@@ -2575,7 +2575,7 @@ bool VulkanExampleBaseNoSwapChain::initVulkan()
 // }
 //
 // // Initialize XCB connection
-// void VulkanExampleBaseNoSwapChain::initxcbConnection()
+// void VulkanBaseApplicationNoSwapChain::initxcbConnection()
 // {
 //    const xcb_setup_t * setup;
 //    xcb_screen_iterator_t iter;
@@ -2600,7 +2600,7 @@ bool VulkanExampleBaseNoSwapChain::initVulkan()
 //    screen = iter.data;
 // }
 //
-// void VulkanExampleBaseNoSwapChain::handleEvent(const xcb_generic_event_t * happening)
+// void VulkanBaseApplicationNoSwapChain::handleEvent(const xcb_generic_event_t * happening)
 // {
 //    switch (happening->response_type & 0x7f)
 //    {
@@ -2712,7 +2712,7 @@ bool VulkanExampleBaseNoSwapChain::initVulkan()
 //    }
 // }
 // #elif defined(VK_USE_PLATFORM_SCREEN_QNX)
-// void VulkanExampleBaseNoSwapChain::handleEvent()
+// void VulkanBaseApplicationNoSwapChain::handleEvent()
 // {
 //    int size[2] = { 0, 0 };
 //    screen_window_t win;
@@ -2907,7 +2907,7 @@ bool VulkanExampleBaseNoSwapChain::initVulkan()
 //    }
 // }
 //
-// void VulkanExampleBaseNoSwapChain::setupWindow()
+// void VulkanBaseApplicationNoSwapChain::setupWindow()
 // {
 //    const char * idstr = name.c_str();
 //    int size[2];
@@ -2997,23 +2997,23 @@ bool VulkanExampleBaseNoSwapChain::initVulkan()
 //    }
 // }
 // #else
-// void VulkanExampleBaseNoSwapChain::setupWindow()
+// void VulkanBaseApplicationNoSwapChain::setupWindow()
 // {
 // }
 // #endif
 
-void VulkanExampleBaseNoSwapChain::render(const ::function < void(void*, int, int, int)>& callback)
+void VulkanBaseApplicationNoSwapChain::render(const ::function < void(void*, int, int, int)>& callback)
 {
 
 }
 
-void VulkanExampleBaseNoSwapChain::keyPressed(uint32_t) {}
+void VulkanBaseApplicationNoSwapChain::keyPressed(uint32_t) {}
 
-void VulkanExampleBaseNoSwapChain::mouseMoved(double x, double y, bool & handled) {}
+void VulkanBaseApplicationNoSwapChain::mouseMoved(double x, double y, bool & handled) {}
 
-void VulkanExampleBaseNoSwapChain::buildCommandBuffers() {}
+void VulkanBaseApplicationNoSwapChain::buildCommandBuffers() {}
 
-void VulkanExampleBaseNoSwapChain::createSynchronizationPrimitives()
+void VulkanBaseApplicationNoSwapChain::createSynchronizationPrimitives()
 {
    // Wait fences to sync command buffer access
    VkFenceCreateInfo fenceCreateInfo = vks::initializers::fenceCreateInfo(VK_FENCE_CREATE_SIGNALED_BIT);
@@ -3023,7 +3023,7 @@ void VulkanExampleBaseNoSwapChain::createSynchronizationPrimitives()
    }
 }
 
-void VulkanExampleBaseNoSwapChain::createCommandPool()
+void VulkanBaseApplicationNoSwapChain::createCommandPool()
 {
    m_queueFamilyIndex = m_pvulkandevice->getQueueFamilyIndex(VK_QUEUE_GRAPHICS_BIT);
    cmdPool = m_pvulkandevice->createCommandPool(m_queueFamilyIndex, VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
@@ -3035,7 +3035,7 @@ void VulkanExampleBaseNoSwapChain::createCommandPool()
    //VK_CHECK_RESULT(vkCreateCommandPool(device, &cmdPoolInfo, nullptr, &cmdPool));
 }
 
-void VulkanExampleBaseNoSwapChain::setupDepthStencil()
+void VulkanBaseApplicationNoSwapChain::setupDepthStencil()
 {
    VkImageCreateInfo imageCI{};
    imageCI.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -3076,7 +3076,7 @@ void VulkanExampleBaseNoSwapChain::setupDepthStencil()
    VK_CHECK_RESULT(vkCreateImageView(device, &imageViewCI, nullptr, &depthStencil.view));
 }
 
-void VulkanExampleBaseNoSwapChain::setupFrameBuffer()
+void VulkanBaseApplicationNoSwapChain::setupFrameBuffer()
 {
 
    // Find a suitable depth format
@@ -3147,7 +3147,7 @@ void VulkanExampleBaseNoSwapChain::setupFrameBuffer()
    //}
 }
 
-void VulkanExampleBaseNoSwapChain::setupRenderPass()
+void VulkanBaseApplicationNoSwapChain::setupRenderPass()
 {
    std::array<VkAttachmentDescription, 2> attachments = {};
    // Color attachment
@@ -3220,11 +3220,11 @@ void VulkanExampleBaseNoSwapChain::setupRenderPass()
    VK_CHECK_RESULT(vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass));
 }
 
-void VulkanExampleBaseNoSwapChain::getEnabledFeatures() {}
+void VulkanBaseApplicationNoSwapChain::getEnabledFeatures() {}
 
-void VulkanExampleBaseNoSwapChain::getEnabledExtensions() {}
+void VulkanBaseApplicationNoSwapChain::getEnabledExtensions() {}
 
-void VulkanExampleBaseNoSwapChain::windowResize()
+void VulkanBaseApplicationNoSwapChain::windowResize()
 {
    if (!prepared)
    {
@@ -3281,7 +3281,7 @@ void VulkanExampleBaseNoSwapChain::windowResize()
    prepared = true;
 }
 
-void VulkanExampleBaseNoSwapChain::handleMouseMove(int32_t x, int32_t y)
+void VulkanBaseApplicationNoSwapChain::handleMouseMove(int32_t x, int32_t y)
 {
    int32_t dx = (int32_t)m_pmousestate->position.x - x;
    int32_t dy = (int32_t)m_pmousestate->position.y - y;
@@ -3314,9 +3314,9 @@ void VulkanExampleBaseNoSwapChain::handleMouseMove(int32_t x, int32_t y)
    m_pmousestate->position = glm::vec2((float)x, (float)y);
 }
 
-void VulkanExampleBaseNoSwapChain::windowResized() {}
+void VulkanBaseApplicationNoSwapChain::windowResized() {}
 
-void VulkanExampleBaseNoSwapChain::initSwapchain()
+void VulkanBaseApplicationNoSwapChain::initSwapchain()
 {
 //#if defined(_WIN32)
 //   swapChain.initSurface(windowInstance, window);
@@ -3339,13 +3339,13 @@ void VulkanExampleBaseNoSwapChain::initSwapchain()
 //#endif
 }
 
-void VulkanExampleBaseNoSwapChain::setupSwapChain()
+void VulkanBaseApplicationNoSwapChain::setupSwapChain()
 {
 //   swapChain.create(&width, &height, settings.vsync, settings.fullscreen);
 }
 
-void VulkanExampleBaseNoSwapChain::OnUpdateUIOverlay(vks::UIOverlay * overlay) {}
+void VulkanBaseApplicationNoSwapChain::OnUpdateUIOverlay(vks::UIOverlay * overlay) {}
 
 //#if defined(_WIN32)
-//void VulkanExampleBaseNoSwapChain::OnHandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {};
+//void VulkanBaseApplicationNoSwapChain::OnHandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {};
 //#endif

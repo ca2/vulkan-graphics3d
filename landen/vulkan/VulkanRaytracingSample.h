@@ -9,7 +9,7 @@
 #pragma once
 
 #include "vulkan/vulkan.h"
-#include "vulkan_example_base_with_swap_chain.h"
+#include "VulkanBaseApplicationWithSwapChain.h"
 #include "VulkanTools.h"
 #include "VulkanDevice.h"
 

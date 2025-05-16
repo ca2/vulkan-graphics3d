@@ -516,7 +516,7 @@ void VulkanOffscreenApplication::updateUniformBufferOffscreen()
 
 void VulkanOffscreenApplication::prepare()
 {
-   VulkanExampleBaseNoSwapChain::prepare();
+   VulkanBaseApplicationNoSwapChain::prepare();
    loadAssets();
    prepareOffscreen();
    prepareUniformBuffers();
@@ -528,13 +528,13 @@ void VulkanOffscreenApplication::prepare()
 
 void VulkanOffscreenApplication::draw(const ::function < void(void *, int, int, int)> & callback)
 {
-   //VulkanExampleBaseNoSwapChain::prepareFrame();
+   //VulkanBaseApplicationNoSwapChain::prepareFrame();
    //submitInfo.commandBufferCount = 1;
    //submitInfo.pCommandBuffers = &m_drawCmdBuffers[currentBuffer];
    //VK_CHECK_RESULT(vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE));
 
    submitWork(m_drawCmdBuffers[currentBuffer], queue);
-   //VulkanExampleBaseNoSwapChain::submitFrame();
+   //VulkanBaseApplicationNoSwapChain::submitFrame();
    vkQueueWaitIdle(queue);
    sample(callback);
 }

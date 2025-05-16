@@ -6,7 +6,7 @@
 
 //#include "vma/vk_mem_alloc.h"
 #include "vulkan-land/landen/vulkan/VulkanDevice.h"
-#include "vulkan-land/landen/vulkan/vulkan_example_base_no_swap_chain.h"
+#include "vulkan-land/landen/vulkan/VulkanBaseApplicationNoSwapChain.h"
 #include "VK_abstraction/vk_descriptors.h"
 #include "VK_abstraction/vk_gameObject.h"
 #include "vulkan-land/landen/vulkan/vk_container.h"
@@ -16,7 +16,7 @@ namespace vkc
 {
 
 
-   //class VulkanExample20 : public VulkanExampleBaseNoSwapChain
+   //class VulkanExample20 : public VulkanBaseApplicationNoSwapChain
    //{
    //public:
    //   bool debugDisplay = false;
@@ -117,7 +117,7 @@ namespace vkc
    //};
 
 	class Application :
-      public VulkanExampleBaseNoSwapChain 
+      public VulkanBaseApplicationNoSwapChain 
    {
 	public:
 		static constexpr int WIDTH = 800;

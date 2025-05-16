@@ -276,7 +276,7 @@ namespace vulkan_land_landen
    ::pointer < ::vulkan::application > impact::start_vulkan_application()
    {
 
-      return start_vulkan_example_20(this, &m_mousestate);
+      return start_VulkanOffscreenApplication(this, &m_mousestate);
 
    }
 
