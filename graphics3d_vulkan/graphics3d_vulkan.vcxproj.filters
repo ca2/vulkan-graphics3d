@@ -58,13 +58,10 @@
     <ClCompile Include="swap_chain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="system_basic_render.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="system_point_light.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="container.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -132,12 +129,6 @@
     <ClInclude Include="swap_chain.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="system_basic_render.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="system_point_light.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -145,6 +136,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="utilities.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="container.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,12 +1,14 @@
 #include "framework.h"
-#include "vk_descriptors.h"
+#include "descriptors.h"
 
 // std
 #include <cassert>
 #include <stdexcept>
 
 
-namespace graphics3d_vulkan {
+namespace graphics3d_vulkan 
+{
+
 
     // *************** Descriptor Set Layout Builder *********************
 

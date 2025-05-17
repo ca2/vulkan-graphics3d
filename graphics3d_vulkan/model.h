@@ -59,10 +59,10 @@ namespace graphics3d_vulkan {
         ::pointer < VkcDevice > m_pvkcdevice;
 
 
-        ::pointer<VkcBuffer> vertexBuffer;
+        ::pointer<buffer> vertexBuffer;
         uint32_t vertexCount;
 
-        ::pointer<VkcBuffer> indexBuffer;
+        ::pointer<buffer> indexBuffer;
         uint32_t indexCount;
     };
 }  // namespace graphics3d_vulkan

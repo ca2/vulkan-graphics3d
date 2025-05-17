@@ -1,6 +1,8 @@
 #pragma once
 
-#include "vk_device.h"
+
+#include "device.h"
+
 
 // std
 #include <memory>
@@ -8,11 +10,16 @@
 #include <vector>
 
 
-namespace graphics3d_vulkan {
+namespace graphics3d_vulkan 
+{
+
+
     class VkcDescriptorSetLayout:
-    virtual public ::particle{
+      virtual public ::particle
+    {
     public:
-        class Builder  {
+        class Builder  
+        {
         public:
             Builder(VkcDevice *pvkcDevice) : m_pvkcdevice{ pvkcDevice } {}
 
@@ -92,7 +99,9 @@ namespace graphics3d_vulkan {
         friend class VkcDescriptorWriter;
     };
 
-    class VkcDescriptorWriter {
+    
+    class VkcDescriptorWriter 
+    {
     public:
         VkcDescriptorWriter(VkcDescriptorSetLayout& setLayout, VkcDescriptorPool& pool);
 
@@ -107,4 +116,9 @@ namespace graphics3d_vulkan {
         VkcDescriptorPool& pool;
         std::vector<VkWriteDescriptorSet> writes;
     };
-}
+
+
+} // namespace graphics3d_vulkan
+
+
+

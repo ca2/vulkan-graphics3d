@@ -727,6 +727,7 @@
     <ClCompile Include="application.cpp" />
     <ClCompile Include="buffer.cpp" />
     <ClCompile Include="camera.cpp" />
+    <ClCompile Include="container.cpp" />
     <ClCompile Include="descriptors.cpp" />
     <ClCompile Include="device.cpp" />
     <ClCompile Include="framework.cpp">
@@ -748,8 +749,6 @@
     <ClCompile Include="renderer.cpp" />
     <ClCompile Include="render_pass.cpp" />
     <ClCompile Include="swap_chain.cpp" />
-    <ClCompile Include="system_basic_render.cpp" />
-    <ClCompile Include="system_point_light.cpp" />
     <ClCompile Include="window.cpp" />
     <ClCompile Include="_.cpp" />
   </ItemGroup>
@@ -759,6 +758,7 @@
     <ClInclude Include="application.h" />
     <ClInclude Include="buffer.h" />
     <ClInclude Include="camera.h" />
+    <ClInclude Include="container.h" />
     <ClInclude Include="descriptors.h" />
     <ClInclude Include="device.h" />
     <ClInclude Include="frame_info.h" />
@@ -772,8 +772,6 @@
     <ClInclude Include="render_pass.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="swap_chain.h" />
-    <ClInclude Include="system_basic_render.h" />
-    <ClInclude Include="system_point_light.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="types.h" />
     <ClInclude Include="utilities.h" />

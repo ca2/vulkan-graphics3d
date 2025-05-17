@@ -1,6 +1,6 @@
 #include "framework.h"
 // vk_core.cpp
-#include "vulkan-land/landen/vulkan/shared.h"
+//#include "shared.h"
 #include "application.h"
 #include "apex/database/stream.h"
 // std
@@ -113,14 +113,14 @@ namespace graphics3d_vulkan
 
       //m_pvkcdevice = __allocate VkcDevice(m_pvulkandevice);
 
-      ::pointer_array<VkcBuffer> uboBuffers;
+      ::pointer_array<buffer> uboBuffers;
 
       uboBuffers.set_size(VkcRenderPass::MAX_FRAMES_IN_FLIGHT);
 
       for (int i = 0; i < uboBuffers.size(); i++) 
       {
 
-         uboBuffers[i] = __allocate VkcBuffer();
+         uboBuffers[i] = __allocate buffer();
 
          uboBuffers[i]->initialize_buffer(
             m_pvkcdevice,

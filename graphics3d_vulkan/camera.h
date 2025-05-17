@@ -5,7 +5,9 @@
 #include <glm/glm.hpp>
 
 
-namespace graphics3d_vulkan {
+namespace graphics3d_vulkan 
+{
+
 	enum CameraMovement {
 		FORWARD,
 		BACKWARD,

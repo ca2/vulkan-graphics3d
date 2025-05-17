@@ -22,6 +22,12 @@
     <ClCompile Include="pane_impact.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="system_basic_render.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="system_point_light.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h">
@@ -49,6 +55,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="_vulkan.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="system_point_light.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="system_basic_render.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -2,17 +2,17 @@
 
 
 #include "core/_.h"
+#include "_vulkan.h"
 
 
-
-#if defined(_lowland_vulkan_project)
+#if defined(_graphics3d_vulkan_project)
    #define CLASS_DECL_GRAPHICS3D_VULKAN  CLASS_DECL_EXPORT
 #else
    #define CLASS_DECL_GRAPHICS3D_VULKAN  CLASS_DECL_IMPORT
 #endif
 
 
-namespace vulkan_land_landen
+namespace graphics3d_vulkan
 {
 
 
@@ -23,7 +23,7 @@ namespace vulkan_land_landen
    class impact;
 
 
-} // namespace vulkan_land_landen
+} // namespace graphics3d_vulkan
 
 
 //#undef APP_TYPE

@@ -2,8 +2,8 @@
 #include "vk_renderer.h"
 #include "VK_abstraction/vk_offscreen.h"
 #include "VK_abstraction/vk_swapchain.h"
-#include "vulkan-land/landen/vulkan/initializers.h"
-#include "vulkan-land/landen/vulkan/tools.h"
+#include "vulkan-graphics3d/graphics3d_vulkan/initializers.h"
+#include "vulkan-graphics3d/graphics3d_vulkan/tools.h"
 
 #include <array>
 #include <cassert>

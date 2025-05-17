@@ -1,6 +1,6 @@
 #include "framework.h"
-#include "vk_model.h"
-#include "Utils/vkc_utils.h"
+#include "model.h"
+#include "utilities.h"
 #include "acme/filesystem/filesystem/directory_context.h"
 #include "acme/filesystem/filesystem/path_system.h"
 
@@ -59,7 +59,7 @@ namespace graphics3d_vulkan {
         VkDeviceSize bufferSize = sizeof(vertices[0]) * vertexCount;
         uint32_t vertexSize = sizeof(vertices[0]);
 
-        VkcBuffer stagingBuffer;
+        buffer stagingBuffer;
         
         stagingBuffer.initialize_buffer(
             m_pvkcdevice,
@@ -72,7 +72,7 @@ namespace graphics3d_vulkan {
         stagingBuffer.map();
         stagingBuffer.writeToBuffer((void*)vertices.data());
 
-        vertexBuffer = __allocate VkcBuffer;
+        vertexBuffer = __allocate buffer;
         
            vertexBuffer->initialize_buffer(
             m_pvkcdevice,
@@ -99,7 +99,7 @@ namespace graphics3d_vulkan {
         VkDeviceSize bufferSize = sizeof(indices[0]) * indexCount;
         uint32_t indexSize = sizeof(indices[0]);
 
-        VkcBuffer stagingBuffer;
+        buffer stagingBuffer;
         stagingBuffer.initialize_buffer(
             m_pvkcdevice,
             indexSize,
@@ -111,7 +111,7 @@ namespace graphics3d_vulkan {
         stagingBuffer.map();
         stagingBuffer.writeToBuffer((void*)indices.data());
 
-        indexBuffer = __allocate VkcBuffer();
+        indexBuffer = __allocate buffer();
         
         indexBuffer->initialize_buffer(
             m_pvkcdevice,

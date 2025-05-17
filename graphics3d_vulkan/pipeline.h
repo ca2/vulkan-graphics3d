@@ -28,19 +28,19 @@ namespace graphics3d_vulkan {
 		uint32_t subpass = 0;
 	};
 
-	class VkcPipeline :
+	class pipeline :
 	virtual public ::particle{
 	public:
-		VkcPipeline();
+		pipeline();
 		virtual void initialize_pipeline(
 			VkcDevice * pvkcdevice,
 			const std::string& vertFilepath,
 			const std::string& fragFilepath,
 			const PipelineConfigInfo& configInfo);
-		~VkcPipeline();
+		~pipeline();
 
-		VkcPipeline(const VkcPipeline&) = delete;
-		void operator=(const VkcPipeline&) = delete;
+		pipeline(const pipeline&) = delete;
+		void operator=(const pipeline&) = delete;
 
 		void bind(VkCommandBuffer commandBuffer);
 		

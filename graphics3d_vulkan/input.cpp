@@ -1,8 +1,9 @@
 #include "framework.h"
-#include "vk_input.h"
-#include "vk_gameObject.h"
-#include "vulkan-land/landen/vulkan/vk_container.h"
+#include "input.h"
+#include "game_object.h"
+#include "container.h"
 #include <limits>
+
 
 namespace graphics3d_vulkan
 {

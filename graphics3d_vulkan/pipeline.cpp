@@ -1,6 +1,6 @@
 #include "framework.h"
-#include "vk_pipeline.h"
-#include "vk_model.h"
+#include "pipeline.h"
+#include "model.h"
 #include "acme/platform/application.h"
 #include "acme/filesystem/filesystem/directory_context.h"
 #include "acme/filesystem/filesystem/file_context.h"
@@ -11,13 +11,15 @@
 #include <iostream>
 #include <cassert>
 
-namespace graphics3d_vulkan {
-	VkcPipeline::VkcPipeline()
+namespace graphics3d_vulkan 
+{
+
+	pipeline::pipeline()
 	{
 
 	}
 	
-	void VkcPipeline::initialize_pipeline(
+	void pipeline::initialize_pipeline(
 		VkcDevice * pvkcdevice,
 		const std::string& vertFilepath,
 		const std::string& fragFilepath,
@@ -30,17 +32,17 @@ namespace graphics3d_vulkan {
 
  
 
-	VkcPipeline::~VkcPipeline() {
+	pipeline::~pipeline() {
 		vkDestroyShaderModule(m_pvkcdevice->device(), vertShaderModule, nullptr);
 		vkDestroyShaderModule(m_pvkcdevice->device(), fragShaderModule, nullptr);
 		vkDestroyPipeline(m_pvkcdevice->device(), graphicsPipeline, nullptr);
 	}
 
-	void VkcPipeline::bind(VkCommandBuffer commandBuffer) {
+	void pipeline::bind(VkCommandBuffer commandBuffer) {
 		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
 	}
 
-	std::vector<char> VkcPipeline::readFile(const std::string& filepath) {
+	std::vector<char> pipeline::readFile(const std::string& filepath) {
 		
 
 		std::ifstream file{ filepath, std::ios::ate | std::ios::binary };
@@ -58,7 +60,7 @@ namespace graphics3d_vulkan {
 		file.close();
 		return buffer;
 	}
-	void VkcPipeline::createGraphicsPipeline(
+	void pipeline::createGraphicsPipeline(
 		const std::string& vertFilepath,
 		const std::string& fragFilepath,
 		const PipelineConfigInfo& configInfo)
@@ -134,7 +136,7 @@ namespace graphics3d_vulkan {
 			throw std::runtime_error("Failed to create graphics pipeline");
 		}
 	}
-	void VkcPipeline::createShaderModule(const block & block, VkShaderModule* shaderModule)
+	void pipeline::createShaderModule(const block & block, VkShaderModule* shaderModule)
 	{
 		VkShaderModuleCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -145,7 +147,7 @@ namespace graphics3d_vulkan {
 			throw std::runtime_error("failed to create shader module");
 		}
 	}
-	void VkcPipeline::defaultPipelineConfigInfo(PipelineConfigInfo& configInfo) {
+	void pipeline::defaultPipelineConfigInfo(PipelineConfigInfo& configInfo) {
 
 		configInfo.inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
 		configInfo.inputAssemblyInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;

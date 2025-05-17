@@ -1,5 +1,5 @@
 #include "framework.h"
-#include "vk_camera.h"
+#include "camera.h"
 
 
 #include <glm/glm.hpp>
