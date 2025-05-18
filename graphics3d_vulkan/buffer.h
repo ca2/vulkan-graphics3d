@@ -1,23 +1,36 @@
 #pragma once
 
-#include "device.h"
+
+#include "context.h"
 
 
 namespace graphics3d_vulkan
 {
 
 
-   class buffer :
+   class CLASS_DECL_GRAPHICS3D_VULKAN buffer :
       virtual public ::particle
    {
    public:
 
 
+      context* m_pcontext;
+      void* m_mapped = nullptr;
+      VkBuffer m_buffer = VK_NULL_HANDLE;
+      VkDeviceMemory m_memory = VK_NULL_HANDLE;
+
+      VkDeviceSize m_bufferSize;
+      uint32_t m_instanceCount;
+      VkDeviceSize m_instanceSize;
+      VkDeviceSize m_alignmentSize;
+      VkBufferUsageFlags m_usageFlags;
+      VkMemoryPropertyFlags m_memoryPropertyFlags;
+
       buffer();
       ~buffer();
 
 
-      void initialize_buffer(VkcDevice* pdevice,
+      void initialize_buffer(context* pdevice,
          VkDeviceSize instanceSize,
          uint32_t instanceCount,
          VkBufferUsageFlags usageFlags,
@@ -49,20 +62,9 @@ namespace graphics3d_vulkan
       VkMemoryPropertyFlags getMemoryPropertyFlags() const { return m_memoryPropertyFlags; }
       VkDeviceSize getBufferSize() const { return m_bufferSize; }
 
-   private:
       static VkDeviceSize getAlignment(VkDeviceSize instanceSize, VkDeviceSize minOffsetAlignment);
 
-      VkcDevice* m_pvkcdevice;
-      void* m_mapped = nullptr;
-      VkBuffer m_buffer = VK_NULL_HANDLE;
-      VkDeviceMemory m_memory = VK_NULL_HANDLE;
 
-      VkDeviceSize m_bufferSize;
-      uint32_t m_instanceCount;
-      VkDeviceSize m_instanceSize;
-      VkDeviceSize m_alignmentSize;
-      VkBufferUsageFlags m_usageFlags;
-      VkMemoryPropertyFlags m_memoryPropertyFlags;
    };
 
 }  // namespace graphics3d_vulkan

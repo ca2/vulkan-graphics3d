@@ -22,10 +22,7 @@
     <ClCompile Include="pane_impact.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="system_basic_render.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="system_point_light.cpp">
+    <ClCompile Include="application3d.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -61,6 +58,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="system_basic_render.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="application3d.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

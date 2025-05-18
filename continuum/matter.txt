@@ -1,2 +1,2 @@
 app/main
-vulkan-land/continuum
+vulkan-graphics3d/continuum

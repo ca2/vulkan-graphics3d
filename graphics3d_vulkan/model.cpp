@@ -1,6 +1,10 @@
+// From V0idsEmbrace@Twich continuum project
+// by camilo on 2025-05-17 02:40 <3ThomasBorregaardSorensen!!
 #include "framework.h"
 #include "model.h"
 #include "utilities.h"
+#include "context.h"
+#include "frame_info.h"
 #include "acme/filesystem/filesystem/directory_context.h"
 #include "acme/filesystem/filesystem/path_system.h"
 
@@ -21,39 +25,56 @@
 #include <unordered_set>
 
 
+//
+//namespace std {
+//    template <>
+//    struct hash<::graphics3d_vulkan::model::Vertex> {
+//        size_t operator()(::graphics3d_vulkan::model::Vertex const& vertex) const {
+//            size_t seed = 0;
+//            ::graphics3d_vulkan::hash_combine(seed, vertex.position, vertex.color, vertex.normal, vertex.uv);
+//            return seed;
+//        }
+//    };
+//}  // namespace std
+//
 
-namespace std {
-    template <>
-    struct hash<vkc::VkcModel::Vertex> {
-        size_t operator()(vkc::VkcModel::Vertex const& vertex) const {
-            size_t seed = 0;
-            vkc::hashCombine(seed, vertex.position, vertex.color, vertex.normal, vertex.uv);
-            return seed;
-        }
-    };
-}  // namespace std
+namespace graphics3d_vulkan 
 
+{
+   model::model()
+   {
 
-namespace graphics3d_vulkan {
-    VkcModel::VkcModel(VkcDevice * pvkcdevice, const VkcModel::Builder& builder) : m_pvkcdevice{ pvkcdevice } {
-       initialize(pvkcdevice);
-        createVertexBuffers(builder.vertices);
-        createIndexBuffers(builder.indices);
     }
-    VkcModel::~VkcModel() {
-    }
-
-    ::pointer<VkcModel> VkcModel::createModelFromFile(VkcDevice * pvkcdevice, const std::string& filepath) {
-        Builder builder{};
-        builder.loadModel(pvkcdevice, filepath);
-
-        __refdbg_this(pvkcdevice);
-
-        return __allocate VkcModel(pvkcdevice, builder);
+    model::~model()
+    {
     }
 
 
-    void VkcModel::createVertexBuffers(const std::vector<Vertex>& vertices) {
+    void model::initialize_model(::cube::context * pcontext, const ::cube::model::Builder& builder)
+    {
+
+       m_pcontext = pcontext;
+       
+       initialize(pcontext);
+       
+       createVertexBuffers(builder.vertices);
+
+       createIndexBuffers(builder.indices);
+
+    }
+
+
+    //::pointer<model> model::createModelFromFile(context * pvkcdevice, const std::string& filepath) {
+    //    Builder builder{};
+    //    builder.loadModel(pvkcdevice, filepath);
+
+    //    __refdbg_this(pvkcdevice);
+
+    //    return __allocate model(pvkcdevice, builder);
+    //}
+
+
+    void model::createVertexBuffers(const std::vector<Vertex>& vertices) {
         vertexCount = static_cast<uint32_t>(vertices.size());
         assert(vertexCount >= 3 && "Vertex count must be at least 3");
         VkDeviceSize bufferSize = sizeof(vertices[0]) * vertexCount;
@@ -62,7 +83,7 @@ namespace graphics3d_vulkan {
         buffer stagingBuffer;
         
         stagingBuffer.initialize_buffer(
-            m_pvkcdevice,
+            m_pcontext,
             vertexSize,
             vertexCount,
             VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
@@ -75,7 +96,7 @@ namespace graphics3d_vulkan {
         vertexBuffer = __allocate buffer;
         
            vertexBuffer->initialize_buffer(
-            m_pvkcdevice,
+            m_pcontext,
             vertexSize,
             vertexCount,
             VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
@@ -83,12 +104,12 @@ namespace graphics3d_vulkan {
         );
 
 
-        m_pvkcdevice->copyBuffer(stagingBuffer.getBuffer(), vertexBuffer->getBuffer(), bufferSize);
+        m_pcontext->copyBuffer(stagingBuffer.getBuffer(), vertexBuffer->getBuffer(), bufferSize);
 
 
     }
 
-    void VkcModel::createIndexBuffers(const std::vector<uint32_t>& indices) {
+    void model::createIndexBuffers(const std::vector<uint32_t>& indices) {
         indexCount = static_cast<uint32_t>(indices.size());
         hasIndexBuffer = indexCount > 0;
 
@@ -101,7 +122,7 @@ namespace graphics3d_vulkan {
 
         buffer stagingBuffer;
         stagingBuffer.initialize_buffer(
-            m_pvkcdevice,
+            m_pcontext,
             indexSize,
             indexCount,
             VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
@@ -114,35 +135,37 @@ namespace graphics3d_vulkan {
         indexBuffer = __allocate buffer();
         
         indexBuffer->initialize_buffer(
-            m_pvkcdevice,
+            m_pcontext,
             indexSize,
             indexCount,
             VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
             VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-        m_pvkcdevice->copyBuffer(stagingBuffer.getBuffer(), indexBuffer->getBuffer(), bufferSize);
+        m_pcontext->copyBuffer(stagingBuffer.getBuffer(), indexBuffer->getBuffer(), bufferSize);
     }
 
 
-    void VkcModel::draw(VkCommandBuffer commandBuffer) {
+    void model::draw(void * p) {
+        auto pframeinfo = (FrameInfo* )p;
         if (hasIndexBuffer) {
-            vkCmdDrawIndexed(commandBuffer, indexCount, 1, 0, 0, 0);
+            vkCmdDrawIndexed(pframeinfo->commandBuffer, indexCount, 1, 0, 0, 0);
         }
         else {
-            vkCmdDraw(commandBuffer, vertexCount, 1, 0, 0);
+            vkCmdDraw(pframeinfo->commandBuffer, vertexCount, 1, 0, 0);
         }
     }
 
-    void VkcModel::bind(VkCommandBuffer commandBuffer) {
+    void model::bind(void *p) {
+       auto pframeinfo = (FrameInfo*)p;
         VkBuffer buffers[] = { vertexBuffer->getBuffer() };
         VkDeviceSize offsets[] = { 0 };
-        vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
+        vkCmdBindVertexBuffers(pframeinfo->commandBuffer, 0, 1, buffers, offsets);
 
         if (hasIndexBuffer) {
-            vkCmdBindIndexBuffer(commandBuffer, indexBuffer->getBuffer(), 0, VK_INDEX_TYPE_UINT32);
+            vkCmdBindIndexBuffer(pframeinfo->commandBuffer, indexBuffer->getBuffer(), 0, VK_INDEX_TYPE_UINT32);
         }
     }
-    std::vector<VkVertexInputBindingDescription> VkcModel::Vertex::getBindingDescriptions() {
+    std::vector<VkVertexInputBindingDescription> model::getVertexBindingDescriptions() {
         std::vector<VkVertexInputBindingDescription> bindingDescriptions(1, VkVertexInputBindingDescription{});
 
         bindingDescriptions[0].binding = 0;
@@ -150,7 +173,7 @@ namespace graphics3d_vulkan {
         bindingDescriptions[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
         return bindingDescriptions;
     }
-    std::vector<VkVertexInputAttributeDescription> VkcModel::Vertex::getAttributeDescriptions() {
+    std::vector<VkVertexInputAttributeDescription> model::getVertexAttributeDescriptions() {
         std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
 
         attributeDescriptions.push_back({ 0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, position) });
@@ -162,68 +185,68 @@ namespace graphics3d_vulkan {
     }
 
 
-    void VkcModel::Builder::loadModel(::particle * pparticle, const std::string& filepath) {
-        tinyobj::attrib_t attrib;
-        std::vector<tinyobj::shape_t> shapes;
-        std::vector<tinyobj::material_t> materials;
-        std::string warn, err;
+    //void model::Builder::loadModel(::cube::context * pcontext, const std::string& filepath) {
+    //    tinyobj::attrib_t attrib;
+    //    std::vector<tinyobj::shape_t> shapes;
+    //    std::vector<tinyobj::material_t> materials;
+    //    std::string warn, err;
 
-        
+    //    
 
-        auto path = pparticle->directory()->defer_get_file_system_file(filepath.c_str(), true);
+    //    auto path = pparticle->directory()->defer_get_file_system_file(filepath.c_str(), true);
 
-        ::string str(::system()->path_system()->shell_path(path));
+    //    ::string str(::system()->path_system()->shell_path(path));
 
-        if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, str.c_str())) {
-            throw std::runtime_error(warn + err);
-        }
+    //    if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, str.c_str())) {
+    //        throw std::runtime_error(warn + err);
+    //    }
 
-        vertices.clear();
-        indices.clear();
+    //    vertices.clear();
+    //    indices.clear();
 
 
-        std::unordered_map<Vertex, uint32_t> uniqueVertices{};
-        for (const auto& shape : shapes) {
-            for (const auto& index : shape.mesh.indices) {
-                Vertex vertex{};
+    //    std::unordered_map<Vertex, uint32_t> uniqueVertices{};
+    //    for (const auto& shape : shapes) {
+    //        for (const auto& index : shape.mesh.indices) {
+    //            Vertex vertex{};
 
-                if (index.vertex_index >= 0) {
-                    vertex.position = {
-                        attrib.vertices[3 * index.vertex_index + 0],
-                        attrib.vertices[3 * index.vertex_index + 1],
-                        attrib.vertices[3 * index.vertex_index + 2],
-                    };
+    //            if (index.vertex_index >= 0) {
+    //                vertex.position = {
+    //                    attrib.vertices[3 * index.vertex_index + 0],
+    //                    attrib.vertices[3 * index.vertex_index + 1],
+    //                    attrib.vertices[3 * index.vertex_index + 2],
+    //                };
 
-                    vertex.color = {
-                    attrib.colors[3 * index.vertex_index + 0],
-                    attrib.colors[3 * index.vertex_index + 1],
-                    attrib.colors[3 * index.vertex_index + 2],
-                    };
+    //                vertex.color = {
+    //                attrib.colors[3 * index.vertex_index + 0],
+    //                attrib.colors[3 * index.vertex_index + 1],
+    //                attrib.colors[3 * index.vertex_index + 2],
+    //                };
 
-                }
+    //            }
 
-                if (index.normal_index >= 0) {
-                    vertex.normal = {
-                        attrib.normals[3 * index.normal_index + 0],
-                        attrib.normals[3 * index.normal_index + 1],
-                        attrib.normals[3 * index.normal_index + 2],
-                    };
-                }
+    //            if (index.normal_index >= 0) {
+    //                vertex.normal = {
+    //                    attrib.normals[3 * index.normal_index + 0],
+    //                    attrib.normals[3 * index.normal_index + 1],
+    //                    attrib.normals[3 * index.normal_index + 2],
+    //                };
+    //            }
 
-                if (index.texcoord_index >= 0) {
-                    vertex.uv = {
-                        attrib.texcoords[2 * index.texcoord_index + 0],
-                        attrib.texcoords[2 * index.texcoord_index + 1],
-                    };
-                }
+    //            if (index.texcoord_index >= 0) {
+    //                vertex.uv = {
+    //                    attrib.texcoords[2 * index.texcoord_index + 0],
+    //                    attrib.texcoords[2 * index.texcoord_index + 1],
+    //                };
+    //            }
 
-                if (uniqueVertices.count(vertex) == 0) {
-                    uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
-                    vertices.push_back(vertex);
-                }
-                indices.push_back(uniqueVertices[vertex]);
+    //            if (uniqueVertices.count(vertex) == 0) {
+    //                uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
+    //                vertices.push_back(vertex);
+    //            }
+    //            indices.push_back(uniqueVertices[vertex]);
 
-            }
-        }
-    }
+    //        }
+    //    }
+    //}
 }  // namespace graphics3d_vulkan

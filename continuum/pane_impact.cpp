@@ -29,7 +29,7 @@
 #define DEBUG_GCOM 0
 #endif
 
-namespace vulkan_land_continuum
+namespace vulkan_graphics3d_continuum
 {
 
 
@@ -862,7 +862,7 @@ namespace vulkan_land_continuum
    //}
 
 
-} // namespace vulkan_land_continuum
+} // namespace vulkan_graphics3d_continuum
 
 
 

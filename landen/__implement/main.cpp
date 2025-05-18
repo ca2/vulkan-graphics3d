@@ -1,6 +1,6 @@
 #include "framework.h"
 //#include "application.h"
-#define APPLICATION_NAMESPACE vulkan_land_landen
+#define APPLICATION_NAMESPACE vulkan_graphics3d_landen
 #include "acme/inline/application/main.inl"
 
 
@@ -27,7 +27,7 @@
 //void application_main(::platform::system * psystem)
 //{
 //
-//   vulkan_land_landen::application application;
+//   vulkan_graphics3d_landen::application application;
 //
 //   application.application_main();
 //

@@ -1,15 +1,15 @@
 #pragma once
 
 
-#include "vulkan-land/landen/frame.h"
+#include "vulkan-graphics3d/landen/frame.h"
 
 
-namespace vulkan_land_continuum
+namespace vulkan_graphics3d_continuum
 {
 
 
-   class CLASS_DECL_VULKAN_LAND_CONTINUUM main_frame :
-      virtual public vulkan_land_landen::frame
+   class CLASS_DECL_VULKAN_GRAPHICS3D_CONTINUUM main_frame :
+      virtual public vulkan_graphics3d_landen::frame
    {
    public:
 
@@ -40,7 +40,7 @@ namespace vulkan_land_continuum
    };
 
 
-} // namespace vulkan_land_continuum
+} // namespace vulkan_graphics3d_continuum
 
 
 

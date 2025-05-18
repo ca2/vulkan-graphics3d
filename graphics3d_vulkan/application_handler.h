@@ -1,16 +1,22 @@
 #pragma once
+
+
+#include "app-cube/cube/application.h"
+
+
 #include <vector>
 #include <memory>
 #include <deque>
 #include <functional>
 
 //#include "vma/vk_mem_alloc.h"
-#include "vulkan-graphics3d/graphics3d_vulkan/device.h"
-#include "vulkan-graphics3d/graphics3d_vulkan/base_application_no_swap_chain.h"
-#include "VK_abstraction/vk_descriptors.h"
-#include "VK_abstraction/vk_gameObject.h"
-#include "vulkan-graphics3d/graphics3d_vulkan/vk_container.h"
-#include "Renderer/vk_renderer.h"
+#include "context.h"
+//#include "vulkan-cube/graphics3d_vulkan/base_application_no_swap_chain.h"
+#include "descriptors.h"
+#include "application_object.h"
+#include "app-cube/cube/container.h"
+#include "renderer.h"
+
 
 namespace graphics3d_vulkan 
 {
@@ -27,9 +33,9 @@ namespace graphics3d_vulkan
    //   } models;
 
    //   struct {
-   //      vks::Buffer vsShared;
-   //      vks::Buffer vsMirror;
-   //      vks::Buffer vsOffScreen;
+   //      ::graphics3d_vulkan::Buffer vsShared;
+   //      ::graphics3d_vulkan::Buffer vsMirror;
+   //      ::graphics3d_vulkan::Buffer vsOffScreen;
    //   } uniformBuffers;
 
    //   struct UniformData {
@@ -108,7 +114,7 @@ namespace graphics3d_vulkan
 
    //   virtual void render(const ::function < void(void*, int, int, int)>& callback);
 
-   //   virtual void OnUpdateUIOverlay(vks::UIOverlay* overlay);
+   //   virtual void OnUpdateUIOverlay(::graphics3d_vulkan::UIOverlay* overlay);
 
    //   void sample(const ::function < void(void*, int, int, int)>& callback);
 
@@ -116,40 +122,33 @@ namespace graphics3d_vulkan
 
    //};
 
-	class Application :
-      public ::vulkan::base_application_no_swap_chain 
+	class CLASS_DECL_GRAPHICS3D_VULKAN application_handler :
+      public ::cube::application
    {
 	public:
-		static constexpr int WIDTH = 800;
-		static constexpr int HEIGHT = 600;
+		//static constexpr int WIDTH = 800;
+		//static constexpr int HEIGHT = 600;
 
-		Application();
-		~Application();
+            // Private Members
+      //VkWindow _window{ WIDTH, HEIGHT, "Vulkan window" };
+      ::pointer < ::cube::container>     m_pcontainer;
+      ::pointer < ::cube::application>     m_p3dapplication;
 
-		Application(const Application&) = delete;
-		Application& operator=(const Application&) = delete;
 
-      void initialize_application(::vkc::VkContainer * pvkcontainer);
+		application_handler();
+		~application_handler();
+
+		//application(const Application&) = delete;
+		//Application& operator=(const Application&) = delete;
+
+      void initialize_application(::cube::container * pcontainer) override;
 
       void run_application() override;
 
-	public:
-
-
       void resize(int cx, int cy) override;
 
-		void loadGameObjects();
+		void load_game_objects() override;
 
-		// Private Members
-		//VkWindow _window{ WIDTH, HEIGHT, "Vulkan window" };
-      ::pointer < ::vkc::VkContainer>     m_pvkcontainer;
-		::pointer < VkcDevice >             m_pvkcdevice;
-		::pointer < Renderer >              m_prenderer;
- 
-
-		::pointer <VkcDescriptorPool> m_pglobalpool;
-		
-		VkcGameObject::Map m_gameObjects;
 
 	};
 

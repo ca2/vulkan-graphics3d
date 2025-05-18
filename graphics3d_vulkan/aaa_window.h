@@ -23,7 +23,7 @@
 //		::windowing::window * get_windowing_window() const { return nullptr; }
 //
 //
-//		//void createWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
+//		//void createWindowSurface(VkInstance m_vkinstance, VkSurfaceKHR* surface);
 //	private:
 //
 //		//static void framebufferResizeCallback(GLFWwindow* window, int width, int height);

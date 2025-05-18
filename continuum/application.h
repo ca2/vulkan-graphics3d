@@ -1,15 +1,15 @@
 #pragma once
 
 
-#include "vulkan-land/landen/application.h"
+#include "vulkan-graphics3d/landen/application.h"
 
 
-namespace vulkan_land_continuum
+namespace vulkan_graphics3d_continuum
 {
 
 
-   class CLASS_DECL_VULKAN_LAND_CONTINUUM application :
-      virtual public vulkan_land_landen::application
+   class CLASS_DECL_VULKAN_GRAPHICS3D_CONTINUUM application :
+      virtual public ::vulkan_graphics3d_landen::application
    {
    public:
 
@@ -48,7 +48,7 @@ namespace vulkan_land_continuum
    };
 
 
-} // namespace vulkan_land_continuum
+} // namespace vulkan_graphics3d_continuum
 
 
 

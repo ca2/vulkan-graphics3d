@@ -1,10 +1,11 @@
 // From vk_swapchain by camilo on 2025-05-09 01:40 <3ThomasBorregaardSorensen!!
 #pragma once
 
-#include "vk_device.h"
+
+#include "context.h"
 
 // vulkan headers
-#include <vulkan/vulkan.h>
+#include "_vulkan.h"
 
 // std lib headers
 #include <string>
@@ -12,20 +13,24 @@
 #include <memory>
 
 
-namespace graphics3d_vulkan {
+namespace graphics3d_vulkan 
+{
 
-   class VkcRenderPass :
+
+   class CLASS_DECL_GRAPHICS3D_VULKAN render_pass :
       virtual public ::particle
    {
    public:
+
+
       static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
-      VkcRenderPass(VkcDevice* pvkcdeviceRef, VkExtent2D windowExtent);
-      VkcRenderPass(VkcDevice* pvkcdeviceRef, VkExtent2D windowExtent, ::pointer <VkcRenderPass>previous);
-      ~VkcRenderPass();
+      render_pass(context* pvkcdeviceRef, VkExtent2D windowExtent);
+      render_pass(context* pvkcdeviceRef, VkExtent2D windowExtent, ::pointer <render_pass>previous);
+      ~render_pass();
 
-      VkcRenderPass(const VkcRenderPass&) = delete;
-      VkcRenderPass& operator=(const VkcRenderPass&) = delete;
+      render_pass(const render_pass&) = delete;
+      render_pass& operator=(const render_pass&) = delete;
 
       VkFramebuffer getFrameBuffer(int index) { return m_framebuffers[index]; }
       VkRenderPass getRenderPass() { return m_vkrenderpass; }
@@ -44,7 +49,7 @@ namespace graphics3d_vulkan {
       virtual VkResult acquireNextImage(uint32_t* imageIndex);
       virtual VkResult submitCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex);
 
-      bool compareFormats(const VkcRenderPass& renderpass) const {
+      bool compareFormats(const render_pass& renderpass) const {
          return renderpass.m_formatDepth == m_formatDepth &&
             renderpass.m_formatImage == m_formatImage;
       }
@@ -77,11 +82,11 @@ namespace graphics3d_vulkan {
       std::vector<VkImage> m_images;
       std::vector<VkImageView> m_imageviews;
 
-      VkcDevice* m_pvkcdevice;
+      context* m_pcontext;
       VkExtent2D windowExtent;
 
       //VkSwapchainKHR swapChain;
-      ::pointer<VkcRenderPass> m_pvkcrenderpassOld;
+      ::pointer<render_pass> m_pvkcrenderpassOld;
 
       std::vector<VkSemaphore> imageAvailableSemaphores;
       std::vector<VkSemaphore> renderFinishedSemaphores;

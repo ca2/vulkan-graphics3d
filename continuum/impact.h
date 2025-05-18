@@ -1,15 +1,15 @@
 #pragma once
 
 
-#include "vulkan-land/landen/impact.h"
+#include "vulkan-graphics3d/landen/impact.h"
 
 
-namespace vulkan_land_continuum
+namespace vulkan_graphics3d_continuum
 {
 
 
-   class CLASS_DECL_VULKAN_LAND_CONTINUUM impact :
-      virtual public ::app_consumer < application, ::vulkan_land_landen::impact >
+   class CLASS_DECL_VULKAN_GRAPHICS3D_CONTINUUM impact :
+      virtual public ::app_consumer < application, ::vulkan_graphics3d_landen::impact >
    {
    public:
 
@@ -30,7 +30,7 @@ namespace vulkan_land_continuum
       virtual long long decrement_reference_count() override;
 #endif
 
-      ::pointer < ::vulkan::application > start_vulkan_application() override;
+      ::pointer < ::graphics3d::application > start_graphics3d_application() override;
 
 
       virtual void install_message_routing(::channel * psender) override;
@@ -56,6 +56,6 @@ namespace vulkan_land_continuum
    };
 
 
-} // namespace vulkan_land_continuum
+} // namespace vulkan_graphics3d_continuum
 
 

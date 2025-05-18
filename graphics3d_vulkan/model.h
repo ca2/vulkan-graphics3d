@@ -1,6 +1,14 @@
+// From V0idsEmbrace@Twich continuum project
+// base from cube::model by
+// camilo on 2025-05-17 02:47 <3ThomasBorregaardSorensen!!
 #pragma once
-#include "vk_device.h"
-#include "Renderer/vk_buffer.h"
+
+
+#include "app-cube/cube/model.h"
+
+
+#include "context.h"
+#include "buffer.h"
 
 // libs
 #define GLM_FORCE_RADIANS	
@@ -12,57 +20,48 @@
 #include <memory>
 #include <vector>
 
-namespace graphics3d_vulkan {
-
-    class VkcModel :
-    virtual public ::particle{
-    public:
-        struct Vertex {
-            glm::vec3 position{};
-            glm::vec3 color{};
-            glm::vec3 normal{};
-            glm::vec2 uv{};
-
-            static std::vector<VkVertexInputBindingDescription> getBindingDescriptions();
-            static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions();
-
-            bool operator==(const Vertex& other) const { return position == other.position && normal == other.normal && uv == other.uv; }
-        };
-
-        struct Builder {
-            std::vector<Vertex> vertices{};
-            std::vector<uint32_t> indices{};
-
-            void loadModel(::particle * pparticle, const std::string& filepath);
-        };
+namespace graphics3d_vulkan
+{
 
 
+   class CLASS_DECL_GRAPHICS3D_VULKAN model :
+      virtual public ::cube::model
+   {
+   public:
+
+   
+         static std::vector<VkVertexInputBindingDescription> getVertexBindingDescriptions();
+         static std::vector<VkVertexInputAttributeDescription> getVertexAttributeDescriptions();
 
 
-        static ::pointer<VkcModel> createModelFromFile(VkcDevice * pvkcdevice, const std::string& filepath);
+      //static ::pointer<model> createModelFromFile(context* pvkcdevice, const std::string& filepath);
 
 
-        VkcModel(VkcDevice * pvkcdevice, const VkcModel::Builder& builder);
-        ~VkcModel();
+      model();
+      ~model();
 
-        VkcModel(const VkcModel&) = delete;
-        void operator=(const VkcModel&) = delete;
+      void initialize_model(::cube::context* pcontext, const ::cube::model::Builder& builder) override;
 
-        void draw(VkCommandBuffer commandBuffer);
-        void bind(VkCommandBuffer commandBuffer);
+      void draw(void * pframeinfo) override;
+      void bind(void* pframeinfo) override;
 
-    private:
-        void createVertexBuffers(const std::vector<Vertex>& vertices);
-        void createIndexBuffers(const std::vector<uint32_t>& indices);
+      void createVertexBuffers(const std::vector<Vertex>& vertices);
+      void createIndexBuffers(const std::vector<uint32_t>& indices);
 
-        bool hasIndexBuffer = false;
-        ::pointer < VkcDevice > m_pvkcdevice;
+      bool hasIndexBuffer = false;
+      ::pointer < context > m_pcontext;
 
 
-        ::pointer<buffer> vertexBuffer;
-        uint32_t vertexCount;
+      ::pointer<buffer> vertexBuffer;
+      uint32_t vertexCount;
 
-        ::pointer<buffer> indexBuffer;
-        uint32_t indexCount;
-    };
+      ::pointer<buffer> indexBuffer;
+      uint32_t indexCount;
+
+   };
+
+
 }  // namespace graphics3d_vulkan
+
+
+

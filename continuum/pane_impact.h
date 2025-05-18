@@ -5,11 +5,11 @@
 #include "core/user/userex/pane_tab_impact.h"
 
 
-namespace vulkan_land_continuum
+namespace vulkan_graphics3d_continuum
 {
 
 
-   class CLASS_DECL_VULKAN_LAND_CONTINUUM pane_impact :
+   class CLASS_DECL_VULKAN_GRAPHICS3D_CONTINUUM pane_impact :
       virtual public ::app_consumer < application, ::userex::pane_tab_impact, ::user::form_callback >
    {
    public:
@@ -60,7 +60,7 @@ namespace vulkan_land_continuum
    };
 
 
-} // namespace vulkan_land_continuum
+} // namespace vulkan_graphics3d_continuum
 
 
 

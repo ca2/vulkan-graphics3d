@@ -1,12 +1,16 @@
 #pragma once 
 // MNK_Controller.h
-#include "VK_abstraction/vk_gameObject.h"
-#include "AppCore/vk_window.h"
+#include "application_object.h"
+//#include "window.h"
 #include "acme/constant/user_key.h"
+#include <glm/glm.hpp>
+
+namespace graphics3d_vulkan 
+{
 
 
-namespace graphics3d_vulkan {
-   class MNKController {
+   class CLASS_DECL_GRAPHICS3D_VULKAN MNKController
+   {
    public:
 
       MNKController(float sensitivity = 0.1f, float yaw = -90.0f, float pitch = 0.0f);
@@ -25,14 +29,14 @@ namespace graphics3d_vulkan {
          ::user::e_key Exit = ::user::e_key_escape;
       } m_keymap;
 
-      //void moveInPlaneXZ(vkc::VkContainer * pcontainer, float dt, VkcGameObject& gameObject);
+      //void moveInPlaneXZ(::cube::container * pcontainer, float dt, application_object& gameObject);
 
-      void updateMovement(vkc::VkContainer* pvkcontainer, float dt, VkcGameObject& gameObject);
-      void updateLook(vkc::VkContainer* pvkcontainer, float xOffset, float yOffset, VkcGameObject& gameObject);
+      void updateMovement(::cube::container* pcontainer, float dt, ::cube::application_object* papplicationobject);
+      void updateLook(::cube::container* pcontainer, float xOffset, float yOffset, ::cube::application_object * papplicationobject);
 
       void processMouseMovement(float xOffset, float yOffset);
-      void processKeyboardInput(vkc::VkContainer* pvkcontainer, float deltaTime);
-      void handleMouseInput(vkc::VkContainer* pvkcontainer);
+      void processKeyboardInput(::cube::container* pcontainer, float deltaTime);
+      void handleMouseInput(::cube::container* pcontainer);
 
       glm::vec3 getCameraDirection() const;
       glm::vec3 getCameraPosition() const;
@@ -69,4 +73,9 @@ namespace graphics3d_vulkan {
       glm::vec3 _cameraDirection; // Camera direction vector
       glm::vec3 _cameraPosition;
    };
+
+
 }  // namespace graphics3d_vulkan
+
+
+

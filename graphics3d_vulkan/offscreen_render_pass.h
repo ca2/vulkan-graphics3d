@@ -1,7 +1,9 @@
 // From vk_swapchain by camilo on 2025-05-09 <3ThomasBorregaardSorensen!!
 #pragma once
 
-#include "vk_renderpass.h"
+
+#include "render_pass.h"
+
 
 //// vulkan headers
 //#include <vulkan/vulkan.h>
@@ -15,20 +17,20 @@
 namespace graphics3d_vulkan 
 {
 
-	class VkcOffScreen :
-		virtual public VkcRenderPass
+	class CLASS_DECL_GRAPHICS3D_VULKAN offscreen_render_pass :
+		virtual public render_pass
 	{
 	public:
 
 
 		static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
-		VkcOffScreen(VkcDevice* pvkcdeviceRef, VkExtent2D windowExtent);
-		VkcOffScreen(VkcDevice* pvkcdeviceRef, VkExtent2D windowExtent, ::pointer <VkcRenderPass>previous);
-		~VkcOffScreen();
+		offscreen_render_pass(context* pvkcdeviceRef, VkExtent2D windowExtent);
+		offscreen_render_pass(context* pvkcdeviceRef, VkExtent2D windowExtent, ::pointer <render_pass>previous);
+		~offscreen_render_pass();
 
-		VkcOffScreen(const VkcOffScreen&) = delete;
-		VkcOffScreen& operator=(const VkcOffScreen&) = delete;
+		offscreen_render_pass(const offscreen_render_pass&) = delete;
+		offscreen_render_pass& operator=(const offscreen_render_pass&) = delete;
 
 		//VkFramebuffer getFrameBuffer(int index) { return swapChainFramebuffers[index]; }
 		//VkRenderPass getRenderPass() { return m_vkrenderpass; }
@@ -47,7 +49,7 @@ namespace graphics3d_vulkan
 		VkResult acquireNextImage(uint32_t* imageIndex) override;
 		VkResult submitCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex);
 
-		//bool compareSwapFormats(const VkcOffScreen& swapChain) const {
+		//bool compareSwapFormats(const offscreen_render_pass& swapChain) const {
 		//	return swapChain.depthFormat == depthFormat &&
 		//		swapChain.imageFormat == imageFormat;
 		//}
@@ -83,11 +85,11 @@ namespace graphics3d_vulkan
 		//std::vector<VkImage> swapChainImages;
 		//std::vector<VkImageView> swapChainImageViews;
 
-		//VkcDevice* m_pvkcdevice;
+		//context* m_pcontext;
 		//VkExtent2D windowExtent;
 
 		////VkSwapchainKHR swapChain;
-		//::pointer<VkcOffScreen> oldOffScreen;
+		//::pointer<offscreen_render_pass> oldOffScreen;
 
 		//std::vector<VkSemaphore> imageAvailableSemaphores;
 		//std::vector<VkSemaphore> renderFinishedSemaphores;

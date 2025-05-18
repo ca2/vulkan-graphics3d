@@ -5,12 +5,12 @@
 #include <functional>
 
 //#include "vma/vk_mem_alloc.h"
-#include "vulkan-land/graphics3d_vulkan/device.h"
-#include "vulkan-land/graphics3d_vulkan/base_application_no_swap_chain.h"
-#include "VK_abstraction/vk_descriptors.h"
-#include "VK_abstraction/vk_gameObject.h"
-#include "vulkan-land/graphics3d_vulkan/vk_container.h"
-#include "Renderer/vk_renderer.h"
+#include "vulkan-graphics3d/graphics3d_vulkan/device.h"
+//#include "vulkan-graphics3d/graphics3d_vulkan/base_application_no_swap_chain.h"
+#include "vulkan-graphics3d/graphics3d_vulkan/descriptors.h"
+#include "vulkan-graphics3d/graphics3d_vulkan/application_object.h"
+#include "bred/graphics3d/container.h"
+#include "vulkan-graphics3d/graphics3d_vulkan/renderer.h"
 
 namespace vulkan 
 {

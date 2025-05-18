@@ -1,26 +1,34 @@
+// From V0idsEmbrace@Twich continuum project
+// renamed from context to context by 
+// camilo on 2025-05-17 03:00 <3ThomasBorregaardSorensen!!
 #pragma once
 
+#include "app-cube/cube/context.h"
 //#include "window.h"
-//#include "vulkan-graphics3d/graphics3d_vulkan/device.h"
+//#include "vulkan-cube/graphics3d_vulkan/context.h"
 #include "_vulkan.h"
 // std lib headers
 #include <string>
 #include <vector>
 
+
 namespace graphics3d_vulkan
 {
 
    
-   class VkContainer;
+   class container;
 
    struct SwapChainSupportDetails
    {
+      
       VkSurfaceCapabilitiesKHR capabilities;
       std::vector<VkSurfaceFormatKHR> formats;
       std::vector<VkPresentModeKHR> presentModes;
+
    };
 
-   struct QueueFamilyIndices {
+   struct QueueFamilyIndices 
+   {
       uint32_t graphicsFamily;
       uint32_t presentFamily;
       bool graphicsFamilyHasValue = false;
@@ -28,35 +36,38 @@ namespace graphics3d_vulkan
       bool isComplete() { return graphicsFamilyHasValue && presentFamilyHasValue; }
    };
 
-   class VkcDevice :
-      virtual public ::particle {
+
+   class CLASS_DECL_GRAPHICS3D_VULKAN context :
+      virtual public ::cube::context
+   {
    public:
+
 #if defined(NDEBUG)
       const bool enableValidationLayers = false;
 #else
       const bool enableValidationLayers = true;
 #endif
 
-      //VkcDevice(VkWindow& window);
-      //VkcDevice(VkPhysicalDevice physicalDevice);
-      //VkcDevice(vks::VulkanDevice * pdevice);
-      VkcDevice();
-      ~VkcDevice();
+      //context(VkWindow& window);
+      //context(VkPhysicalDevice physicalDevice);
+      //context(::graphics3d_vulkan::VulkanDevice * pdevice);
+      context();
+      ~context();
 
-      virtual void initialize_device(::vkc::VkContainer* pvkcontainer);
+      virtual void initialize_context(::cube::container* pcontainer);
 
       // Not copyable or movable
-      VkcDevice(const VkcDevice&) = delete;
-      void operator=(const VkcDevice&) = delete;
-      //VkcDevice(vks::VulkanDevice&&) = delete;
-      VkcDevice& operator=(VkcDevice&&) = delete;
+      context(const context&) = delete;
+      void operator=(const context&) = delete;
+      //context(::graphics3d_vulkan::VulkanDevice&&) = delete;
+      context& operator=(context&&) = delete;
 
-      VkCommandPool getCommandPool() { return commandPool; }
-      VkDevice device() { return m_vkdevice; }
+      VkCommandPool getCommandPool() { return m_vkcommandpool; }
+      VkDevice logicalDevice() { return m_vkdevice; }
 
-      VkSurfaceKHR surface() { return surface_; }
-      VkQueue graphicsQueue() { return graphicsQueue_; }
-      VkQueue presentQueue() { return presentQueue_; }
+      VkSurfaceKHR surface() { return m_vksurfacekhr; }
+      VkQueue graphicsQueue() { return m_vkqueueGraphics; }
+      VkQueue presentQueue() { return m_vkqueuePresent; }
 
       SwapChainSupportDetails getSwapChainSupport() { return querySwapChainSupport(physicalDevice); }
       uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
@@ -106,16 +117,16 @@ namespace graphics3d_vulkan
       bool checkDeviceExtensionSupport(VkPhysicalDevice pvkcdevice);
       SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice pvkcdevice);
 
-      VkInstance instance;
+      VkInstance m_vkinstance;
       VkDebugUtilsMessengerEXT debugMessenger;
       VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-      ::pointer < vkc::VkContainer > m_pvkcontainer;
-      VkCommandPool commandPool;
+      ::pointer < ::cube::container > m_pcontainer;
+      VkCommandPool m_vkcommandpool;
 
       VkDevice m_vkdevice;
-      VkSurfaceKHR surface_;
-      VkQueue graphicsQueue_;
-      VkQueue presentQueue_;
+      VkSurfaceKHR m_vksurfacekhr;
+      VkQueue m_vkqueueGraphics;
+      VkQueue m_vkqueuePresent;
 
       const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
       const std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };

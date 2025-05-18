@@ -4,11 +4,11 @@
 #include "base/user/user/document.h"
 
 
-namespace vulkan_land_continuum
+namespace vulkan_graphics3d_continuum
 {
 
 
-   class CLASS_DECL_VULKAN_LAND_CONTINUUM document :
+   class CLASS_DECL_VULKAN_GRAPHICS3D_CONTINUUM document :
       public ::user::document
    {
    public:
@@ -38,7 +38,7 @@ namespace vulkan_land_continuum
    };
 
 
-} // namespace vulkan_land_continuum
+} // namespace vulkan_graphics3d_continuum
 
 
 

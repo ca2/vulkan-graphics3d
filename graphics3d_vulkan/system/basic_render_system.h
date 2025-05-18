@@ -1,10 +1,10 @@
 #pragma once
 
-#include <VK_abstraction/vk_device.h>
-#include <VK_abstraction/vk_pipeline.h>
-#include <VK_abstraction/vk_gameObject.h>
-#include <VK_abstraction/vk_frameInfo.h>
-#include <VK_abstraction/vk_camera.h>
+#include "context.h"
+#include "pipeline.h"
+#include "application_object.h"
+#include "frame_info.h"
+#include "app-cube/cube/camera.h"
 
 
 
@@ -13,10 +13,12 @@
 
 
 
-namespace graphics3d_vulkan {
+namespace graphics3d_vulkan 
+{
+
 	class SimpleRenderSystem {
 	public:
-		SimpleRenderSystem(VkcDevice *pvkcdevice, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
+		SimpleRenderSystem(context *pvkcdevice, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
 		~SimpleRenderSystem();
 
 		SimpleRenderSystem(const SimpleRenderSystem&) = delete;
@@ -27,10 +29,10 @@ namespace graphics3d_vulkan {
 		void createPipelineLayout(VkDescriptorSetLayout globalSetLayout);
 		void createPipeline(VkRenderPass renderPass);
 
-		VkcDevice* m_pvkcdevice;
+		context* m_pcontext;
 
 
-		::pointer<VkcPipeline> vkcPipeline;
+		::pointer<pipeline> m_ppipeline;
 		VkPipelineLayout pipelineLayout;
 	};
 }

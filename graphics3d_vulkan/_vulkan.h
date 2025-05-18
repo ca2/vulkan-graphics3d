@@ -7,6 +7,7 @@
 #include "acme/_operating_system.h"
 
 #if defined(WINDOWS_DESKTOP)
+#define VK_PROTOTYPES
 #define VK_USE_PLATFORM_WIN32_KHR
 #else
 #error "wwwwwhat?!?!"

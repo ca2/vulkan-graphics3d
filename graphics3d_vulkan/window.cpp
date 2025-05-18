@@ -1,5 +1,5 @@
 #include "framework.h"
-//#include "vk_window.h"
+//#include "window.h"
 ////#include <GLFW/glfw3.h>
 //#include <stdexcept>
 //
@@ -24,8 +24,8 @@
 //		//glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
 //	}
 //
-//	//void VkWindow::createWindowSurface(VkInstance instance, VkSurfaceKHR* surface) {
-//	//	if (glfwCreateWindowSurface(instance, window, nullptr, surface) != VK_SUCCESS) {
+//	//void VkWindow::createWindowSurface(VkInstance m_vkinstance, VkSurfaceKHR* surface) {
+//	//	if (glfwCreateWindowSurface(m_vkinstance, window, nullptr, surface) != VK_SUCCESS) {
 //	//		throw std::runtime_error("Failed to create window surface");
 //	//	}
 //	//}

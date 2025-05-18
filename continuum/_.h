@@ -1,18 +1,18 @@
 #pragma once
 
 
-#include "landen/_.h"
+#include "vulkan-graphics3d/landen/_.h"
 
 
 
-#if defined(_vulkan_land_continuum_project)
-#define CLASS_DECL_VULKAN_LAND_CONTINUUM  CLASS_DECL_EXPORT
+#if defined(_vulkan_graphics3d_continuum_project)
+#define CLASS_DECL_VULKAN_GRAPHICS3D_CONTINUUM  CLASS_DECL_EXPORT
 #else
-#define CLASS_DECL_VULKAN_LAND_CONTINUUM  CLASS_DECL_IMPORT
+#define CLASS_DECL_VULKAN_GRAPHICS3D_CONTINUUM  CLASS_DECL_IMPORT
 #endif
 
 
-namespace vulkan_land_continuum
+namespace vulkan_graphics3d_continuum
 {
 
    class application;

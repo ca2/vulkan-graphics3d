@@ -1,6 +1,9 @@
+// From V0idsEmbrace@Twich continuum project
+// renamed from context to context by 
+// camilo on 2025-05-17 03:00 <3ThomasBorregaardSorensen!!
 #include "framework.h"
-#include "device.h"
-#include "container.h"
+#include "context.h"
+#include "app-cube/cube/container.h"
 #include "initializers.h"
 #include "tools.h"
 // std headers
@@ -25,16 +28,16 @@ namespace graphics3d_vulkan
    }
 
    VkResult CreateDebugUtilsMessengerEXT(
-      VkInstance instance,
+      VkInstance m_vkinstance,
       const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
       const VkAllocationCallbacks* pAllocator,
       VkDebugUtilsMessengerEXT* pDebugMessenger)
    {
       auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(
-         instance,
+         m_vkinstance,
          "vkCreateDebugUtilsMessengerEXT");
       if (func != nullptr) {
-         return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
+         return func(m_vkinstance, pCreateInfo, pAllocator, pDebugMessenger);
       }
       else {
          return VK_ERROR_EXTENSION_NOT_PRESENT;
@@ -42,25 +45,25 @@ namespace graphics3d_vulkan
    }
 
    void DestroyDebugUtilsMessengerEXT(
-      VkInstance instance,
+      VkInstance m_vkinstance,
       VkDebugUtilsMessengerEXT debugMessenger,
       const VkAllocationCallbacks* pAllocator) {
       auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(
-         instance,
+         m_vkinstance,
          "vkDestroyDebugUtilsMessengerEXT");
       if (func != nullptr) {
-         func(instance, debugMessenger, pAllocator);
+         func(m_vkinstance, debugMessenger, pAllocator);
       }
    }
 
    // class member functions
-   //VkcDevice::VkcDevice(vks::VulkanDevice* pdevice) : m_vkdevice{pdevice->logicalDevice} {
-   VkcDevice::VkcDevice()
+   //context::context(::graphics3d_vulkan::VulkanDevice* pdevice) : m_vkdevice{pdevice->logicalDevice} {
+   context::context()
    {
 
-      surface_ = nullptr;
-      presentQueue_ = nullptr;
-      graphicsQueue_ = nullptr;
+      m_vksurfacekhr = nullptr;
+      m_vkqueuePresent = nullptr;
+      m_vkqueueGraphics = nullptr;
 
       createInstance();
       setupDebugMessenger();
@@ -70,33 +73,33 @@ namespace graphics3d_vulkan
       createCommandPool();
    }
 
-   VkcDevice::~VkcDevice()
+   context::~context()
    {
-      vkDestroyCommandPool(m_vkdevice, commandPool, nullptr);
+      vkDestroyCommandPool(m_vkdevice, m_vkcommandpool, nullptr);
       vkDestroyDevice(m_vkdevice, nullptr);
 
       if (enableValidationLayers) {
-         DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
+         DestroyDebugUtilsMessengerEXT(m_vkinstance, debugMessenger, nullptr);
       }
 
-      if (surface_)
+      if (m_vksurfacekhr)
       {
-         vkDestroySurfaceKHR(instance, surface_, nullptr);
+         vkDestroySurfaceKHR(m_vkinstance, m_vksurfacekhr, nullptr);
       }
-      vkDestroyInstance(instance, nullptr);
+      vkDestroyInstance(m_vkinstance, nullptr);
 
    }
 
 
-   void VkcDevice::initialize_device(vkc::VkContainer* pvkcontainer)
+   void context::initialize_context(::cube::container* pcontainer)
    {
 
-      m_pvkcontainer = pvkcontainer;
+      m_pcontainer = pcontainer;
 
    }
 
 
-   void VkcDevice::createInstance()
+   void context::createInstance()
    {
 
       if (enableValidationLayers && !checkValidationLayerSupport()) {
@@ -132,24 +135,24 @@ namespace graphics3d_vulkan
          createInfo.pNext = nullptr;
       }
 
-      if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
-         throw std::runtime_error("failed to create instance!");
+      if (vkCreateInstance(&createInfo, nullptr, &m_vkinstance) != VK_SUCCESS) {
+         throw std::runtime_error("failed to create m_vkinstance!");
       }
 
       hasGflwRequiredInstanceExtensions();
    }
 
 
-   void VkcDevice::pickPhysicalDevice()
+   void context::pickPhysicalDevice()
    {
       uint32_t deviceCount = 0;
-      vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
+      vkEnumeratePhysicalDevices(m_vkinstance, &deviceCount, nullptr);
       if (deviceCount == 0) {
          throw std::runtime_error("failed to find GPUs with Vulkan support!");
       }
       std::cout << "Device count: " << deviceCount << std::endl;
       std::vector<VkPhysicalDevice> devices(deviceCount);
-      vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
+      vkEnumeratePhysicalDevices(m_vkinstance, &deviceCount, devices.data());
 
       for (const auto& pvkcdevice : devices) {
          if (isDeviceSuitable(pvkcdevice)) {
@@ -167,7 +170,7 @@ namespace graphics3d_vulkan
    }
 
 
-   void VkcDevice::createLogicalDevice()
+   void context::createLogicalDevice()
    {
 
       QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
@@ -225,16 +228,16 @@ namespace graphics3d_vulkan
       }
       if (indices.graphicsFamilyHasValue)
       {
-         vkGetDeviceQueue(m_vkdevice, indices.graphicsFamily, 0, &graphicsQueue_);
+         vkGetDeviceQueue(m_vkdevice, indices.graphicsFamily, 0, &m_vkqueueGraphics);
       }
       if (indices.presentFamilyHasValue)
       {
-         vkGetDeviceQueue(m_vkdevice, indices.presentFamily, 0, &presentQueue_);
+         vkGetDeviceQueue(m_vkdevice, indices.presentFamily, 0, &m_vkqueuePresent);
       }
    }
 
 
-   void VkcDevice::createCommandPool()
+   void context::createCommandPool()
    {
       QueueFamilyIndices queueFamilyIndices = findPhysicalQueueFamilies();
 
@@ -244,17 +247,17 @@ namespace graphics3d_vulkan
       poolInfo.flags =
          VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 
-      if (vkCreateCommandPool(m_vkdevice, &poolInfo, nullptr, &commandPool) != VK_SUCCESS) {
+      if (vkCreateCommandPool(m_vkdevice, &poolInfo, nullptr, &m_vkcommandpool) != VK_SUCCESS) {
          throw std::runtime_error("failed to create command pool!");
       }
    }
 
-   //void VkcDevice::createSurface() { window.createWindowSurface(instance, &surface_); }
+   //void context::createSurface() { window.createWindowSurface(m_vkinstance, &m_vksurfacekhr); }
 
-   void VkcDevice::createSurface() {}
+   void context::createSurface() {}
 
 
-   bool VkcDevice::isDeviceSuitable(VkPhysicalDevice pvkcdevice)
+   bool context::isDeviceSuitable(VkPhysicalDevice pvkcdevice)
    {
 
       QueueFamilyIndices indices = findQueueFamilies(pvkcdevice);
@@ -262,7 +265,7 @@ namespace graphics3d_vulkan
       bool extensionsSupported = checkDeviceExtensionSupport(pvkcdevice);
 
       bool swapChainAdequate = false;
-      if (surface_)
+      if (m_vksurfacekhr)
       {
          if (extensionsSupported)
          {
@@ -280,13 +283,13 @@ namespace graphics3d_vulkan
       VkPhysicalDeviceFeatures supportedFeatures;
       vkGetPhysicalDeviceFeatures(pvkcdevice, &supportedFeatures);
 
-      return (!surface_ || indices.isComplete()) && extensionsSupported && swapChainAdequate &&
+      return (!m_vksurfacekhr || indices.isComplete()) && extensionsSupported && swapChainAdequate &&
          supportedFeatures.samplerAnisotropy;
 
    }
 
 
-   void VkcDevice::populateDebugMessengerCreateInfo(
+   void context::populateDebugMessengerCreateInfo(
       VkDebugUtilsMessengerCreateInfoEXT& createInfo)
    {
 
@@ -303,7 +306,7 @@ namespace graphics3d_vulkan
    }
 
 
-   void VkcDevice::setupDebugMessenger()
+   void context::setupDebugMessenger()
    {
 
       if (!enableValidationLayers)
@@ -317,7 +320,7 @@ namespace graphics3d_vulkan
 
       populateDebugMessengerCreateInfo(createInfo);
 
-      if (CreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr, &debugMessenger) != VK_SUCCESS)
+      if (CreateDebugUtilsMessengerEXT(m_vkinstance, &createInfo, nullptr, &debugMessenger) != VK_SUCCESS)
       {
 
          throw std::runtime_error("failed to set up debug messenger!");
@@ -327,7 +330,7 @@ namespace graphics3d_vulkan
    }
 
 
-   bool VkcDevice::checkValidationLayerSupport()
+   bool context::checkValidationLayerSupport()
    {
       uint32_t layerCount;
       vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
@@ -361,7 +364,7 @@ namespace graphics3d_vulkan
    }
 
 
-   std::vector<const char*> VkcDevice::getRequiredExtensions()
+   std::vector<const char*> context::getRequiredExtensions()
    {
       uint32_t glfwExtensionCount = 0;
       const char** glfwExtensions;
@@ -380,7 +383,7 @@ namespace graphics3d_vulkan
    }
 
 
-   void VkcDevice::hasGflwRequiredInstanceExtensions()
+   void context::hasGflwRequiredInstanceExtensions()
    {
       uint32_t extensionCount = 0;
       vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
@@ -407,7 +410,7 @@ namespace graphics3d_vulkan
    }
 
 
-   bool VkcDevice::checkDeviceExtensionSupport(VkPhysicalDevice pvkcdevice)
+   bool context::checkDeviceExtensionSupport(VkPhysicalDevice pvkcdevice)
    {
 
       uint32_t extensionCount;
@@ -430,7 +433,7 @@ namespace graphics3d_vulkan
    }
 
 
-   QueueFamilyIndices VkcDevice::findQueueFamilies(VkPhysicalDevice pvkcdevice)
+   QueueFamilyIndices context::findQueueFamilies(VkPhysicalDevice pvkcdevice)
    {
 
       QueueFamilyIndices indices;
@@ -449,10 +452,10 @@ namespace graphics3d_vulkan
             indices.graphicsFamily = i;
             indices.graphicsFamilyHasValue = true;
          }
-         if (surface_)
+         if (m_vksurfacekhr)
          {
             VkBool32 presentSupport = false;
-            vkGetPhysicalDeviceSurfaceSupportKHR(pvkcdevice, i, surface_, &presentSupport);
+            vkGetPhysicalDeviceSurfaceSupportKHR(pvkcdevice, i, m_vksurfacekhr, &presentSupport);
             if (queueFamily.queueCount > 0 && presentSupport)
             {
                indices.presentFamily = i;
@@ -471,32 +474,32 @@ namespace graphics3d_vulkan
    }
 
 
-   SwapChainSupportDetails VkcDevice::querySwapChainSupport(VkPhysicalDevice pvkcdevice)
+   SwapChainSupportDetails context::querySwapChainSupport(VkPhysicalDevice pvkcdevice)
    {
 
       SwapChainSupportDetails details{};
 
-      if (surface_)
+      if (m_vksurfacekhr)
       {
 
-         vkGetPhysicalDeviceSurfaceCapabilitiesKHR(pvkcdevice, surface_, &details.capabilities);
+         vkGetPhysicalDeviceSurfaceCapabilitiesKHR(pvkcdevice, m_vksurfacekhr, &details.capabilities);
 
          uint32_t formatCount;
-         vkGetPhysicalDeviceSurfaceFormatsKHR(pvkcdevice, surface_, &formatCount, nullptr);
+         vkGetPhysicalDeviceSurfaceFormatsKHR(pvkcdevice, m_vksurfacekhr, &formatCount, nullptr);
 
          if (formatCount != 0) {
             details.formats.resize(formatCount);
-            vkGetPhysicalDeviceSurfaceFormatsKHR(pvkcdevice, surface_, &formatCount, details.formats.data());
+            vkGetPhysicalDeviceSurfaceFormatsKHR(pvkcdevice, m_vksurfacekhr, &formatCount, details.formats.data());
          }
 
          uint32_t presentModeCount;
-         vkGetPhysicalDeviceSurfacePresentModesKHR(pvkcdevice, surface_, &presentModeCount, nullptr);
+         vkGetPhysicalDeviceSurfacePresentModesKHR(pvkcdevice, m_vksurfacekhr, &presentModeCount, nullptr);
 
          if (presentModeCount != 0) {
             details.presentModes.resize(presentModeCount);
             vkGetPhysicalDeviceSurfacePresentModesKHR(
                pvkcdevice,
-               surface_,
+               m_vksurfacekhr,
                &presentModeCount,
                details.presentModes.data());
          }
@@ -506,7 +509,7 @@ namespace graphics3d_vulkan
    }
 
 
-   VkFormat VkcDevice::findSupportedFormat(
+   VkFormat context::findSupportedFormat(
       const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features) {
       for (VkFormat format : candidates) {
          VkFormatProperties props;
@@ -524,7 +527,7 @@ namespace graphics3d_vulkan
    }
 
 
-   uint32_t VkcDevice::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {
+   uint32_t context::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {
       VkPhysicalDeviceMemoryProperties memProperties;
       vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProperties);
       for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
@@ -538,7 +541,7 @@ namespace graphics3d_vulkan
    }
 
 
-   void VkcDevice::createBuffer(
+   void context::createBuffer(
       VkDeviceSize size,
       VkBufferUsageFlags usage,
       VkMemoryPropertyFlags properties,
@@ -579,13 +582,13 @@ namespace graphics3d_vulkan
    }
 
 
-   VkCommandBuffer VkcDevice::beginSingleTimeCommands()
+   VkCommandBuffer context::beginSingleTimeCommands()
    {
 
       VkCommandBufferAllocateInfo allocInfo{};
       allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
       allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-      allocInfo.commandPool = commandPool;
+      allocInfo.commandPool = m_vkcommandpool;
       allocInfo.commandBufferCount = 1;
 
       VkCommandBuffer commandBuffer;
@@ -601,7 +604,7 @@ namespace graphics3d_vulkan
    }
 
 
-   void VkcDevice::endSingleTimeCommands(VkCommandBuffer commandBuffer)
+   void context::endSingleTimeCommands(VkCommandBuffer commandBuffer)
    {
 
       vkEndCommandBuffer(commandBuffer);
@@ -611,15 +614,15 @@ namespace graphics3d_vulkan
       submitInfo.commandBufferCount = 1;
       submitInfo.pCommandBuffers = &commandBuffer;
 
-      vkQueueSubmit(graphicsQueue_, 1, &submitInfo, VK_NULL_HANDLE);
-      vkQueueWaitIdle(graphicsQueue_);
+      vkQueueSubmit(m_vkqueueGraphics, 1, &submitInfo, VK_NULL_HANDLE);
+      vkQueueWaitIdle(m_vkqueueGraphics);
 
-      vkFreeCommandBuffers(m_vkdevice, commandPool, 1, &commandBuffer);
+      vkFreeCommandBuffers(m_vkdevice, m_vkcommandpool, 1, &commandBuffer);
 
    }
 
 
-   void VkcDevice::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
+   void context::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
    {
       VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 
@@ -634,7 +637,7 @@ namespace graphics3d_vulkan
    }
 
 
-   void VkcDevice::copyBufferToImage(
+   void context::copyBufferToImage(
       VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, uint32_t layerCount)
    {
 
@@ -666,7 +669,7 @@ namespace graphics3d_vulkan
    }
 
 
-   void VkcDevice::createImageWithInfo(
+   void context::createImageWithInfo(
       const VkImageCreateInfo& imageInfo,
       VkMemoryPropertyFlags properties,
       VkImage& image,
@@ -699,14 +702,14 @@ namespace graphics3d_vulkan
 
 
 
-   void VkcDevice::submitWork(VkCommandBuffer cmdBuffer, VkQueue queue)
+   void context::submitWork(VkCommandBuffer cmdBuffer, VkQueue queue)
    {
-      VkSubmitInfo submitInfo = vks::initializers::submitInfo();
+      VkSubmitInfo submitInfo = initializers::submit_info();
       submitInfo.commandBufferCount = 1;
       submitInfo.pCommandBuffers = &cmdBuffer;
       //m_submitInfo.commandBufferCount = 1;
       //m_submitInfo.pCommandBuffers = &cmdBuffer;
-      VkFenceCreateInfo fenceInfo = vks::initializers::fenceCreateInfo();
+      VkFenceCreateInfo fenceInfo = initializers::fence_create_info();
       VkFence fence;
       VK_CHECK_RESULT(vkCreateFence(m_vkdevice, &fenceInfo, nullptr, &fence));
       VK_CHECK_RESULT(vkQueueSubmit(queue, 1, &submitInfo, fence));

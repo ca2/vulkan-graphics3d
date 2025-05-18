@@ -18,11 +18,11 @@
 #include "base/user/user/single_document_template.h"
 
 
-__IMPLEMENT_APPLICATION_RELEASE_TIME(vulkan_land_landen);
-IMPLEMENT_APPLICATION_FACTORY(vulkan_land_landen);
+__IMPLEMENT_APPLICATION_RELEASE_TIME(vulkan_graphics3d_landen);
+IMPLEMENT_APPLICATION_FACTORY(vulkan_graphics3d_landen);
 
 
-namespace vulkan_land_landen
+namespace vulkan_graphics3d_landen
 {
 
 
@@ -36,9 +36,9 @@ namespace vulkan_land_landen
       //m_ptemplateFuelMain = nullptr;
       //m_ptemplateFuelImpact = nullptr;
 
-      m_strAppId              = "vulkan-land/landen";
-      m_strAppName            = "vulkan-land/landen";
-      m_strBaseSupportId      = "vulkan-land/landen";
+      m_strAppId              = "vulkan-graphics3d/landen";
+      m_strAppName            = "vulkan-graphics3d/landen";
+      m_strBaseSupportId      = "vulkan-graphics3d/landen";
       m_bLicense              = false;
 
    }
@@ -54,10 +54,10 @@ namespace vulkan_land_landen
    {
 
       //factory()->add_factory_item <::app_core_vulken::child_frame >();
-      factory()->add_factory_item <::vulkan_land_landen::document >();
-      factory()->add_factory_item <::vulkan_land_landen::frame >();
+      factory()->add_factory_item <::vulkan_graphics3d_landen::document >();
+      factory()->add_factory_item <::vulkan_graphics3d_landen::frame >();
       //factory()->add_factory_item <::app_core_vulken::edit_impact >();
-      factory()->add_factory_item <::vulkan_land_landen::impact >();
+      factory()->add_factory_item <::vulkan_graphics3d_landen::impact >();
       //factory()->add_factory_item <::app_core_vulken::main_impact >();
       //factory()->add_factory_item <::app_core_vulken::pane_impact >();
       //factory()->add_factory_item <::app_core_vulken::top_impact >();
@@ -78,9 +78,9 @@ namespace vulkan_land_landen
       add_impact_system(
          "main"_ansi, __initialize_new ::user::single_document_template(
                           "main"_ansi,
-                          ::type < ::vulkan_land_landen::document >(),
-                          ::type < ::vulkan_land_landen::frame >(),       // top level SDI frame::windowing::window
-                        ::type < ::vulkan_land_landen::impact >()));
+                          ::type < ::vulkan_graphics3d_landen::document >(),
+                          ::type < ::vulkan_graphics3d_landen::frame >(),       // top level SDI frame::windowing::window
+                        ::type < ::vulkan_graphics3d_landen::impact >()));
       //::type < ::app_core_vulken::pane_impact >()));
       
       //add_document_template(pdocumenttemplate);
@@ -102,13 +102,17 @@ namespace vulkan_land_landen
 
       //return true;
 
+      auto pfactoryGraphics3dVulkan = system()->factory("graphics3d", "vulkan");
+
+      pfactoryGraphics3dVulkan->merge_to_global_factory();
+
    }
 
 
    void application::update_3d_application(int cx, int cy)
    {
 
-      if (!m_pvulkanapplication)
+      if (!m_p3dapplication)
       {
 
          if (!m_pimpact->m_callbackOffscreen)
@@ -184,11 +188,11 @@ namespace vulkan_land_landen
 
                //            run_vulkan_example();
 
-               m_pvulkanapplication = m_pimpact->start_vulkan_application();
+               m_p3dapplication = m_pimpact->start_graphics3d_application();
 
-               m_pvulkanapplication->m_callbackOffscreen = m_pimpact->m_callbackOffscreen;
+               m_p3dapplication->m_callbackOffscreen = m_pimpact->m_callbackOffscreen;
 
-               m_pvulkanapplication->run_application();
+               m_p3dapplication->run_application();
 
                m_ptask3dApp.release();
 
@@ -201,7 +205,7 @@ namespace vulkan_land_landen
       else
       {
 
-         m_pvulkanapplication->resize(cx, cy);
+         m_p3dapplication->resize(cx, cy);
 
       }
 
@@ -297,7 +301,7 @@ namespace vulkan_land_landen
    //__namespace_application_factory("app-core/vulken"_ansi);
 
 
-} // namespace vulkan_land_landen
+} // namespace vulkan_graphics3d_landen
 
 
 

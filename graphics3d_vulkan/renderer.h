@@ -1,11 +1,11 @@
 #pragma once
  
 //#include "AppCore/vk_window.h"
-#include "vulkan-graphics3d/graphics3d_vulkan/vk_container.h"
-#include "VK_abstraction/vk_device.h"
-//#include "VK_abstraction/vk_offscreen.h"
-//#include "VK_abstraction/vk_swapchain.h"
-#include "VK_abstraction/vk_renderpass.h"
+#include "app-cube/cube/container.h"
+#include "context.h"
+//#include "offscreen.h"
+//#include "swapchain.h"
+#include "render_pass.h"
 
 
 
@@ -16,20 +16,24 @@
 constexpr unsigned int FRAME_OVERLAP = 2;
 
 
-namespace graphics3d_vulkan {
-	class Renderer:
-	virtual public ::particle{
+namespace graphics3d_vulkan
+{
+
+
+	class CLASS_DECL_GRAPHICS3D_VULKAN renderer:
+	virtual public ::particle
+	{
 	public:
 		bool m_bOffScreen = true;
-		//Renderer(VkWindow &window, VkcDevice * pvkcdevice);
-		Renderer();
-		~Renderer();
+		//renderer(VkWindow &window, context * pvkcdevice);
+		renderer();
+		~renderer();
 
 
-		void initialize_renderer(vkc::VkContainer * pvkccontainer,  VkcDevice* pvkcdevice);
+		void initialize_renderer(::cube::container * pvkccontainer,  context* pvkcdevice);
 
-		Renderer(const Renderer&) = delete;
-		Renderer& operator=(const Renderer&) = delete;
+		renderer(const renderer&) = delete;
+		renderer& operator=(const renderer&) = delete;
 
 
 		VkRenderPass getRenderPass() const 
@@ -97,7 +101,7 @@ namespace graphics3d_vulkan {
 			VkDeviceMemory		m_vkdevicememory;
 			VkImage				m_vkimage;
 
-			::pointer < VkcDevice > m_pvkcdevice;
+			::pointer < context > m_pcontext;
 
 
 
@@ -107,7 +111,7 @@ namespace graphics3d_vulkan {
 			~OffScreenSampler();
 
 
-			void initialize_offscreen_sampler(VkcDevice* pvkcdevice);
+			void initialize_offscreen_sampler(context* pvkcdevice);
 
 			void clear();
 			void update(VkExtent2D vkextent2d);
@@ -119,12 +123,12 @@ namespace graphics3d_vulkan {
 
 		};
 
-		::pointer < vkc::VkContainer >	m_pvkcontainer;
-		::pointer < VkcDevice >				m_pvkcdevice;
+		::pointer < ::cube::container >	m_pcontainer;
+		::pointer < context >				m_pcontext;
 		::pointer < OffScreenSampler >	m_poffscreensampler;
-		//::pointer<VkcSwapChain>			m_pvkcswapchain;
-		//::pointer<VkcOffScreen>			m_pvkcoffscreen;
-		::pointer<VkcRenderPass>			m_pvkcrenderpass;
+		//::pointer<swap_chain_render_pass>			m_pvkcswapchain;
+		//::pointer<offscreen_render_pass>			m_pvkcoffscreen;
+		::pointer<render_pass>			m_pvkcrenderpass;
 		std::vector<VkCommandBuffer>	commandBuffers;
 		VkExtent2D m_extentRenderer;
 		uint32_t currentImageIndex;

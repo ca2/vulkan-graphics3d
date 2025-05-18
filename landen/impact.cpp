@@ -12,25 +12,25 @@
 #include "aura/graphics/image/image.h"
 #include "aura/graphics/image/drawing.h"
 #include "aura/message/user.h"
-#include "vulkan/vk_container.h"
+//#include "vulkan/vk_container.h"
 
 
 int run_vulkan_example();
 
 int run_vulkan_example2(const ::function < void(void*, int, int, int)>& callback);
 
-int run_vulkan_example5(mouse_state* pmousestate, const ::function < void(void*, int, int, int)>& callback);
+int run_vulkan_example5(::graphics3d::mouse_state* pmousestate, const ::function < void(void*, int, int, int)>& callback);
 
 
-namespace vulkan
-{
-
-
-   ::pointer<::vulkan::application > start_offscreen_application(vkc::VkContainer* pvkcontainer, mouse_state* pmousestate);
-
-
-} // namespace vulkan
-
+//namespace vulkan
+//{
+//
+//
+//   ::pointer<::vulkan::application > start_offscreen_application(vkc::VkContainer* pvkcontainer, mouse_state* pmousestate);
+//
+//
+//} // namespace vulkan
+//
 
 
 
@@ -98,10 +98,7 @@ namespace vulkan
 
 
 
-
-
-
-namespace vulkan_land_landen
+namespace vulkan_graphics3d_landen
 {
 
 
@@ -171,7 +168,7 @@ namespace vulkan_land_landen
 
       pmessage->m_bRet = true;
 
-      if (get_app()->m_pvulkanapplication)
+      if (get_app()->m_p3dapplication)
       {
 
          auto point = pmouse->m_pointHost;
@@ -220,7 +217,7 @@ namespace vulkan_land_landen
 
          track_mouse_leave();
 
-         get_app()->m_pvulkanapplication->handleMouseMove(xCursor, yCursor);
+         get_app()->m_p3dapplication->handle_mouse_move(xCursor, yCursor);
 
       }
 
@@ -262,8 +259,8 @@ namespace vulkan_land_landen
 
       host_to_client()(point);
 
-      m_mousestate.position.x = point.x();
-      m_mousestate.position.y = point.y();
+      m_mousestate.m_position.x = point.x();
+      m_mousestate.m_position.y = point.y();
       m_mousestate.m_buttons.left = true;
 
    }
@@ -280,17 +277,24 @@ namespace vulkan_land_landen
 
       host_to_client()(point);
 
-      m_mousestate.position.x = point.x();
-      m_mousestate.position.y = point.y();
+      m_mousestate.m_position.x = point.x();
+      m_mousestate.m_position.y = point.y();
       m_mousestate.m_buttons.left = false;
 
    }
 
 
-   ::pointer < ::vulkan::application > impact::start_vulkan_application()
+   ::pointer < ::graphics3d::application > impact::start_graphics3d_application()
    {
 
-      return ::vulkan::start_offscreen_application(this, &m_mousestate);
+      auto p3dapplication = get_app()->start_graphics3d_aplication();
+
+      p3dapplication->initialize_application(this);
+
+      //p3dapplication->m_pmousestate = &m_mousestate;
+
+      return p3dapplication;
+      //return ::vulkan::start_offscreen_application(this, &m_mousestate);
 
    }
 

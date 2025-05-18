@@ -1,6 +1,6 @@
 #include "framework.h"
 // vk_core.cpp
-#include "vulkan-land/graphics3d_vulkan/shared.h"
+#include "vulkan-graphics3d/graphics3d_vulkan/shared.h"
 #include "application.h"
 #include "apex/database/stream.h"
 // std
@@ -82,7 +82,7 @@ namespace vkc {
    void Application::run_application()
    {
 
-      ::pointer < vulkan_land_continuum::application> papp = m_papplication;
+      ::pointer < vulkan_graphics3d_continuum::application> papp = m_papplication;
 
 
       __construct_new(m_pvkcdevice);

@@ -12,7 +12,7 @@ namespace graphics3d_vulkan
 
     // *************** Descriptor Set Layout Builder *********************
 
-    VkcDescriptorSetLayout::Builder& VkcDescriptorSetLayout::Builder::addBinding(
+    set_descriptor_layout::Builder& set_descriptor_layout::Builder::addBinding(
         uint32_t binding,
         VkDescriptorType descriptorType,
         VkShaderStageFlags stageFlags,
@@ -27,18 +27,18 @@ namespace graphics3d_vulkan
         return *this;
     }
 
-    ::pointer<VkcDescriptorSetLayout> VkcDescriptorSetLayout::Builder::build() const 
+    ::pointer<set_descriptor_layout> set_descriptor_layout::Builder::build() const 
     {
-        auto pvkcdevice = this->m_pvkcdevice.m_p;
+        auto pvkcdevice = this->m_pcontext.m_p;
         __refdbg_this(pvkcdevice);
-        return __allocate VkcDescriptorSetLayout(m_pvkcdevice, bindings);
+        return __allocate set_descriptor_layout(m_pcontext, bindings);
     }
 
     // *************** Descriptor Set Layout *********************
 
-    VkcDescriptorSetLayout::VkcDescriptorSetLayout(
-        VkcDevice *pvkcdevice, std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings)
-        : m_pvkcdevice{ pvkcdevice }, bindings{ bindings } {
+    set_descriptor_layout::set_descriptor_layout(
+        context *pvkcdevice, std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings)
+        : m_pcontext{ pvkcdevice }, bindings{ bindings } {
         std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings{};
         for (auto kv : bindings) {
             setLayoutBindings.push_back(kv.second);
@@ -50,7 +50,7 @@ namespace graphics3d_vulkan
         descriptorSetLayoutInfo.pBindings = setLayoutBindings.data();
 
         if (vkCreateDescriptorSetLayout(
-            m_pvkcdevice->device(),
+            m_pcontext->logicalDevice(),
             &descriptorSetLayoutInfo,
             nullptr,
             &descriptorSetLayout) != VK_SUCCESS) {
@@ -58,43 +58,43 @@ namespace graphics3d_vulkan
         }
     }
 
-    VkcDescriptorSetLayout::~VkcDescriptorSetLayout() {
+    set_descriptor_layout::~set_descriptor_layout() {
         if (descriptorSetLayout != VK_NULL_HANDLE) {
-            vkDestroyDescriptorSetLayout(m_pvkcdevice->device(), descriptorSetLayout, nullptr);
+            vkDestroyDescriptorSetLayout(m_pcontext->logicalDevice(), descriptorSetLayout, nullptr);
             descriptorSetLayout = VK_NULL_HANDLE;
         }
     }
 
     // *************** Descriptor Pool Builder *********************
 
-    VkcDescriptorPool::Builder& VkcDescriptorPool::Builder::addPoolSize(
+    descriptor_pool::Builder& descriptor_pool::Builder::addPoolSize(
         VkDescriptorType descriptorType, uint32_t count) {
         poolSizes.push_back({ descriptorType, count });
         return *this;
     }
 
-    VkcDescriptorPool::Builder& VkcDescriptorPool::Builder::setPoolFlags(
+    descriptor_pool::Builder& descriptor_pool::Builder::setPoolFlags(
         VkDescriptorPoolCreateFlags flags) {
         poolFlags = flags;
         return *this;
     }
-    VkcDescriptorPool::Builder& VkcDescriptorPool::Builder::setMaxSets(uint32_t count) {
+    descriptor_pool::Builder& descriptor_pool::Builder::setMaxSets(uint32_t count) {
         maxSets = count;
         return *this;
     }
 
-    ::pointer <VkcDescriptorPool> VkcDescriptorPool::Builder::build() const {
-        return __allocate VkcDescriptorPool (m_pvkcdevice, maxSets, poolFlags, poolSizes);
+    ::pointer <descriptor_pool> descriptor_pool::Builder::build() const {
+        return __allocate descriptor_pool (m_pcontext, maxSets, poolFlags, poolSizes);
     }
 
     // *************** Descriptor Pool *********************
 
-    VkcDescriptorPool::VkcDescriptorPool(
-        VkcDevice * pvkcdevice,
+    descriptor_pool::descriptor_pool(
+        context * pvkcdevice,
         uint32_t maxSets,
         VkDescriptorPoolCreateFlags poolFlags,
         const std::vector<VkDescriptorPoolSize>& poolSizes)
-        : m_pvkcdevice{ pvkcdevice } {
+        : m_pcontext{ pvkcdevice } {
         VkDescriptorPoolCreateInfo descriptorPoolInfo{};
         descriptorPoolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
         descriptorPoolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
@@ -102,20 +102,20 @@ namespace graphics3d_vulkan
         descriptorPoolInfo.maxSets = maxSets;
         descriptorPoolInfo.flags = poolFlags;
 
-        if (vkCreateDescriptorPool(m_pvkcdevice->device(), &descriptorPoolInfo, nullptr, &descriptorPool) !=
+        if (vkCreateDescriptorPool(m_pcontext->logicalDevice(), &descriptorPoolInfo, nullptr, &descriptorPool) !=
             VK_SUCCESS) {
             throw std::runtime_error("failed to create descriptor pool!");
         }
     }
 
-    VkcDescriptorPool::~VkcDescriptorPool() {
+    descriptor_pool::~descriptor_pool() {
         if (descriptorPool != VK_NULL_HANDLE) {
-            vkDestroyDescriptorPool(m_pvkcdevice->device(), descriptorPool, nullptr);
+            vkDestroyDescriptorPool(m_pcontext->logicalDevice(), descriptorPool, nullptr);
             descriptorPool = VK_NULL_HANDLE;
         }
     }
 
-    bool VkcDescriptorPool::allocateDescriptor(
+    bool descriptor_pool::allocateDescriptor(
         const VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet& descriptor) const {
         VkDescriptorSetAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -125,31 +125,31 @@ namespace graphics3d_vulkan
 
         // Might want to create a "DescriptorPoolManager" class that handles this case, and builds
         // a new pool whenever an old pool fills up. But this is beyond our current scope
-        if (vkAllocateDescriptorSets(m_pvkcdevice->device(), &allocInfo, &descriptor) != VK_SUCCESS) {
+        if (vkAllocateDescriptorSets(m_pcontext->logicalDevice(), &allocInfo, &descriptor) != VK_SUCCESS) {
             return false;
         }
         return true;
     }
 
-    void VkcDescriptorPool::freeDescriptors(std::vector<VkDescriptorSet>& descriptors) const {
+    void descriptor_pool::freeDescriptors(std::vector<VkDescriptorSet>& descriptors) const {
         vkFreeDescriptorSets(
-            m_pvkcdevice->device(),
+            m_pcontext->logicalDevice(),
             descriptorPool,
             static_cast<uint32_t>(descriptors.size()),
             descriptors.data());
     }
 
-    void VkcDescriptorPool::resetPool() {
-        vkResetDescriptorPool(m_pvkcdevice->device(), descriptorPool, 0);
+    void descriptor_pool::resetPool() {
+        vkResetDescriptorPool(m_pcontext->logicalDevice(), descriptorPool, 0);
     }
 
     // *************** Descriptor Writer *********************
 
-    VkcDescriptorWriter::VkcDescriptorWriter(VkcDescriptorSetLayout& setLayout, VkcDescriptorPool& pool)
+    descriptor_writer::descriptor_writer(set_descriptor_layout& setLayout, descriptor_pool& pool)
         : setLayout{ setLayout }, pool{ pool } {
     }
 
-    VkcDescriptorWriter& VkcDescriptorWriter::writeBuffer(
+    descriptor_writer& descriptor_writer::writeBuffer(
         uint32_t binding, VkDescriptorBufferInfo* bufferInfo) {
         assert(setLayout.bindings.count(binding) == 1 && "Layout does not contain specified binding");
 
@@ -170,7 +170,7 @@ namespace graphics3d_vulkan
         return *this;
     }
 
-    VkcDescriptorWriter& VkcDescriptorWriter::writeImage(
+    descriptor_writer& descriptor_writer::writeImage(
         uint32_t binding, VkDescriptorImageInfo* imageInfo) {
         assert(setLayout.bindings.count(binding) == 1 && "Layout does not contain specified binding");
 
@@ -191,7 +191,7 @@ namespace graphics3d_vulkan
         return *this;
     }
 
-    bool VkcDescriptorWriter::build(VkDescriptorSet& set) {
+    bool descriptor_writer::build(VkDescriptorSet& set) {
         bool success = pool.allocateDescriptor(setLayout.getDescriptorSetLayout(), set);
         if (!success) {
             return false;
@@ -200,11 +200,11 @@ namespace graphics3d_vulkan
         return true;
     }
 
-    void VkcDescriptorWriter::overwrite(VkDescriptorSet& set) {
+    void descriptor_writer::overwrite(VkDescriptorSet& set) {
         for (auto& write : writes) {
             write.dstSet = set;
         }
-        vkUpdateDescriptorSets(pool.m_pvkcdevice->device(), writes.size(), writes.data(), 0, nullptr);
+        vkUpdateDescriptorSets(pool.m_pcontext->logicalDevice(), writes.size(), writes.data(), 0, nullptr);
     }
 
 

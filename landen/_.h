@@ -1,18 +1,18 @@
 #pragma once
 
 
-#include "core/_.h"
+#include "app-cube/cube/_.h"
 
 
 
-#if defined(_vulkan_land_landen_project)
-   #define CLASS_DECL_VULKAN_LAND_LANDEN  CLASS_DECL_EXPORT
+#if defined(_vulkan_graphics3d_landen_project)
+   #define CLASS_DECL_VULKAN_GRAPHICS3D_LANDEN  CLASS_DECL_EXPORT
 #else
-   #define CLASS_DECL_VULKAN_LAND_LANDEN  CLASS_DECL_IMPORT
+   #define CLASS_DECL_VULKAN_GRAPHICS3D_LANDEN  CLASS_DECL_IMPORT
 #endif
 
 
-namespace vulkan_land_landen
+namespace vulkan_graphics3d_landen
 {
 
 
@@ -23,7 +23,7 @@ namespace vulkan_land_landen
    class impact;
 
 
-} // namespace vulkan_land_landen
+} // namespace vulkan_graphics3d_landen
 
 
 //#undef APP_TYPE

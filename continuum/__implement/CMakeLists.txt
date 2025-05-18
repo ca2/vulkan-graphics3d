@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(_vulkan_land_continuum CXX)
+project(_vulkan_graphics3d_continuum CXX)
 
 
 
@@ -26,7 +26,7 @@ list(APPEND executable_references
    base
         bred
         core
-   vulkan_land_continuum
+   vulkan_graphics3d_continuum
    )
 
 

@@ -1,5 +1,5 @@
 #include "framework.h"
-#include "vk_basicRenderSystem.h"
+#include "basic_render_system.h"
 // libs
 #define GLM_FORCE_RADIANS	
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -20,15 +20,15 @@ namespace graphics3d_vulkan {
 	};
 
 
-	SimpleRenderSystem::SimpleRenderSystem(VkcDevice * pvkcdevice, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout)
-		: m_pvkcdevice{ pvkcdevice } {
+	SimpleRenderSystem::SimpleRenderSystem(context * pdevice, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout)
+		: m_pcontext{ pdevice } {
 		createPipelineLayout(globalSetLayout);
 		createPipeline(renderPass);
 
 	}
 
 	SimpleRenderSystem::~SimpleRenderSystem() {
-		vkDestroyPipelineLayout(m_pvkcdevice->device(), pipelineLayout, nullptr);
+		vkDestroyPipelineLayout(m_pcontext->logicalDevice(), pipelineLayout, nullptr);
 	}
 
 
@@ -48,17 +48,21 @@ namespace graphics3d_vulkan {
 		pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
 		pipelineLayoutInfo.pushConstantRangeCount = 1;
 		pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
-		if (vkCreatePipelineLayout(m_pvkcdevice->device(), &pipelineLayoutInfo, nullptr, &pipelineLayout) !=
+		if (vkCreatePipelineLayout(m_pcontext->logicalDevice(), &pipelineLayoutInfo, nullptr, &pipelineLayout) !=
 			VK_SUCCESS) {
 			throw std::runtime_error("Failed to create pipeline layout");
 		}
 
 	}
-	void SimpleRenderSystem::createPipeline(VkRenderPass renderPass) {
+
+
+	void SimpleRenderSystem::createPipeline(VkRenderPass renderPass) 
+	{
+
 		assert(pipelineLayout != nullptr && "Cannot create pipeline before pipeline layout");
 
 		PipelineConfigInfo pipelineConfig{};
-		VkcPipeline::defaultPipelineConfigInfo(pipelineConfig);
+		pipeline::defaultPipelineConfigInfo(pipelineConfig);
 
 		pipelineConfig.renderPass = renderPass;
 		pipelineConfig.pipelineLayout = pipelineLayout;
@@ -67,10 +71,10 @@ namespace graphics3d_vulkan {
 		std::string vertShaderPath = "matter://Shaders/SpirV/vert.vert.spv";
 		std::string fragShaderPath = "matter://Shaders/SpirV/frag.frag.spv";
 
-		vkcPipeline = __allocate VkcPipeline();
+		m_ppipeline = __allocate pipeline();
 		
-		vkcPipeline->initialize_pipeline(
-			m_pvkcdevice,
+		m_ppipeline->initialize_pipeline(
+			m_pcontext,
 			vertShaderPath.c_str(),
 			fragShaderPath.c_str(),
 			pipelineConfig
@@ -80,7 +84,7 @@ namespace graphics3d_vulkan {
 
 	void SimpleRenderSystem::renderGameObjects(FrameInfo& frameInfo) {
 
-		vkcPipeline->bind(frameInfo.commandBuffer);
+		m_ppipeline->bind(frameInfo.commandBuffer);
 		vkCmdBindDescriptorSets(
 			frameInfo.commandBuffer,
 			VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -91,10 +95,10 @@ namespace graphics3d_vulkan {
 		);
 
 		for (auto& kv : frameInfo.gameObjects) {
-			auto& obj = kv.second;
+			auto& obj = kv.element2();
 			SimplePushConstantData push{};
-			push.modelMatrix = obj.transform.mat4();
-			push.normalMatrix = obj.transform.normalMatrix();
+			push.modelMatrix = obj->m_transform.mat4();
+			push.normalMatrix = obj->m_transform.normalMatrix();
 
 			vkCmdPushConstants(
 				frameInfo.commandBuffer,
@@ -103,10 +107,11 @@ namespace graphics3d_vulkan {
 				0,
 				sizeof(SimplePushConstantData),
 				&push);
-			if (obj.model)
+
+			if (obj->m_pmodel)
 			{
-				obj.model->bind(frameInfo.commandBuffer);
-				obj.model->draw(frameInfo.commandBuffer);
+				obj->m_pmodel->bind(&frameInfo);
+				obj->m_pmodel->draw(&frameInfo);
 			}
 		}
 	}

@@ -5,7 +5,7 @@
 #include "acme/filesystem/filesystem/file_context.h"
 
 
-namespace vulkan_land_continuum
+namespace vulkan_graphics3d_continuum
 {
 
 
@@ -26,7 +26,7 @@ namespace vulkan_land_continuum
 
       //::file::path path;
       //
-      //::pointer < ::vulkan_land_continuum::application > papp = application();
+      //::pointer < ::vulkan_graphics3d_continuum::application > papp = application();
       //
       //path = papp->m_pathApplicationText;
 
@@ -109,7 +109,7 @@ namespace vulkan_land_continuum
 #endif
 
 
-} // namespace vulkan_land_continuum
+} // namespace vulkan_graphics3d_continuum
 
 
 

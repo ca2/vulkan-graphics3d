@@ -1,7 +1,7 @@
 // From vk_swapchain by camilo on 2025-05-09 <3ThomasBorregaardSorensen!!
 #include "framework.h"
 #include "vk_offscreen.h"
-#include "vulkan-land/graphics3d_vulkan/VulkanTools.h"
+#include "vulkan-graphics3d/graphics3d_vulkan/VulkanTools.h"
 
 // std
 #include <array>

@@ -3,7 +3,7 @@
 #include "acme/constant/message.h"
 
 
-namespace vulkan_land_continuum
+namespace vulkan_graphics3d_continuum
 {
 
 
@@ -26,7 +26,7 @@ namespace vulkan_land_continuum
    ::pointer < ::experience::frame > main_frame::frame_experience()
    {
 
-      auto pframe = vulkan_land_landen::frame::frame_experience(nullptr, "022", "LightBlue");
+      auto pframe = vulkan_graphics3d_landen::frame::frame_experience(nullptr, "022", "LightBlue");
 
       return pframe;
 
@@ -44,9 +44,9 @@ namespace vulkan_land_continuum
    void main_frame::install_message_routing(::channel * pchannel)
    {
 
-      vulkan_land_landen::frame::install_message_routing(pchannel);
+      vulkan_graphics3d_landen::frame::install_message_routing(pchannel);
 
-      MESSAGE_LINK(e_message_create, pchannel, this, &vulkan_land_landen::frame::on_message_create);
+      MESSAGE_LINK(e_message_create, pchannel, this, &vulkan_graphics3d_landen::frame::on_message_create);
 
    }
 
@@ -59,7 +59,7 @@ namespace vulkan_land_continuum
    }
 
 
-} // namespace vulkan_land_continuum
+} // namespace vulkan_graphics3d_continuum
 
 
 

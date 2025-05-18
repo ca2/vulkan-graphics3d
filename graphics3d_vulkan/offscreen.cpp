@@ -1,7 +1,7 @@
 // From vk_swapchain by camilo on 2025-05-09 <3ThomasBorregaardSorensen!!
 #include "framework.h"
-#include "vk_offscreen.h"
-#include "vulkan-graphics3d/graphics3d_vulkan/VulkanTools.h"
+#include "offscreen_render_pass.h"
+#include "tools.h"
 
 // std
 #include <array>
@@ -22,21 +22,21 @@ namespace graphics3d_vulkan
 {
 
 
-   VkcOffScreen::VkcOffScreen(VkcDevice* pvkcdeviceRef, VkExtent2D extent)
-      : VkcRenderPass(pvkcdeviceRef, extent)
+   offscreen_render_pass::offscreen_render_pass(context* pvkcdeviceRef, VkExtent2D extent)
+      : render_pass(pvkcdeviceRef, extent)
    {
 
    }
 
 
-   VkcOffScreen::VkcOffScreen(VkcDevice* pvkcdeviceRef, VkExtent2D extent, ::pointer<VkcRenderPass> previous)
-      : VkcRenderPass(pvkcdeviceRef, extent, previous)
+   offscreen_render_pass::offscreen_render_pass(context* pvkcdeviceRef, VkExtent2D extent, ::pointer<render_pass> previous)
+      : render_pass(pvkcdeviceRef, extent, previous)
    {
 
    }
 
 
-   void VkcOffScreen::init()
+   void offscreen_render_pass::init()
    {
 
       createRenderPassImpl();
@@ -49,52 +49,52 @@ namespace graphics3d_vulkan
    }
 
 
-   VkcOffScreen::~VkcOffScreen() 
+   offscreen_render_pass::~offscreen_render_pass() 
    {
 
       for (auto imageView : m_imageviews) 
       {
 
-         vkDestroyImageView(m_pvkcdevice->device(), imageView, nullptr);
+         vkDestroyImageView(m_pcontext->logicalDevice(), imageView, nullptr);
 
       }
 
       m_imageviews.clear();
 
       //if (swapChain != nullptr) {
-      //   vkDestroySwapchainKHR(m_pvkcdevice->device(), swapChain, nullptr);
+      //   vkDestroySwapchainKHR(m_pcontext->logicalDevice(), swapChain, nullptr);
       //   swapChain = nullptr;
       //}
 
       for (int i = 0; i < depthImages.size(); i++) 
       {
 
-         vkDestroyImageView(m_pvkcdevice->device(), depthImageViews[i], nullptr);
-         vkDestroyImage(m_pvkcdevice->device(), depthImages[i], nullptr);
-         vkFreeMemory(m_pvkcdevice->device(), depthImageMemorys[i], nullptr);
+         vkDestroyImageView(m_pcontext->logicalDevice(), depthImageViews[i], nullptr);
+         vkDestroyImage(m_pcontext->logicalDevice(), depthImages[i], nullptr);
+         vkFreeMemory(m_pcontext->logicalDevice(), depthImageMemorys[i], nullptr);
 
       }
 
       //for (auto framebuffer : m_framebuffers) {
-      //   vkDestroyFramebuffer(m_pvkcdevice->device(), framebuffer, nullptr);
+      //   vkDestroyFramebuffer(m_pcontext->logicalDevice(), framebuffer, nullptr);
       //}
 
-      //vkDestroyRenderPass(m_pvkcdevice->device(), renderPass, nullptr);
+      //vkDestroyRenderPass(m_pcontext->logicalDevice(), renderPass, nullptr);
 
       //// cleanup synchronization objects
       //for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-      //   vkDestroySemaphore(m_pvkcdevice->device(), renderFinishedSemaphores[i], nullptr);
-      //   vkDestroySemaphore(m_pvkcdevice->device(), imageAvailableSemaphores[i], nullptr);
-      //   vkDestroyFence(m_pvkcdevice->device(), inFlightFences[i], nullptr);
+      //   vkDestroySemaphore(m_pcontext->logicalDevice(), renderFinishedSemaphores[i], nullptr);
+      //   vkDestroySemaphore(m_pcontext->logicalDevice(), imageAvailableSemaphores[i], nullptr);
+      //   vkDestroyFence(m_pcontext->logicalDevice(), inFlightFences[i], nullptr);
       //}
    }
 
 
-   VkResult VkcOffScreen::acquireNextImage(uint32_t* imageIndex) 
+   VkResult offscreen_render_pass::acquireNextImage(uint32_t* imageIndex) 
    {
 
       vkWaitForFences(
-         m_pvkcdevice->device(),
+         m_pcontext->logicalDevice(),
          1,
          &inFlightFences[currentFrame],
          VK_TRUE,
@@ -103,7 +103,7 @@ namespace graphics3d_vulkan
       *imageIndex = (*imageIndex + 1) % m_images.size();
 
       //VkResult result = vkAcquireNextImageKHR(
-      //   m_pvkcdevice->device(),
+      //   m_pcontext->logicalDevice(),
       //   swapChain,
       //   std::numeric_limits<uint64_t>::max(),
       //   imageAvailableSemaphores[currentFrame],  // must be a not signaled semaphore
@@ -115,13 +115,13 @@ namespace graphics3d_vulkan
    }
 
 
-   VkResult VkcOffScreen::submitCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex)
+   VkResult offscreen_render_pass::submitCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex)
    {
 
       if (imagesInFlight[*imageIndex] != VK_NULL_HANDLE)
       {
 
-         vkWaitForFences(m_pvkcdevice->device(), 1, &imagesInFlight[*imageIndex], VK_TRUE, UINT64_MAX);
+         vkWaitForFences(m_pcontext->logicalDevice(), 1, &imagesInFlight[*imageIndex], VK_TRUE, UINT64_MAX);
 
       }
 
@@ -143,16 +143,16 @@ namespace graphics3d_vulkan
       submitInfo.signalSemaphoreCount = 1;
       submitInfo.pSignalSemaphores = signalSemaphores;
 
-      vkResetFences(m_pvkcdevice->device(), 1, &inFlightFences[currentFrame]);
+      vkResetFences(m_pcontext->logicalDevice(), 1, &inFlightFences[currentFrame]);
 
-      if (vkQueueSubmit(m_pvkcdevice->graphicsQueue(), 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS) 
+      if (vkQueueSubmit(m_pcontext->graphicsQueue(), 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS) 
       {
 
          throw std::runtime_error("failed to submit draw command buffer!");
          
       }
 
-      //VK_CHECK(vkWaitForFences(m_pvkcdevice->device(), 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX));
+      //VK_CHECK(vkWaitForFences(m_pcontext->logicalDevice(), 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX));
 
       //VkPresentInfoKHR presentInfo = {};
       //presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -166,7 +166,7 @@ namespace graphics3d_vulkan
 
       //presentInfo.pImageIndices = imageIndex;
 
-      //auto result = vkQueuePresentKHR(m_pvkcdevice->presentQueue(), &presentInfo);
+      //auto result = vkQueuePresentKHR(m_pcontext->presentQueue(), &presentInfo);
 
       //currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 
@@ -175,10 +175,10 @@ namespace graphics3d_vulkan
    }
 
 
-   void VkcOffScreen::createRenderPassImpl()
+   void offscreen_render_pass::createRenderPassImpl()
    {
 
-      ////SwapChainSupportDetails swapChainSupport = m_pvkcdevice->getSwapChainSupport();
+      ////SwapChainSupportDetails swapChainSupport = m_pcontext->getSwapChainSupport();
 
       ////VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
       ////VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
@@ -192,7 +192,7 @@ namespace graphics3d_vulkan
 
       ////VkSwapchainCreateInfoKHR createInfo = {};
       ////createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-      ////createInfo.surface = m_pvkcdevice->surface();
+      ////createInfo.surface = m_pcontext->surface();
 
       ////createInfo.minImageCount = imageCount;
       ////createInfo.imageFormat = surfaceFormat.format;
@@ -201,7 +201,7 @@ namespace graphics3d_vulkan
       ////createInfo.imageArrayLayers = 1;
       ////createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-      ////QueueFamilyIndices indices = m_pvkcdevice->findPhysicalQueueFamilies();
+      ////QueueFamilyIndices indices = m_pcontext->findPhysicalQueueFamilies();
       ////uint32_t queueFamilyIndices[] = { indices.graphicsFamily, indices.presentFamily };
 
       ////if (indices.graphicsFamily != indices.presentFamily) {
@@ -223,7 +223,7 @@ namespace graphics3d_vulkan
 
       ////createInfo.oldSwapchain = oldSwapChain == nullptr ? VK_NULL_HANDLE : oldSwapChain->swapChain;
 
-      ////if (vkCreateSwapchainKHR(m_pvkcdevice->device(), &createInfo, nullptr, &swapChain) != VK_SUCCESS) {
+      ////if (vkCreateSwapchainKHR(m_pcontext->logicalDevice(), &createInfo, nullptr, &swapChain) != VK_SUCCESS) {
       ////   throw std::runtime_error("failed to create swap chain!");
       ////}
 
@@ -231,9 +231,9 @@ namespace graphics3d_vulkan
       ////// allowed to create a swap chain with more. That's why we'll first query the final number of
       ////// images with vkGetSwapchainImagesKHR, then resize the container and finally call it again to
       ////// retrieve the handles.
-      ////vkGetSwapchainImagesKHR(m_pvkcdevice->device(), swapChain, &imageCount, nullptr);
+      ////vkGetSwapchainImagesKHR(m_pcontext->logicalDevice(), swapChain, &imageCount, nullptr);
       ////swapChainImages.resize(imageCount);
-      ////vkGetSwapchainImagesKHR(m_pvkcdevice->device(), swapChain, &imageCount, swapChainImages.data());
+      ////vkGetSwapchainImagesKHR(m_pcontext->logicalDevice(), swapChain, &imageCount, swapChainImages.data());
 
       ////swapChainImageFormat = surfaceFormat.format;
       ////swapChainExtent = extent;
@@ -250,11 +250,11 @@ namespace graphics3d_vulkan
 
       //// Find a suitable depth format
       VkFormat fbDepthFormat;
-      VkBool32 validDepthFormat = vks::tools::getSupportedDepthFormat(m_pvkcdevice->physicalDevice, &fbDepthFormat);
+      VkBool32 validDepthFormat = ::graphics3d_vulkan::tools::getSupportedDepthFormat(m_pcontext->physicalDevice, &fbDepthFormat);
       assert(validDepthFormat);
 
       //// Color attachment
-      VkImageCreateInfo image = vks::initializers::imageCreateInfo();
+      VkImageCreateInfo image = initializers::image_create_info();
       image.imageType = VK_IMAGE_TYPE_2D;
       image.format = m_formatImage;
       image.extent.width = m_extent.width;
@@ -267,7 +267,7 @@ namespace graphics3d_vulkan
       //// We will sample directly from the color attachment
       image.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 
-      //VkMemoryAllocateInfo memAlloc = vks::initializers::memoryAllocateInfo();
+      //VkMemoryAllocateInfo memAlloc = initializers::memory_allocate_info();
       //VkMemoryRequirements memReqs;
 
       m_images.resize(MAX_FRAMES_IN_FLIGHT);
@@ -276,22 +276,22 @@ namespace graphics3d_vulkan
       for (int i = 0; i < m_images.size(); i++)
       {
 
-         m_pvkcdevice->createImageWithInfo(
+         m_pcontext->createImageWithInfo(
             image,
             VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
             m_images[i],
             m_imagememories[i]
          );
-         //VK_CHECK_RESULT(vkCreateImage(m_pvkcdevice->device(), &image, nullptr, &m_images[i]));
-         //vkGetImageMemoryRequirements(m_pvkcdevice->device(), m_images[i], &memReqs);
+         //VK_CHECK_RESULT(vkCreateImage(m_pcontext->logicalDevice(), &image, nullptr, &m_images[i]));
+         //vkGetImageMemoryRequirements(m_pcontext->logicalDevice(), m_images[i], &memReqs);
          //memAlloc.allocationSize = memReqs.size;
-         //memAlloc.memoryTypeIndex = m_pvkcdevice->findMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-         //VK_CHECK_RESULT(vkAllocateMemory(m_pvkcdevice->device(), &memAlloc, nullptr, &m_imagememories[i]));
-         //VK_CHECK_RESULT(vkBindImageMemory(m_pvkcdevice->device(), m_images[i], m_imagememories[i], 0));
+         //memAlloc.memoryTypeIndex = m_pcontext->findMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+         //VK_CHECK_RESULT(vkAllocateMemory(m_pcontext->logicalDevice(), &memAlloc, nullptr, &m_imagememories[i]));
+         //VK_CHECK_RESULT(vkBindImageMemory(m_pcontext->logicalDevice(), m_images[i], m_imagememories[i], 0));
 
       }
 
-      //VkImageViewCreateInfo colorImageView = vks::initializers::imageViewCreateInfo();
+      //VkImageViewCreateInfo colorImageView = initializers::imageViewCreateInfo();
       //colorImageView.viewType = VK_IMAGE_VIEW_TYPE_2D;
       //colorImageView.format = m_formatImage;
       //colorImageView.subresourceRange = {};
@@ -301,10 +301,10 @@ namespace graphics3d_vulkan
       //colorImageView.subresourceRange.baseArrayLayer = 0;
       //colorImageView.subresourceRange.layerCount = 1;
       //colorImageView.image = offscreenPass.color.image;
-      //VK_CHECK_RESULT(vkCreateImageView(device, &colorImageView, nullptr, &offscreenPass.color.view));
+      //VK_CHECK_RESULT(vkCreateImageView(context, &colorImageView, nullptr, &offscreenPass.color.view));
 
       // Create sampler to sample from the attachment in the fragment shader
-      VkSamplerCreateInfo samplerInfo = vks::initializers::samplerCreateInfo();
+      VkSamplerCreateInfo samplerInfo = initializers::sampler_create_info();
       samplerInfo.magFilter = VK_FILTER_LINEAR;
       samplerInfo.minFilter = VK_FILTER_LINEAR;
       samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
@@ -316,7 +316,7 @@ namespace graphics3d_vulkan
       samplerInfo.minLod = 0.0f;
       samplerInfo.maxLod = 1.0f;
       samplerInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
-      VK_CHECK_RESULT(vkCreateSampler(m_pvkcdevice->device(), &samplerInfo, nullptr, &m_vksampler));
+      VK_CHECK_RESULT(vkCreateSampler(m_pcontext->logicalDevice(), &samplerInfo, nullptr, &m_vksampler));
 
       //// Depth stencil attachment
       //image.format = fbDepthFormat;
@@ -327,16 +327,16 @@ namespace graphics3d_vulkan
 
       //for (int i = 0; i < depthImages.size(); i++)
       //{
-      //   VK_CHECK_RESULT(vkCreateImage(m_pvkcdevice->device(), &image, nullptr, &depthImages[i]));
-      //   vkGetImageMemoryRequirements(m_pvkcdevice->device(), depthImages[i], &memReqs);
+      //   VK_CHECK_RESULT(vkCreateImage(m_pcontext->logicalDevice(), &image, nullptr, &depthImages[i]));
+      //   vkGetImageMemoryRequirements(m_pcontext->logicalDevice(), depthImages[i], &memReqs);
       //   memAlloc.allocationSize = memReqs.size;
-      //   memAlloc.memoryTypeIndex = m_pvkcdevice->findMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-      //   VK_CHECK_RESULT(vkAllocateMemory(m_pvkcdevice->device(), &memAlloc, nullptr, &depthImageMemorys[i]));
-      //   VK_CHECK_RESULT(vkBindImageMemory(m_pvkcdevice->device(), depthImages[i], depthImageMemorys[i], 0));
+      //   memAlloc.memoryTypeIndex = m_pcontext->findMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+      //   VK_CHECK_RESULT(vkAllocateMemory(m_pcontext->logicalDevice(), &memAlloc, nullptr, &depthImageMemorys[i]));
+      //   VK_CHECK_RESULT(vkBindImageMemory(m_pcontext->logicalDevice(), depthImages[i], depthImageMemorys[i], 0));
 
       //}
 
-      //VkImageViewCreateInfo depthStencilView = vks::initializers::imageViewCreateInfo();
+      //VkImageViewCreateInfo depthStencilView = initializers::imageViewCreateInfo();
       //depthStencilView.viewType = VK_IMAGE_VIEW_TYPE_2D;
       //depthStencilView.format = fbDepthFormat;
       //depthStencilView.flags = 0;
@@ -350,7 +350,7 @@ namespace graphics3d_vulkan
       //depthStencilView.subresourceRange.baseArrayLayer = 0;
       //depthStencilView.subresourceRange.layerCount = 1;
       //depthStencilView.image = offscreenPass.depth.image;
-      //VK_CHECK_RESULT(vkCreateImageView(device, &depthStencilView, nullptr, &offscreenPass.depth.view));
+      //VK_CHECK_RESULT(vkCreateImageView(context, &depthStencilView, nullptr, &offscreenPass.depth.view));
 
       //// Create a separate render pass for the offscreen rendering as it may differ from the one used for scene rendering
 
@@ -412,13 +412,13 @@ namespace graphics3d_vulkan
       //renderPassInfo.dependencyCount = static_cast<uint32_t>(dependencies.size());
       //renderPassInfo.pDependencies = dependencies.data();
 
-      //VK_CHECK_RESULT(vkCreateRenderPass(device, &renderPassInfo, nullptr, &offscreenPass.renderPass));
+      //VK_CHECK_RESULT(vkCreateRenderPass(context, &renderPassInfo, nullptr, &offscreenPass.renderPass));
 
       //VkImageView attachments[2];
       //attachments[0] = offscreenPass.color.view;
       //attachments[1] = offscreenPass.depth.view;
 
-      //VkFramebufferCreateInfo fbufCreateInfo = vks::initializers::framebufferCreateInfo();
+      //VkFramebufferCreateInfo fbufCreateInfo = initializers::framebufferCreateInfo();
       //fbufCreateInfo.renderPass = offscreenPass.renderPass;
       //fbufCreateInfo.attachmentCount = 2;
       //fbufCreateInfo.pAttachments = attachments;
@@ -426,7 +426,7 @@ namespace graphics3d_vulkan
       //fbufCreateInfo.height = offscreenPass.height;
       //fbufCreateInfo.layers = 1;
 
-      //VK_CHECK_RESULT(vkCreateFramebuffer(device, &fbufCreateInfo, nullptr, &offscreenPass.frameBuffer));
+      //VK_CHECK_RESULT(vkCreateFramebuffer(context, &fbufCreateInfo, nullptr, &offscreenPass.frameBuffer));
 
       //// Fill a descriptor for later use in a descriptor set
       //offscreenPass.descriptor.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -439,10 +439,10 @@ namespace graphics3d_vulkan
 
 
 
-   void VkcOffScreen::createImageViews()
+   void offscreen_render_pass::createImageViews()
    {
 
-      VkcRenderPass::createImageViews();
+      render_pass::createImageViews();
 
       //m_imageviews.resize(m_images.size());
       //for (size_t i = 0; i < m_images.size(); i++) {
@@ -457,7 +457,7 @@ namespace graphics3d_vulkan
       //   viewInfo.subresourceRange.baseArrayLayer = 0;
       //   viewInfo.subresourceRange.layerCount = 1;
 
-      //   if (vkCreateImageView(m_pvkcdevice->device(), &viewInfo, nullptr, &m_imageviews[i]) !=
+      //   if (vkCreateImageView(m_pcontext->logicalDevice(), &viewInfo, nullptr, &m_imageviews[i]) !=
       //      VK_SUCCESS) {
       //      throw std::runtime_error("failed to create texture image view!");
       //   }
@@ -466,10 +466,10 @@ namespace graphics3d_vulkan
    }
 
 
-   void VkcOffScreen::createRenderPass()
+   void offscreen_render_pass::createRenderPass()
    {
 
-      VkcRenderPass::createRenderPass();
+      render_pass::createRenderPass();
 
 
       //VkAttachmentDescription depthAttachment{};
@@ -528,14 +528,14 @@ namespace graphics3d_vulkan
       //renderPassInfo.dependencyCount = 1;
       //renderPassInfo.pDependencies = &dependency;
 
-      //if (vkCreateRenderPass(m_pvkcdevice->device(), &renderPassInfo, nullptr, &m_vkrenderpass) != VK_SUCCESS) {
+      //if (vkCreateRenderPass(m_pcontext->logicalDevice(), &renderPassInfo, nullptr, &m_vkrenderpass) != VK_SUCCESS) {
       //   throw std::runtime_error("failed to create render pass!");
       //}
    }
 
-   void VkcOffScreen::createFramebuffers()
+   void offscreen_render_pass::createFramebuffers()
    {
-      VkcRenderPass::createFramebuffers();
+      render_pass::createFramebuffers();
       //m_framebuffers.resize(imageCount());
       //for (size_t i = 0; i < imageCount(); i++) {
       //   std::array<VkImageView, 2> attachments = { m_imageviews[i], depthImageViews[i] };
@@ -551,7 +551,7 @@ namespace graphics3d_vulkan
       //   framebufferInfo.layers = 1;
 
       //   if (vkCreateFramebuffer(
-      //      m_pvkcdevice->device(),
+      //      m_pcontext->logicalDevice(),
       //      &framebufferInfo,
       //      nullptr,
       //      &m_framebuffers[i]) != VK_SUCCESS) {
@@ -560,9 +560,9 @@ namespace graphics3d_vulkan
       //}
    }
 
-   void VkcOffScreen::createDepthResources()
+   void offscreen_render_pass::createDepthResources()
    {
-      VkcRenderPass::createDepthResources();
+      render_pass::createDepthResources();
       //VkFormat depthFormat = findDepthFormat();
       //m_formatDepth = depthFormat;
       //VkExtent2D extent = getExtent();
@@ -588,7 +588,7 @@ namespace graphics3d_vulkan
       //   imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
       //   imageInfo.flags = 0;
 
-      //   m_pvkcdevice->createImageWithInfo(
+      //   m_pcontext->createImageWithInfo(
       //      imageInfo,
       //      VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
       //      depthImages[i],
@@ -605,17 +605,17 @@ namespace graphics3d_vulkan
       //   viewInfo.subresourceRange.baseArrayLayer = 0;
       //   viewInfo.subresourceRange.layerCount = 1;
 
-      //   if (vkCreateImageView(m_pvkcdevice->device(), &viewInfo, nullptr, &depthImageViews[i]) != VK_SUCCESS) {
+      //   if (vkCreateImageView(m_pcontext->logicalDevice(), &viewInfo, nullptr, &depthImageViews[i]) != VK_SUCCESS) {
       //      throw std::runtime_error("failed to create texture image view!");
       //   }
       //}
    }
 
 
-   void VkcOffScreen::createSyncObjects()
+   void offscreen_render_pass::createSyncObjects()
    {
 
-      VkcRenderPass::createSyncObjects();
+      render_pass::createSyncObjects();
 
       //imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
       //renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
@@ -630,17 +630,17 @@ namespace graphics3d_vulkan
       //fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
       //for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-      //   if (vkCreateSemaphore(m_pvkcdevice->device(), &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) !=
+      //   if (vkCreateSemaphore(m_pcontext->logicalDevice(), &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) !=
       //      VK_SUCCESS ||
-      //      vkCreateSemaphore(m_pvkcdevice->device(), &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) !=
+      //      vkCreateSemaphore(m_pcontext->logicalDevice(), &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) !=
       //      VK_SUCCESS ||
-      //      vkCreateFence(m_pvkcdevice->device(), &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS) {
+      //      vkCreateFence(m_pcontext->logicalDevice(), &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS) {
       //      throw std::runtime_error("failed to create synchronization objects for a frame!");
       //   }
       //}
    }
 
-   //VkSurfaceFormatKHR VkcOffScreen::chooseSwapSurfaceFormat(
+   //VkSurfaceFormatKHR offscreen_render_pass::chooseSwapSurfaceFormat(
    //   const std::vector<VkSurfaceFormatKHR>& availableFormats) {
    //   for (const auto& availableFormat : availableFormats) {
    //      // SRGB can be changed to "UNORM" instead
@@ -653,7 +653,7 @@ namespace graphics3d_vulkan
    //   return availableFormats[0];
    //}
 
-   //VkPresentModeKHR VkcOffScreen::chooseSwapPresentMode(
+   //VkPresentModeKHR offscreen_render_pass::chooseSwapPresentMode(
    //   const std::vector<VkPresentModeKHR>& availablePresentModes) {
    //   for (const auto& availablePresentMode : availablePresentModes) {
    //      if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
@@ -673,7 +673,7 @@ namespace graphics3d_vulkan
    //   return VK_PRESENT_MODE_FIFO_KHR;
    //}
 
-   //VkExtent2D VkcOffScreen::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) {
+   //VkExtent2D offscreen_render_pass::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) {
    //   if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
    //      return capabilities.currentExtent;
    //   }
@@ -690,11 +690,11 @@ namespace graphics3d_vulkan
    //   }
    //}
 
-   VkFormat VkcOffScreen::findDepthFormat()
+   VkFormat offscreen_render_pass::findDepthFormat()
    {
-      return VkcRenderPass::findDepthFormat();
+      return render_pass::findDepthFormat();
 
-      //return m_pvkcdevice->findSupportedFormat(
+      //return m_pcontext->findSupportedFormat(
       //   { VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
       //   VK_IMAGE_TILING_OPTIMAL,
       //   VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
@@ -710,11 +710,11 @@ namespace graphics3d_vulkan
 //
 //	// Find a suitable depth format
 //	VkFormat fbDepthFormat;
-//	VkBool32 validDepthFormat = vks::tools::getSupportedDepthFormat(physicalDevice, &fbDepthFormat);
+//	VkBool32 validDepthFormat = ::graphics3d_vulkan::tools::getSupportedDepthFormat(physicalDevice, &fbDepthFormat);
 //	assert(validDepthFormat);
 //
 //	// Color attachment
-//	VkImageCreateInfo image = vks::initializers::imageCreateInfo();
+//	VkImageCreateInfo image = initializers::imageCreateInfo();
 //	image.imageType = VK_IMAGE_TYPE_2D;
 //	image.format = m_formatImage;
 //	image.extent.width = windowExtent.width;
@@ -727,17 +727,17 @@ namespace graphics3d_vulkan
 //	// We will sample directly from the color attachment
 //	image.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 //
-//	////VkMemoryAllocateInfo memAlloc = vks::initializers::memoryAllocateInfo();
+//	////VkMemoryAllocateInfo memAlloc = initializers::memory_allocate_info();
 //	////VkMemoryRequirements memReqs;
 //
-//	////VK_CHECK_RESULT(vkCreateImage(device, &image, nullptr, &offscreenPass.color.image));
-//	////vkGetImageMemoryRequirements(device, offscreenPass.color.image, &memReqs);
+//	////VK_CHECK_RESULT(vkCreateImage(context, &image, nullptr, &offscreenPass.color.image));
+//	////vkGetImageMemoryRequirements(context, offscreenPass.color.image, &memReqs);
 //	////memAlloc.allocationSize = memReqs.size;
 //	////memAlloc.memoryTypeIndex = vulkanDevice->getMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-//	////VK_CHECK_RESULT(vkAllocateMemory(device, &memAlloc, nullptr, &offscreenPass.color.mem));
-//	////VK_CHECK_RESULT(vkBindImageMemory(device, offscreenPass.color.image, offscreenPass.color.mem, 0));
+//	////VK_CHECK_RESULT(vkAllocateMemory(context, &memAlloc, nullptr, &offscreenPass.color.mem));
+//	////VK_CHECK_RESULT(vkBindImageMemory(context, offscreenPass.color.image, offscreenPass.color.mem, 0));
 //
-//	////VkImageViewCreateInfo colorImageView = vks::initializers::imageViewCreateInfo();
+//	////VkImageViewCreateInfo colorImageView = initializers::imageViewCreateInfo();
 //	////colorImageView.viewType = VK_IMAGE_VIEW_TYPE_2D;
 //	////colorImageView.format = FB_COLOR_FORMAT;
 //	////colorImageView.subresourceRange = {};
@@ -747,10 +747,10 @@ namespace graphics3d_vulkan
 //	////colorImageView.subresourceRange.baseArrayLayer = 0;
 //	////colorImageView.subresourceRange.layerCount = 1;
 //	////colorImageView.image = offscreenPass.color.image;
-//	////VK_CHECK_RESULT(vkCreateImageView(device, &colorImageView, nullptr, &offscreenPass.color.view));
+//	////VK_CHECK_RESULT(vkCreateImageView(context, &colorImageView, nullptr, &offscreenPass.color.view));
 //
 //	//// Create sampler to sample from the attachment in the fragment shader
-//	//VkSamplerCreateInfo samplerInfo = vks::initializers::samplerCreateInfo();
+//	//VkSamplerCreateInfo samplerInfo = initializers::samplerCreateInfo();
 //	//samplerInfo.magFilter = VK_FILTER_LINEAR;
 //	//samplerInfo.minFilter = VK_FILTER_LINEAR;
 //	//samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
@@ -762,20 +762,20 @@ namespace graphics3d_vulkan
 //	//samplerInfo.minLod = 0.0f;
 //	//samplerInfo.maxLod = 1.0f;
 //	//samplerInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
-//	//VK_CHECK_RESULT(vkCreateSampler(device, &samplerInfo, nullptr, &offscreenPass.sampler));
+//	//VK_CHECK_RESULT(vkCreateSampler(context, &samplerInfo, nullptr, &offscreenPass.sampler));
 //
 //	//// Depth stencil attachment
 //	//image.format = fbDepthFormat;
 //	//image.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
 //
-//	//VK_CHECK_RESULT(vkCreateImage(device, &image, nullptr, &offscreenPass.depth.image));
-//	//vkGetImageMemoryRequirements(device, offscreenPass.depth.image, &memReqs);
+//	//VK_CHECK_RESULT(vkCreateImage(context, &image, nullptr, &offscreenPass.depth.image));
+//	//vkGetImageMemoryRequirements(context, offscreenPass.depth.image, &memReqs);
 //	//memAlloc.allocationSize = memReqs.size;
 //	//memAlloc.memoryTypeIndex = vulkanDevice->getMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-//	//VK_CHECK_RESULT(vkAllocateMemory(device, &memAlloc, nullptr, &offscreenPass.depth.mem));
-//	//VK_CHECK_RESULT(vkBindImageMemory(device, offscreenPass.depth.image, offscreenPass.depth.mem, 0));
+//	//VK_CHECK_RESULT(vkAllocateMemory(context, &memAlloc, nullptr, &offscreenPass.depth.mem));
+//	//VK_CHECK_RESULT(vkBindImageMemory(context, offscreenPass.depth.image, offscreenPass.depth.mem, 0));
 //
-//	//VkImageViewCreateInfo depthStencilView = vks::initializers::imageViewCreateInfo();
+//	//VkImageViewCreateInfo depthStencilView = initializers::imageViewCreateInfo();
 //	//depthStencilView.viewType = VK_IMAGE_VIEW_TYPE_2D;
 //	//depthStencilView.format = fbDepthFormat;
 //	//depthStencilView.flags = 0;
@@ -789,7 +789,7 @@ namespace graphics3d_vulkan
 //	//depthStencilView.subresourceRange.baseArrayLayer = 0;
 //	//depthStencilView.subresourceRange.layerCount = 1;
 //	//depthStencilView.image = offscreenPass.depth.image;
-//	//VK_CHECK_RESULT(vkCreateImageView(device, &depthStencilView, nullptr, &offscreenPass.depth.view));
+//	//VK_CHECK_RESULT(vkCreateImageView(context, &depthStencilView, nullptr, &offscreenPass.depth.view));
 //
 //	//// Create a separate render pass for the offscreen rendering as it may differ from the one used for scene rendering
 //
@@ -851,13 +851,13 @@ namespace graphics3d_vulkan
 //	//renderPassInfo.dependencyCount = static_cast<uint32_t>(dependencies.size());
 //	//renderPassInfo.pDependencies = dependencies.data();
 //
-//	//VK_CHECK_RESULT(vkCreateRenderPass(device, &renderPassInfo, nullptr, &offscreenPass.renderPass));
+//	//VK_CHECK_RESULT(vkCreateRenderPass(context, &renderPassInfo, nullptr, &offscreenPass.renderPass));
 //
 //	//VkImageView attachments[2];
 //	//attachments[0] = offscreenPass.color.view;
 //	//attachments[1] = offscreenPass.depth.view;
 //
-//	//VkFramebufferCreateInfo fbufCreateInfo = vks::initializers::framebufferCreateInfo();
+//	//VkFramebufferCreateInfo fbufCreateInfo = initializers::framebufferCreateInfo();
 //	//fbufCreateInfo.renderPass = offscreenPass.renderPass;
 //	//fbufCreateInfo.attachmentCount = 2;
 //	//fbufCreateInfo.pAttachments = attachments;
@@ -865,7 +865,7 @@ namespace graphics3d_vulkan
 //	//fbufCreateInfo.height = offscreenPass.height;
 //	//fbufCreateInfo.layers = 1;
 //
-//	//VK_CHECK_RESULT(vkCreateFramebuffer(device, &fbufCreateInfo, nullptr, &offscreenPass.frameBuffer));
+//	//VK_CHECK_RESULT(vkCreateFramebuffer(context, &fbufCreateInfo, nullptr, &offscreenPass.frameBuffer));
 //
 //	//// Fill a descriptor for later use in a descriptor set
 //	//offscreenPass.descriptor.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;

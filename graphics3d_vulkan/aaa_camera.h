@@ -15,10 +15,10 @@ namespace graphics3d_vulkan
 		RIGHT
 	};
 
-	class VkcCamera {
+	class CLASS_DECL_GRAPHICS3D_VULKAN camera {
 	public:
-		VkcCamera() {};
-		VkcCamera(glm::vec3 position, float yaw, float pitch);
+		camera() {};
+		camera(glm::vec3 position, float yaw, float pitch);
 
 		void setOrthographicProjection(float left, float right, float top, float bottom, float near, float far);
 		void setViewDirection(glm::vec3 position, glm::vec3 direction, glm::vec3 up = glm::vec3{ 0.f, -1.f, 0.f });

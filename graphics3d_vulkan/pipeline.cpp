@@ -14,28 +14,29 @@
 namespace graphics3d_vulkan 
 {
 
+
 	pipeline::pipeline()
 	{
 
 	}
 	
 	void pipeline::initialize_pipeline(
-		VkcDevice * pvkcdevice,
+		context * pvkcdevice,
 		const std::string& vertFilepath,
 		const std::string& fragFilepath,
 		const PipelineConfigInfo& configInfo)
 	{
 		initialize(pvkcdevice);
-		m_pvkcdevice = pvkcdevice;
+		m_pcontext = pvkcdevice;
 		createGraphicsPipeline(vertFilepath, fragFilepath, configInfo);
 	}
 
  
 
 	pipeline::~pipeline() {
-		vkDestroyShaderModule(m_pvkcdevice->device(), vertShaderModule, nullptr);
-		vkDestroyShaderModule(m_pvkcdevice->device(), fragShaderModule, nullptr);
-		vkDestroyPipeline(m_pvkcdevice->device(), graphicsPipeline, nullptr);
+		vkDestroyShaderModule(m_pcontext->logicalDevice(), vertShaderModule, nullptr);
+		vkDestroyShaderModule(m_pcontext->logicalDevice(), fragShaderModule, nullptr);
+		vkDestroyPipeline(m_pcontext->logicalDevice(), graphicsPipeline, nullptr);
 	}
 
 	void pipeline::bind(VkCommandBuffer commandBuffer) {
@@ -127,7 +128,7 @@ namespace graphics3d_vulkan
 
 
 		if (vkCreateGraphicsPipelines(
-			m_pvkcdevice->device(),
+			m_pcontext->logicalDevice(),
 			VK_NULL_HANDLE,
 			1,
 			&pipelineInfo,
@@ -143,7 +144,7 @@ namespace graphics3d_vulkan
 		createInfo.codeSize = block.size();
 		createInfo.pCode = reinterpret_cast<const uint32_t*>(block.data());
 
-		if (vkCreateShaderModule(m_pvkcdevice->device(), &createInfo, nullptr, shaderModule) != VK_SUCCESS) {
+		if (vkCreateShaderModule(m_pcontext->logicalDevice(), &createInfo, nullptr, shaderModule) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create shader module");
 		}
 	}
@@ -219,7 +220,12 @@ namespace graphics3d_vulkan
 		configInfo.dynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(configInfo.dynamicStateEnables.size());
 		configInfo.dynamicStateInfo.flags = 0;
 
-		configInfo.bindingDescriptions = VkcModel::Vertex::getBindingDescriptions();
-		configInfo.attributeDescriptions = VkcModel::Vertex::getAttributeDescriptions();
+		configInfo.bindingDescriptions = model::getVertexBindingDescriptions();
+		configInfo.attributeDescriptions = model::getVertexAttributeDescriptions();
 	}
-}
+
+
+} // namespace graphics3d_vulkan 
+
+
+

@@ -13,7 +13,7 @@
 namespace graphics3d_vulkan {
 
 
-    VkcCamera::VkcCamera(glm::vec3 position, float yaw, float pitch)
+    camera::camera(glm::vec3 position, float yaw, float pitch)
         : m_Position(position), m_Yaw(yaw), m_Pitch(pitch),
         m_WorldUp(glm::vec3(0.0f, 1.0f, 0.0f)),
         m_Zoom(75.0f), m_MovementSpeed(8.0f) {
@@ -22,7 +22,7 @@ namespace graphics3d_vulkan {
     }
 
     // Mouse movement processing
-    void VkcCamera::ProcessMouseMovement(float xoffset, float yoffset, bool constrainPitch) {
+    void camera::ProcessMouseMovement(float xoffset, float yoffset, bool constrainPitch) {
         const float sensitivity = 0.1f;  // Adjust this value to your liking
         xoffset *= sensitivity;
         yoffset *= sensitivity;
@@ -37,7 +37,7 @@ namespace graphics3d_vulkan {
 
         UpdateCameraVectors();
     }
-    void VkcCamera::ProcessKeyboardInput(int direction, float deltaTime) {
+    void camera::ProcessKeyboardInput(int direction, float deltaTime) {
         float velocity = m_MovementSpeed * deltaTime;  // Use movement speed
         if (direction == FORWARD)
             m_Position += m_Front * velocity;
@@ -49,29 +49,29 @@ namespace graphics3d_vulkan {
             m_Position += m_Right * velocity;
     }
 
-    void VkcCamera::setOrthographicProjection(
-        float left, float right, float top, float bottom, float near, float far) {
+    void camera::setOrthographicProjection(
+        float left, float right, float top, float bottom, float fNear, float fFar) {
         projectionMatrix = glm::mat4{ 1.0f };
         projectionMatrix[0][0] = 2.f / (right - left);
         projectionMatrix[1][1] = 2.f / (bottom - top);
-        projectionMatrix[2][2] = 1.f / (far - near);
+        projectionMatrix[2][2] = 1.f / (fFar - fNear);
         projectionMatrix[3][0] = -(right + left) / (right - left);
         projectionMatrix[3][1] = -(bottom + top) / (bottom - top);
-        projectionMatrix[3][2] = -near / (far - near);
+        projectionMatrix[3][2] = -fNear / (fFar - fNear);
     }
     // This is the method being used below as opposed to ortho ^
-    void VkcCamera::setPerspectiveProjection(float fovy, float aspect, float near, float far) {
+    void camera::setPerspectiveProjection(float fovy, float aspect, float fNear, float fFar) {
         assert(glm::abs(aspect - std::numeric_limits<float>::epsilon()) > 0.0f);
         const float tanHalfFovy = tan(fovy / 2.f);
         projectionMatrix = glm::mat4{ 0.0f };
         projectionMatrix[0][0] = 1.f / (aspect * tanHalfFovy);
         projectionMatrix[1][1] = 1.f / (tanHalfFovy);
-        projectionMatrix[2][2] = far / (far - near);
+        projectionMatrix[2][2] = fFar / (fFar - fNear);
         projectionMatrix[2][3] = 1.f;
-        projectionMatrix[3][2] = -(far * near) / (far - near);
+        projectionMatrix[3][2] = -(fFar * fNear) / (fFar - fNear);
     }
 
-    void VkcCamera::setViewDirection(glm::vec3 position, glm::vec3 direction, glm::vec3 up) {
+    void camera::setViewDirection(glm::vec3 position, glm::vec3 direction, glm::vec3 up) {
         const glm::vec3 w{ glm::normalize(direction) };
         const glm::vec3 u{ glm::normalize(glm::cross(w, up)) };
         const glm::vec3 v{ glm::cross(w, u) };
@@ -105,11 +105,11 @@ namespace graphics3d_vulkan {
 
     }
 
-    void VkcCamera::setViewTarget(glm::vec3 position, glm::vec3 target, glm::vec3 up) {
+    void camera::setViewTarget(glm::vec3 position, glm::vec3 target, glm::vec3 up) {
         setViewDirection(position, target - position, up);
     }
 
-    void VkcCamera::setViewYXZ(glm::vec3 position, glm::vec3 rotation) {
+    void camera::setViewYXZ(glm::vec3 position, glm::vec3 rotation) {
         const float c3 = glm::cos(rotation.z);
         const float s3 = glm::sin(rotation.z);
         const float c2 = glm::cos(rotation.x);
@@ -148,7 +148,7 @@ namespace graphics3d_vulkan {
         inverseViewMatrix[3][2] = position.z;
     }
 
-    void VkcCamera::UpdateCameraVectors() {
+    void camera::UpdateCameraVectors() {
         // Calculate the new front vector based on yaw and pitch
         glm::vec3 front;
         front.x = cos(glm::radians(m_Yaw)) * cos(glm::radians(m_Pitch));
@@ -163,20 +163,20 @@ namespace graphics3d_vulkan {
 
 
     // Get the camera's zoom (field of view)
-    float VkcCamera::GetZoom() const {
+    float camera::GetZoom() const {
         return m_Zoom;
     }
 
     // Set the movement speed of the camera
-    void VkcCamera::SetMovementSpeed(float speed) {
+    void camera::SetMovementSpeed(float speed) {
         m_MovementSpeed = speed;
     }
     // Get the view matrix
-    glm::mat4 VkcCamera::GetViewMatrix() const {
+    glm::mat4 camera::GetViewMatrix() const {
         return glm::lookAt(m_Position, m_Position + m_Front, m_Up);
     }
     // Get the camera position
-    glm::vec3 VkcCamera::GetPosition() const {
+    glm::vec3 camera::GetPosition() const {
         return m_Position;
     }
 

@@ -1,9 +1,9 @@
 #include "framework.h"
-#include "vk_renderer.h"
-#include "VK_abstraction/vk_offscreen.h"
-#include "VK_abstraction/vk_swapchain.h"
-#include "vulkan-graphics3d/graphics3d_vulkan/initializers.h"
-#include "vulkan-graphics3d/graphics3d_vulkan/tools.h"
+#include "renderer.h"
+#include "offscreen_render_pass.h"
+#include "swap_chain_render_pass.h"
+#include "initializers.h"
+#include "tools.h"
 
 #include <array>
 #include <cassert>
@@ -14,17 +14,17 @@
 namespace graphics3d_vulkan
 {
 
-   // Renderer::Renderer(VkWindow& window, VkcDevice* pvkcdevice) : vkcWindow{ window }, m_pvkcdevice{ pvkcdevice } 
-   Renderer::Renderer()
+   // renderer::renderer(VkWindow& window, context* pvkcdevice) : vkcWindow{ window }, m_pcontext{ pvkcdevice } 
+   renderer::renderer()
    {
 
    }
 
-   void Renderer::initialize_renderer(vkc::VkContainer* pvkcontainer, VkcDevice* pvkcdevice)
+   void renderer::initialize_renderer(::cube::container* pcontainer, context* pvkcdevice)
    {
 
-      m_pvkcontainer = pvkcontainer;
-      m_pvkcdevice = pvkcdevice;
+      m_pcontainer = pcontainer;
+      m_pcontext = pvkcdevice;
 
       __construct_new(m_poffscreensampler);
 
@@ -34,15 +34,15 @@ namespace graphics3d_vulkan
       createCommandBuffers();
    }
 
-   Renderer::~Renderer() {
+   renderer::~renderer() {
       freeCommandBuffers();
    }
 
 
-   void Renderer::defer_layout()
+   void renderer::defer_layout()
    {
 
-      auto size = m_pvkcontainer->size();
+      auto size = m_pcontainer->size();
 
       if (m_extentRenderer.width == size.width()
          && m_extentRenderer.height == size.height())
@@ -58,7 +58,7 @@ namespace graphics3d_vulkan
       if (m_bOffScreen)
       {
 
-         m_pvkcrenderpass = __allocate VkcOffScreen(m_pvkcdevice, m_extentRenderer, m_pvkcrenderpass);
+         m_pvkcrenderpass = __allocate offscreen_render_pass(m_pcontext, m_extentRenderer, m_pvkcrenderpass);
 
       }
 
@@ -68,14 +68,14 @@ namespace graphics3d_vulkan
       //while (extent.width == 0 || extent.height == 0) {
       //	glfwWaitEvents();
       //}
-      //vkDeviceWaitIdle(m_pvkcdevice->device());
+      //vkDeviceWaitIdle(m_pcontext->logicalDevice());
 
       //if (vkcSwapChain == nullptr) {
-      //	vkcSwapChain = std::make_unique<VkcSwapChain>(m_pvkcdevice, extent);
+      //	vkcSwapChain = std::make_unique<swap_chain_render_pass>(m_pcontext, extent);
       //}
       //else {
-      //	::pointer<VkcSwapChain> oldSwapChain = std::move(vkcSwapChain);
-      //	vkcSwapChain = std::make_unique<VkcSwapChain>(m_pvkcdevice, extent, oldSwapChain);
+      //	::pointer<swap_chain_render_pass> oldSwapChain = std::move(vkcSwapChain);
+      //	vkcSwapChain = std::make_unique<swap_chain_render_pass>(m_pcontext, extent, oldSwapChain);
       //	if (!oldSwapChain->compareSwapFormats(*vkcSwapChain.get())) {
       //		throw std::runtime_error("Swap chain image(or depth) format has changed!");
       //	}
@@ -83,32 +83,32 @@ namespace graphics3d_vulkan
       //}
    }
 
-   void Renderer::createCommandBuffers() {
-      commandBuffers.resize(VkcRenderPass::MAX_FRAMES_IN_FLIGHT);
+   void renderer::createCommandBuffers() {
+      commandBuffers.resize(render_pass::MAX_FRAMES_IN_FLIGHT);
 
       VkCommandBufferAllocateInfo allocInfo{};
       allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
       allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-      allocInfo.commandPool = m_pvkcdevice->getCommandPool();
+      allocInfo.commandPool = m_pcontext->getCommandPool();
       allocInfo.commandBufferCount = static_cast<uint32_t>(commandBuffers.size());
 
-      if (vkAllocateCommandBuffers(m_pvkcdevice->device(), &allocInfo, commandBuffers.data()) !=
+      if (vkAllocateCommandBuffers(m_pcontext->logicalDevice(), &allocInfo, commandBuffers.data()) !=
          VK_SUCCESS) {
          throw std::runtime_error("failed to allocate command buffers!");
       }
 
    }
 
-   void Renderer::freeCommandBuffers() {
+   void renderer::freeCommandBuffers() {
       vkFreeCommandBuffers(
-         m_pvkcdevice->device(),
-         m_pvkcdevice->getCommandPool(),
+         m_pcontext->logicalDevice(),
+         m_pcontext->getCommandPool(),
          static_cast<float>(commandBuffers.size()),
          commandBuffers.data());
       commandBuffers.clear();
    }
 
-   VkCommandBuffer Renderer::beginFrame()
+   VkCommandBuffer renderer::beginFrame()
    {
 
       defer_layout();
@@ -171,7 +171,7 @@ namespace graphics3d_vulkan
    }
 
 
-   Renderer::OffScreenSampler::OffScreenSampler()
+   renderer::OffScreenSampler::OffScreenSampler()
    {
 
       clear();
@@ -179,7 +179,7 @@ namespace graphics3d_vulkan
    }
 
 
-   Renderer::OffScreenSampler::~OffScreenSampler()
+   renderer::OffScreenSampler::~OffScreenSampler()
    {
 
       destroy();
@@ -187,15 +187,15 @@ namespace graphics3d_vulkan
    }
 
 
-   void Renderer::OffScreenSampler::initialize_offscreen_sampler(VkcDevice* pvkcdevice)
+   void renderer::OffScreenSampler::initialize_offscreen_sampler(context* pvkcdevice)
    {
 
-      m_pvkcdevice = pvkcdevice;
+      m_pcontext = pvkcdevice;
 
    }
 
 
-   void Renderer::OffScreenSampler::clear()
+   void renderer::OffScreenSampler::clear()
    {
 
       m_vkextent2d.width = 0;
@@ -206,7 +206,7 @@ namespace graphics3d_vulkan
    }
 
 
-   void Renderer::OffScreenSampler::update(VkExtent2D vkextent2d)
+   void renderer::OffScreenSampler::update(VkExtent2D vkextent2d)
    {
 
       if (vkextent2d.width == m_vkextent2d.width
@@ -230,7 +230,7 @@ namespace graphics3d_vulkan
       m_vkextent2d.width = vkextent2d.width;
       m_vkextent2d.height = vkextent2d.height;
 
-      VkImageCreateInfo imgCreateInfo(vks::initializers::imageCreateInfo());
+      VkImageCreateInfo imgCreateInfo(initializers::image_create_info());
       imgCreateInfo.imageType = VK_IMAGE_TYPE_2D;
       imgCreateInfo.format = VK_FORMAT_R8G8B8A8_UNORM;
       imgCreateInfo.extent.width = m_vkextent2d.width;
@@ -244,29 +244,29 @@ namespace graphics3d_vulkan
       imgCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT;
       // Create the image
       VkImage dstImage;
-      VK_CHECK_RESULT(vkCreateImage(m_pvkcdevice->device(), &imgCreateInfo, nullptr, &m_vkimage));
+      VK_CHECK_RESULT(vkCreateImage(m_pcontext->logicalDevice(), &imgCreateInfo, nullptr, &m_vkimage));
       // Create memory to back up the image
       VkMemoryRequirements memRequirements;
-      VkMemoryAllocateInfo memAllocInfo(vks::initializers::memoryAllocateInfo());
-      vkGetImageMemoryRequirements(m_pvkcdevice->device(), m_vkimage, &memRequirements);
+      VkMemoryAllocateInfo memAllocInfo(initializers::memory_allocate_info());
+      vkGetImageMemoryRequirements(m_pcontext->logicalDevice(), m_vkimage, &memRequirements);
       memAllocInfo.allocationSize = memRequirements.size;
       // Memory must be host visible to copy from
-      memAllocInfo.memoryTypeIndex = m_pvkcdevice->findMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-      VK_CHECK_RESULT(vkAllocateMemory(m_pvkcdevice->device(), &memAllocInfo, nullptr, &m_vkdevicememory));
-      VK_CHECK_RESULT(vkBindImageMemory(m_pvkcdevice->device(), m_vkimage, m_vkdevicememory, 0));
+      memAllocInfo.memoryTypeIndex = m_pcontext->findMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+      VK_CHECK_RESULT(vkAllocateMemory(m_pcontext->logicalDevice(), &memAllocInfo, nullptr, &m_vkdevicememory));
+      VK_CHECK_RESULT(vkBindImageMemory(m_pcontext->logicalDevice(), m_vkimage, m_vkdevicememory, 0));
 
 
    }
 
 
-   void Renderer::OffScreenSampler::destroy()
+   void renderer::OffScreenSampler::destroy()
    {
 
       if (m_vkdevicememory)
       {
 
-         vkFreeMemory(m_pvkcdevice->device(), m_vkdevicememory, nullptr);
-         vkDestroyImage(m_pvkcdevice->device(), m_vkimage, nullptr);
+         vkFreeMemory(m_pcontext->logicalDevice(), m_vkdevicememory, nullptr);
+         vkDestroyImage(m_pcontext->logicalDevice(), m_vkimage, nullptr);
 
          clear();
 
@@ -275,7 +275,7 @@ namespace graphics3d_vulkan
    }
 
 
-   void Renderer::OffScreenSampler::sample(VkImage vkimage)
+   void renderer::OffScreenSampler::sample(VkImage vkimage)
    {
 
       if (!m_vkimage || !m_vkdevicememory)
@@ -289,14 +289,14 @@ namespace graphics3d_vulkan
       // Create the linear tiled destination image to copy to and to read the memory from
 
 // Do the actual blit from the offscreen image to our host visible destination image
-      VkCommandBufferAllocateInfo cmdBufAllocateInfo = vks::initializers::commandBufferAllocateInfo(m_pvkcdevice->getCommandPool(), VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1);
+      VkCommandBufferAllocateInfo cmdBufAllocateInfo = initializers::command_buffer_allocate_info(m_pcontext->getCommandPool(), VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1);
       VkCommandBuffer copyCmd;
-      VK_CHECK_RESULT(vkAllocateCommandBuffers(m_pvkcdevice->device(), &cmdBufAllocateInfo, &copyCmd));
-      VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
+      VK_CHECK_RESULT(vkAllocateCommandBuffers(m_pcontext->logicalDevice(), &cmdBufAllocateInfo, &copyCmd));
+      VkCommandBufferBeginInfo cmdBufInfo = initializers::command_buffer_begin_info();
       VK_CHECK_RESULT(vkBeginCommandBuffer(copyCmd, &cmdBufInfo));
 
       // Transition destination image to transfer destination layout
-      vks::tools::insertImageMemoryBarrier(
+      ::graphics3d_vulkan::tools::insertImageMemoryBarrier(
          copyCmd,
          m_vkimage,
          0,
@@ -327,7 +327,7 @@ namespace graphics3d_vulkan
          &imageCopyRegion);
 
       // Transition destination image to general layout, which is the required layout for mapping the image memory later on
-      vks::tools::insertImageMemoryBarrier(
+      ::graphics3d_vulkan::tools::insertImageMemoryBarrier(
          copyCmd,
          m_vkimage,
          VK_ACCESS_TRANSFER_WRITE_BIT,
@@ -340,12 +340,12 @@ namespace graphics3d_vulkan
 
       VK_CHECK_RESULT(vkEndCommandBuffer(copyCmd));
 
-      m_pvkcdevice->submitWork(copyCmd, m_pvkcdevice->graphicsQueue());
+      m_pcontext->submitWork(copyCmd, m_pcontext->graphicsQueue());
 
    }
 
 
-   void Renderer::OffScreenSampler::send_sample()
+   void renderer::OffScreenSampler::send_sample()
    {
 
       if (!m_vkimage || !m_vkdevicememory)
@@ -355,19 +355,20 @@ namespace graphics3d_vulkan
 
       }
 
+      auto pcontainer = m_pcontext->m_pcontainer;
 
-      auto callback = m_pvkcdevice->m_pvkcontainer->m_callbackOffscreen;
+      auto callback = pcontainer->m_callbackOffscreen;
 
       // Get layout of the image (including row pitch)
       VkImageSubresource subResource{};
       subResource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
       VkSubresourceLayout subResourceLayout;
 
-      vkGetImageSubresourceLayout(m_pvkcdevice->device(), m_vkimage, &subResource, &subResourceLayout);
+      vkGetImageSubresourceLayout(m_pcontext->logicalDevice(), m_vkimage, &subResource, &subResourceLayout);
 
       const char* imagedata = nullptr;
       // Map image memory so we can start copying from it
-      vkMapMemory(m_pvkcdevice->device(), m_vkdevicememory, 0, VK_WHOLE_SIZE, 0, (void**)&imagedata);
+      vkMapMemory(m_pcontext->logicalDevice(), m_vkdevicememory, 0, VK_WHOLE_SIZE, 0, (void**)&imagedata);
       imagedata += subResourceLayout.offset;
 
       /*
@@ -386,15 +387,15 @@ namespace graphics3d_vulkan
          subResourceLayout.rowPitch);
 
 
-      vkUnmapMemory(m_pvkcdevice->device(), m_vkdevicememory);
+      vkUnmapMemory(m_pcontext->logicalDevice(), m_vkdevicememory);
 
    }
 
 
-   void Renderer::sample()
+   void renderer::sample()
    {
 
-      auto callback = m_pvkcontainer->m_callbackOffscreen;
+      auto callback = m_pcontainer->m_callbackOffscreen;
 
       if (callback)
       {
@@ -411,14 +412,14 @@ namespace graphics3d_vulkan
             //// Create the linear tiled destination image to copy to and to read the memory from
 
             //// Do the actual blit from the offscreen image to our host visible destination image
-            //VkCommandBufferAllocateInfo cmdBufAllocateInfo = vks::initializers::commandBufferAllocateInfo(m_pvkcdevice->getCommandPool(), VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1);
+            //VkCommandBufferAllocateInfo cmdBufAllocateInfo = initializers::commandBufferAllocateInfo(m_pcontext->getCommandPool(), VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1);
             //VkCommandBuffer copyCmd;
-            //VK_CHECK_RESULT(vkAllocateCommandBuffers(m_pvkcdevice->device(), &cmdBufAllocateInfo, &copyCmd));
-            //VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
+            //VK_CHECK_RESULT(vkAllocateCommandBuffers(m_pcontext->logicalDevice(), &cmdBufAllocateInfo, &copyCmd));
+            //VkCommandBufferBeginInfo cmdBufInfo = initializers::commandBufferBeginInfo();
             //VK_CHECK_RESULT(vkBeginCommandBuffer(copyCmd, &cmdBufInfo));
 
             //// Transition destination image to transfer destination layout
-            //vks::tools::insertImageMemoryBarrier(
+            //::graphics3d_vulkan::tools::insertImageMemoryBarrier(
             //	copyCmd,
             //	m_poffscreensampler->m_vkimage,
             //	0,
@@ -449,7 +450,7 @@ namespace graphics3d_vulkan
             //	&imageCopyRegion);
 
             //// Transition destination image to general layout, which is the required layout for mapping the image memory later on
-            //vks::tools::insertImageMemoryBarrier(
+            //::graphics3d_vulkan::tools::insertImageMemoryBarrier(
             //	copyCmd,
             //	dstImage,
             //	VK_ACCESS_TRANSFER_WRITE_BIT,
@@ -474,10 +475,10 @@ namespace graphics3d_vulkan
             //subResource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
             //VkSubresourceLayout subResourceLayout;
 
-            //vkGetImageSubresourceLayout(m_pvkcdevice->device(), dstImage, &subResource, &subResourceLayout);
+            //vkGetImageSubresourceLayout(m_pcontext->logicalDevice(), dstImage, &subResource, &subResourceLayout);
 
             //// Map image memory so we can start copying from it
-            //vkMapMemory(m_pvkcdevice->device(), dstImageMemory, 0, VK_WHOLE_SIZE, 0, (void**)&imagedata);
+            //vkMapMemory(m_pcontext->logicalDevice(), dstImageMemory, 0, VK_WHOLE_SIZE, 0, (void**)&imagedata);
             //imagedata += subResourceLayout.offset;
 
             m_poffscreensampler->send_sample();
@@ -561,13 +562,13 @@ namespace graphics3d_vulkan
 
 
       }
-       vkQueueWaitIdle(m_pvkcdevice->graphicsQueue());
+       vkQueueWaitIdle(m_pcontext->graphicsQueue());
 
 
    }
 
 
-   void Renderer::endFrame()
+   void renderer::endFrame()
    {
 
       //if (m_bOffScreen)
@@ -591,7 +592,7 @@ namespace graphics3d_vulkan
          //}
          sample();
          isFrameStarted = false;
-         currentFrameIndex = (currentFrameIndex + 1) % VkcRenderPass::MAX_FRAMES_IN_FLIGHT;
+         currentFrameIndex = (currentFrameIndex + 1) % render_pass::MAX_FRAMES_IN_FLIGHT;
 
       }
       //else
@@ -615,14 +616,14 @@ namespace graphics3d_vulkan
       //	//	throw std::runtime_error("failed to present swap chain image!");
       //	//}
       //	isFrameStarted = false;
-      //	currentFrameIndex = (currentFrameIndex + 1) % VkcSwapChain::MAX_FRAMES_IN_FLIGHT;
+      //	currentFrameIndex = (currentFrameIndex + 1) % swap_chain_render_pass::MAX_FRAMES_IN_FLIGHT;
 
       //}
 
    }
 
 
-   void Renderer::beginRenderPass(VkCommandBuffer commandBuffer)
+   void renderer::beginRenderPass(VkCommandBuffer commandBuffer)
    {
 
       //if (m_bOffScreen)
@@ -702,7 +703,7 @@ namespace graphics3d_vulkan
    }
 
 
-   void Renderer::endRenderPass(VkCommandBuffer commandBuffer)
+   void renderer::endRenderPass(VkCommandBuffer commandBuffer)
    {
 
       assert(isFrameStarted && "Can't call endSwapChainRenderPass if frame is not in progress");

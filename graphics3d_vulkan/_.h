@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "core/_.h"
+#include "app-cube/cube/_.h"
 #include "_vulkan.h"
 
 
@@ -16,12 +16,19 @@ namespace graphics3d_vulkan
 {
 
 
-   class application;
-   //class top_impact;
-   //class main_impact;
-   class document;
-   class impact;
+   class application_handler;
 
+   class renderer;
+   class application_object;
+
+
+   class model;
+   class context;
+   class input;
+   //class camera;
+   class pipeline;
+
+   class descriptor_pool;
 
 } // namespace graphics3d_vulkan
 
@@ -32,13 +39,6 @@ namespace graphics3d_vulkan
 
 //#include "application.h"
 
-
-#if defined(WINDOWS_DESKTOP)
-
-#define VK_PROTOTYPES
-#define VK_USE_PLATFORM_WIN32_KHR
-
-#endif
 
 
 

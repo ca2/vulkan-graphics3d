@@ -1,5 +1,6 @@
 #include "framework.h"
 #include "application.h"
+#include "application3d.h"
 #include "main_frame.h"
 #include "document.h"
 #include "impact.h"
@@ -17,11 +18,11 @@
 #include "base/user/user/single_document_template.h"
 
 
-__IMPLEMENT_APPLICATION_RELEASE_TIME(vulkan_land_continuum);
-IMPLEMENT_APPLICATION_FACTORY(vulkan_land_continuum);
+__IMPLEMENT_APPLICATION_RELEASE_TIME(vulkan_graphics3d_continuum);
+IMPLEMENT_APPLICATION_FACTORY(vulkan_graphics3d_continuum);
 
 
-namespace vulkan_land_continuum
+namespace vulkan_graphics3d_continuum
 {
 
 
@@ -39,11 +40,11 @@ namespace vulkan_land_continuum
 
       //m_ppaneimpact = nullptr;
 
-      m_strAppId = "vulkan-land/continuum";
+      m_strAppId = "vulkan-graphics3d/continuum";
 
-      m_strAppName = "vulkan-land/continuum";
+      m_strAppName = "vulkan-graphics3d/continuum";
 
-      m_strBaseSupportId = "vulkan_land_continuum";
+      m_strBaseSupportId = "vulkan_graphics3d_continuum";
 
       m_bLicense = false;
       
@@ -63,12 +64,13 @@ namespace vulkan_land_continuum
    void application::init_instance()
    {
 
-      factory()->add_factory_item <::vulkan_land_continuum::document >();
-      factory()->add_factory_item <::vulkan_land_continuum::main_frame >();
-      factory()->add_factory_item <::vulkan_land_continuum::impact >();
-      factory()->add_factory_item <::vulkan_land_continuum::pane_impact >();
+      factory()->add_factory_item <::vulkan_graphics3d_continuum::document >();
+      factory()->add_factory_item <::vulkan_graphics3d_continuum::main_frame >();
+      factory()->add_factory_item <::vulkan_graphics3d_continuum::impact >();
+      factory()->add_factory_item <::vulkan_graphics3d_continuum::pane_impact >();
+      factory()->add_factory_item <::vulkan_graphics3d_continuum::application3d, ::graphics3d::application >();
 
-      ::vulkan_land_landen::application::init_instance();
+      ::vulkan_graphics3d_landen::application::init_instance();
 
       add_impact_system(
          "main", __initialize_new ::user::single_document_template(
@@ -298,7 +300,7 @@ namespace vulkan_land_continuum
    }
 
 
-} // namespace vulkan_land_continuum
+} // namespace vulkan_graphics3d_continuum
 
 
 

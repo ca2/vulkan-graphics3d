@@ -2,11 +2,18 @@
 #include <string>
 #include <vector>
 
-#include "vk_device.h"
 
-namespace graphics3d_vulkan {
+#include "context.h"
 
-	struct PipelineConfigInfo {
+
+namespace graphics3d_vulkan 
+{
+
+
+	struct PipelineConfigInfo 
+	{
+
+
 		PipelineConfigInfo() = default;
 		PipelineConfigInfo(const PipelineConfigInfo&) = delete;
 		PipelineConfigInfo& operator=(const PipelineConfigInfo&) = delete;
@@ -28,12 +35,15 @@ namespace graphics3d_vulkan {
 		uint32_t subpass = 0;
 	};
 
-	class pipeline :
-	virtual public ::particle{
+	class CLASS_DECL_GRAPHICS3D_VULKAN pipeline :
+	virtual public ::particle
+	{
 	public:
+
+
 		pipeline();
 		virtual void initialize_pipeline(
-			VkcDevice * pvkcdevice,
+			context * pvkcdevice,
 			const std::string& vertFilepath,
 			const std::string& fragFilepath,
 			const PipelineConfigInfo& configInfo);
@@ -55,9 +65,14 @@ namespace graphics3d_vulkan {
 
 		void createShaderModule(const ::block & block, VkShaderModule* shaderModule);
 
-		::pointer < VkcDevice > m_pvkcdevice;
+		::pointer < context > m_pcontext;
 		VkPipeline graphicsPipeline;
 		VkShaderModule vertShaderModule;
 		VkShaderModule fragShaderModule;
 	};
-}
+
+
+} // namespace graphics3d_vulkan 
+
+
+

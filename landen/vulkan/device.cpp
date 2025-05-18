@@ -1,8 +1,8 @@
 #include "framework.h"
 #include "vk_device.h"
-#include "vulkan-land/graphics3d_vulkan/vk_container.h"
-#include "vulkan-land/graphics3d_vulkan/VulkanInitializers.h"
-#include "vulkan-land/graphics3d_vulkan/VulkanTools.h"
+#include "vulkan-graphics3d/graphics3d_vulkan/container.h"
+#include "vulkan-graphics3d/graphics3d_vulkan/VulkanInitializers.h"
+#include "vulkan-graphics3d/graphics3d_vulkan/VulkanTools.h"
 // std headers
 #include <cstring>
 #include <iostream>

@@ -4,7 +4,7 @@
 #include <math.h>
 
 
-namespace vulkan_land_landen
+namespace vulkan_graphics3d_landen
 {
 
 
@@ -53,7 +53,7 @@ namespace vulkan_land_landen
    void frame::on_message_close(::message::message* pmessage)
    {
 
-      ::pointer <::vulkan_land_landen::application> papp = m_papplication;
+      ::pointer <::vulkan_graphics3d_landen::application> papp = m_papplication;
 
       if (papp)
       {

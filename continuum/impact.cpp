@@ -13,12 +13,12 @@
 
 
 CLASS_DECL_AURA ::color::color dk_red(); // <3 tbs
-namespace vkc
-{
-   ::pointer<::vulkan::application > start_vulkan_application(::vkc::VkContainer* pvkcontainer, mouse_state* pmousestate);
-} // namespace vkc
+//namespace vkc
+//{
+//   ::pointer<::vulkan::application > start_vulkan_application(::vkc::VkContainer* pvkcontainer, mouse_state* pmousestate);
+//} // namespace vkc
 
-namespace vulkan_land_continuum
+namespace vulkan_graphics3d_continuum
 {
 
 
@@ -70,7 +70,7 @@ namespace vulkan_land_continuum
    void impact::install_message_routing(::channel * psender)
    {
 
-      ::vulkan_land_landen::impact::install_message_routing(psender);
+      ::vulkan_graphics3d_landen::impact::install_message_routing(psender);
 
       MESSAGE_LINK(e_message_create,psender,this,&impact::on_message_create);
       MESSAGE_LINK(e_message_destroy, psender, this, &impact::on_message_destroy);
@@ -79,10 +79,10 @@ namespace vulkan_land_continuum
 
 
 
-   ::pointer < ::vulkan::application > impact::start_vulkan_application()
+   ::pointer < ::graphics3d::application > impact::start_graphics3d_application()
    {
 
-      return ::vkc::start_vulkan_application(this, &m_mousestate);
+      return ::vulkan_graphics3d_landen::impact::start_graphics3d_application();
 
    }
 
@@ -303,7 +303,7 @@ namespace vulkan_land_continuum
       pgraphics->text_out(point.x(), point.y() + y + size.cy(), strText);
 
       pgraphics->set_smooth_mode(::draw2d::e_smooth_mode_none);
-      ::vulkan_land_landen::impact::_001OnDraw(pgraphics);
+      ::vulkan_graphics3d_landen::impact::_001OnDraw(pgraphics);
    }
 
 
@@ -319,7 +319,7 @@ namespace vulkan_land_continuum
 
       }
 
-      ::vulkan_land_landen::impact::on_layout(pgraphics);
+      ::vulkan_graphics3d_landen::impact::on_layout(pgraphics);
       
       setup_default_client_area_user_item();
 
@@ -341,7 +341,7 @@ namespace vulkan_land_continuum
             
             filtera.add({"application.txt", "application.txt"});
             
-            pick_single_file(filtera, [ this ] (const ::file::path & path)
+            pick_single_file_to_open(filtera, [ this ] (const ::file::path & path)
                              {
                
                try {
@@ -359,7 +359,7 @@ namespace vulkan_land_continuum
                   pmessagebox->async();
                }
                
-            }, false);
+            });
 
             return true;
 
@@ -380,7 +380,7 @@ namespace vulkan_land_continuum
    }
 
 
-} // namespace vulkan_land_continuum
+} // namespace vulkan_graphics3d_continuum
 
 
 

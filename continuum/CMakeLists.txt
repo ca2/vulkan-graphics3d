@@ -1,5 +1,5 @@
 ﻿cmake_minimum_required(VERSION "3.13")
-project(vulkan_land_continuum CXX)
+project(vulkan_graphics3d_continuum CXX)
 
 
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
@@ -98,7 +98,7 @@ list(APPEND library_references
     base
     bred
     core
-    vulkan_land_landen
+    vulkan_graphics3d_landen
 )
 
 

@@ -16,9 +16,9 @@ namespace graphics3d_vulkan
 {
 
     /**
-     * Returns the minimum instance size required to be compatible with devices minOffsetAlignment
+     * Returns the minimum m_vkinstance size required to be compatible with devices minOffsetAlignment
      *
-     * @param instanceSize The size of an instance
+     * @param instanceSize The size of an m_vkinstance
      * @param minOffsetAlignment The minimum required alignment, in bytes, for the offset member (eg
      * minUniformBufferOffsetAlignment)
      *
@@ -36,14 +36,14 @@ namespace graphics3d_vulkan
 
     }
     void buffer::initialize_buffer(
-        VkcDevice * pvkcdevice,
+        context * pvkcdevice,
         VkDeviceSize instanceSize,
         uint32_t instanceCount,
         VkBufferUsageFlags usageFlags,
         VkMemoryPropertyFlags memoryPropertyFlags,
         VkDeviceSize minOffsetAlignment)
     {
-       m_pvkcdevice = pvkcdevice;
+       m_pcontext = pvkcdevice;
        m_instanceSize = instanceSize;
        m_instanceCount = instanceCount;
        m_usageFlags = usageFlags;
@@ -57,8 +57,8 @@ namespace graphics3d_vulkan
     buffer::~buffer() {
         unmap();
 
-        vkDestroyBuffer(m_pvkcdevice->device(), m_buffer, nullptr);
-        vkFreeMemory(m_pvkcdevice->device(), m_memory, nullptr);
+        vkDestroyBuffer(m_pcontext->logicalDevice(), m_buffer, nullptr);
+        vkFreeMemory(m_pcontext->logicalDevice(), m_memory, nullptr);
      
     }
 
@@ -73,7 +73,7 @@ namespace graphics3d_vulkan
      */
     VkResult buffer::map(VkDeviceSize size, VkDeviceSize offset) {
         assert(m_buffer && m_memory && "Called map on buffer before create");
-        return vkMapMemory(m_pvkcdevice->device(), m_memory, offset, size, 0, &m_mapped);
+        return vkMapMemory(m_pcontext->logicalDevice(), m_memory, offset, size, 0, &m_mapped);
     }
 
     /**
@@ -83,7 +83,7 @@ namespace graphics3d_vulkan
      */
     void buffer::unmap() {
         if (m_mapped) {
-            vkUnmapMemory(m_pvkcdevice->device(), m_memory);
+            vkUnmapMemory(m_pcontext->logicalDevice(), m_memory);
             m_mapped = nullptr;
         }
     }
@@ -127,7 +127,7 @@ namespace graphics3d_vulkan
         mappedRange.memory = m_memory;
         mappedRange.offset = offset;
         mappedRange.size = size;
-        return vkFlushMappedMemoryRanges(m_pvkcdevice->device(), 1, &mappedRange);
+        return vkFlushMappedMemoryRanges(m_pcontext->logicalDevice(), 1, &mappedRange);
     }
 
     /**
@@ -147,7 +147,7 @@ namespace graphics3d_vulkan
         mappedRange.memory = m_memory;
         mappedRange.offset = offset;
         mappedRange.size = size;
-        return vkInvalidateMappedMemoryRanges(m_pvkcdevice->device(), 1, &mappedRange);
+        return vkInvalidateMappedMemoryRanges(m_pcontext->logicalDevice(), 1, &mappedRange);
     }
 
     /**
@@ -190,7 +190,7 @@ namespace graphics3d_vulkan
      *
      * @param index Specifies the region given by index * alignmentSize
      *
-     * @return VkDescriptorBufferInfo for instance at index
+     * @return VkDescriptorBufferInfo for m_vkinstance at index
      */
     VkDescriptorBufferInfo buffer::descriptorInfoForIndex(int index) {
         return descriptorInfo(m_alignmentSize, index * m_alignmentSize);

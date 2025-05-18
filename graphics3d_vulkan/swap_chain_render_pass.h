@@ -1,25 +1,25 @@
 #pragma once
 
 
-#include "vk_renderpass.h"
+#include "render_pass.h"
 
 
 namespace graphics3d_vulkan
 {
 
 
-   class VkcSwapChain :
-      virtual public VkcRenderPass
+   class swap_chain_render_pass :
+      virtual public render_pass
    {
    public:
       static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
-      VkcSwapChain(VkcDevice* pvkcdeviceRef, VkExtent2D windowExtent);
-      VkcSwapChain(VkcDevice* pvkcdeviceRef, VkExtent2D windowExtent, ::pointer <VkcRenderPass>previous);
-      ~VkcSwapChain();
+      swap_chain_render_pass(context* pvkcdeviceRef, VkExtent2D windowExtent);
+      swap_chain_render_pass(context* pvkcdeviceRef, VkExtent2D windowExtent, ::pointer <render_pass>previous);
+      ~swap_chain_render_pass();
 
-      VkcSwapChain(const VkcSwapChain&) = delete;
-      VkcSwapChain& operator=(const VkcSwapChain&) = delete;
+      swap_chain_render_pass(const swap_chain_render_pass&) = delete;
+      swap_chain_render_pass& operator=(const swap_chain_render_pass&) = delete;
 
       //VkFramebuffer getFrameBuffer(int index) { return swapChainFramebuffers[index]; }
       //VkRenderPass getRenderPass() { return m_vkrenderpass; }
@@ -38,7 +38,7 @@ namespace graphics3d_vulkan
       VkResult acquireNextImage(uint32_t* imageIndex);
       VkResult submitCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex);
 
-      //bool compareSwapFormats(const VkcSwapChain& m_swapchain) const {
+      //bool compareSwapFormats(const swap_chain_render_pass& m_swapchain) const {
       //   return m_swapchain.swapChainDepthFormat == swapChainDepthFormat &&
       //      m_swapchain.swapChainImageFormat == swapChainImageFormat;
       //}
@@ -72,11 +72,11 @@ namespace graphics3d_vulkan
       std::vector<VkImage> swapChainImages;
       std::vector<VkImageView> swapChainImageViews;
 
-      ::pointer < VkcDevice > m_pvkcdevice;
+      ::pointer < context > m_pcontext;
       VkExtent2D windowExtent;*/
 
       VkSwapchainKHR m_vkswapchain;
-      //::pointer<VkcSwapChain> oldSwapChain;
+      //::pointer<swap_chain_render_pass> oldSwapChain;
 
       //std::vector<VkSemaphore> imageAvailableSemaphores;
       //std::vector<VkSemaphore> renderFinishedSemaphores;

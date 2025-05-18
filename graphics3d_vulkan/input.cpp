@@ -1,7 +1,7 @@
 #include "framework.h"
 #include "input.h"
-#include "game_object.h"
-#include "container.h"
+#include "application_object.h"
+#include "app-cube/cube/container.h"
 #include <limits>
 
 
@@ -13,12 +13,12 @@ namespace graphics3d_vulkan
       : _sensitivity(sensitivity), _yaw(yaw), _pitch(pitch), _cameraDirection(glm::vec3(0.0f, 0.0f, -1.0f)), _cameraPosition(glm::vec3(0.0f, 0.0f, 3.0f)) {
    }
    //void MNKController::moveInPlaneXZ(
-   //    vkc::VkContainer * pvkcontainer, float dt, VkcGameObject& gameObject) {
+   //    ::cube::container * pcontainer, float dt, application_object& gameObject) {
    //    glm::vec3 rotate{ 0 };
-   //    if (pvkcontainer->get_key_state(m_keymap.lookRight) == ::user::e_key_state_pressed) rotate.y += 1.f;
-   //    if (pvkcontainer->get_key_state(m_keymap.lookLeft) == ::user::e_key_state_pressed) rotate.y -= 1.f;
-   //    if (pvkcontainer->get_key_state(m_keymap.lookUp) == ::user::e_key_state_pressed) rotate.x += 1.f;
-   //    if (pvkcontainer->get_key_state(m_keymap.lookDown) == ::user::e_key_state_pressed) rotate.x -= 1.f;
+   //    if (pcontainer->get_key_state(m_keymap.lookRight) == ::user::e_key_state_pressed) rotate.y += 1.f;
+   //    if (pcontainer->get_key_state(m_keymap.lookLeft) == ::user::e_key_state_pressed) rotate.y -= 1.f;
+   //    if (pcontainer->get_key_state(m_keymap.lookUp) == ::user::e_key_state_pressed) rotate.x += 1.f;
+   //    if (pcontainer->get_key_state(m_keymap.lookDown) == ::user::e_key_state_pressed) rotate.x -= 1.f;
 
    //    if (glm::dot(rotate, rotate) > std::numeric_limits<float>::epsilon()) {
    //        gameObject.transform.rotation += lookSpeed * dt * glm::normalize(rotate);
@@ -34,18 +34,18 @@ namespace graphics3d_vulkan
    //    const glm::vec3 upDir{ 0.f, -1.f, 0.f };
 
    //    glm::vec3 moveDir{ 0.f };
-   //    if (pvkcontainer->get_key_state(m_keymap.moveForward) == ::user::e_key_state_pressed) moveDir += forwardDir;
-   //    if (pvkcontainer->get_key_state(m_keymap.moveBackward) == ::user::e_key_state_pressed) moveDir -= forwardDir;
-   //    if (pvkcontainer->get_key_state(m_keymap.moveRight) == ::user::e_key_state_pressed) moveDir += rightDir;
-   //    if (pvkcontainer->get_key_state(m_keymap.moveLeft) == ::user::e_key_state_pressed) moveDir -= rightDir;
-   //    if (pvkcontainer->get_key_state(m_keymap.moveUp) == ::user::e_key_state_pressed) moveDir += upDir;
-   //    if (pvkcontainer->get_key_state(m_keymap.moveDown) == ::user::e_key_state_pressed) moveDir -= upDir;
+   //    if (pcontainer->get_key_state(m_keymap.moveForward) == ::user::e_key_state_pressed) moveDir += forwardDir;
+   //    if (pcontainer->get_key_state(m_keymap.moveBackward) == ::user::e_key_state_pressed) moveDir -= forwardDir;
+   //    if (pcontainer->get_key_state(m_keymap.moveRight) == ::user::e_key_state_pressed) moveDir += rightDir;
+   //    if (pcontainer->get_key_state(m_keymap.moveLeft) == ::user::e_key_state_pressed) moveDir -= rightDir;
+   //    if (pcontainer->get_key_state(m_keymap.moveUp) == ::user::e_key_state_pressed) moveDir += upDir;
+   //    if (pcontainer->get_key_state(m_keymap.moveDown) == ::user::e_key_state_pressed) moveDir -= upDir;
 
    //    if (glm::dot(moveDir, moveDir) > std::numeric_limits<float>::epsilon()) {
    //        gameObject.transform.translation += moveSpeed * dt * glm::normalize(moveDir);
    //    }
 
-   //    if (pvkcontainer->get_key_state(m_keymap.Exit) == ::user::e_key_state_pressed)
+   //    if (pcontainer->get_key_state(m_keymap.Exit) == ::user::e_key_state_pressed)
    //    {
    //       //glfwSetWindowShouldClose(window, GLFW_TRUE);
 
@@ -95,17 +95,22 @@ namespace graphics3d_vulkan
    //}
 
 
-   void MNKController::updateLook(vkc::VkContainer* pvkcontainer, float xOffset, float yOffset, VkcGameObject& gameObject) {
+   void MNKController::updateLook(::cube::container* pcontainer, float xOffset, float yOffset, ::cube::application_object * papplicationobject)
+   {
+
       xOffset *= _sensitivity;
       yOffset *= _sensitivity;
 
       // limit pitch values between about +/- 85ish degrees
-      gameObject.transform.rotation.x = glm::clamp(gameObject.transform.rotation.x, -1.5f, 1.5f);
-      gameObject.transform.rotation.y = glm::mod(gameObject.transform.rotation.y, glm::two_pi<float>());
-      if (pvkcontainer->is_absolute_mouse_position())
+      papplicationobject->m_transform.rotation.x = glm::clamp(papplicationobject->m_transform.rotation.x, -1.5f, 1.5f);
+      papplicationobject->m_transform.rotation.y = glm::mod(papplicationobject->m_transform.rotation.y, glm::two_pi<float>());
+
+      if (pcontainer->is_absolute_mouse_position())
       {
+
          _yaw = xOffset;
          _pitch = yOffset;
+
       }
       else
       {
@@ -122,33 +127,35 @@ namespace graphics3d_vulkan
       if (_yaw > 360.0f) _yaw -= 360.0f;
       if (_yaw < 0.0f) _yaw += 360.0f;
 
-      gameObject.transform.rotation.x = glm::radians(_pitch);
-      gameObject.transform.rotation.y = glm::radians(_yaw);
+      papplicationobject->m_transform.rotation.x = glm::radians(_pitch);
+      papplicationobject->m_transform.rotation.y = glm::radians(_yaw);
+
    }
 
 
-   void MNKController::updateMovement(vkc::VkContainer* pvkcontainer, float dt, VkcGameObject& gameObject)
+   void MNKController::updateMovement(::cube::container* pcontainer, float dt, ::cube::application_object* papplicationobject)
    {
-      float yaw = gameObject.transform.rotation.y;
+
+      float yaw = papplicationobject->m_transform.rotation.y;
       const glm::vec3 forwardDir{ sin(yaw), 0.f, cos(yaw) };
       const glm::vec3 rightDir{ forwardDir.z, 0.f, -forwardDir.x };
       const glm::vec3 upDir{ 0.f, -1.f, 0.f };
 
       glm::vec3 moveDir{ 0.f };
-      if (pvkcontainer->get_key_state(m_keymap.moveForward) == ::user::e_key_state_pressed) moveDir += forwardDir;
-      if (pvkcontainer->get_key_state(m_keymap.moveBackward) == ::user::e_key_state_pressed) moveDir -= forwardDir;
-      if (pvkcontainer->get_key_state(m_keymap.moveRight) == ::user::e_key_state_pressed) moveDir += rightDir;
-      if (pvkcontainer->get_key_state(m_keymap.moveLeft) == ::user::e_key_state_pressed) moveDir -= rightDir;
-      if (pvkcontainer->get_key_state(m_keymap.moveUp) == ::user::e_key_state_pressed) moveDir += upDir;
-      if (pvkcontainer->get_key_state(m_keymap.moveDown) == ::user::e_key_state_pressed) moveDir -= upDir;
+      if (pcontainer->get_key_state(m_keymap.moveForward) == ::user::e_key_state_pressed) moveDir += forwardDir;
+      if (pcontainer->get_key_state(m_keymap.moveBackward) == ::user::e_key_state_pressed) moveDir -= forwardDir;
+      if (pcontainer->get_key_state(m_keymap.moveRight) == ::user::e_key_state_pressed) moveDir += rightDir;
+      if (pcontainer->get_key_state(m_keymap.moveLeft) == ::user::e_key_state_pressed) moveDir -= rightDir;
+      if (pcontainer->get_key_state(m_keymap.moveUp) == ::user::e_key_state_pressed) moveDir += upDir;
+      if (pcontainer->get_key_state(m_keymap.moveDown) == ::user::e_key_state_pressed) moveDir -= upDir;
 
       if (glm::dot(moveDir, moveDir) > std::numeric_limits<float>::epsilon()) {
-         gameObject.transform.translation += moveSpeed * dt * glm::normalize(moveDir);
+         papplicationobject->m_transform.translation += moveSpeed * dt * glm::normalize(moveDir);
       }
 
-      if (pvkcontainer->get_key_state(m_keymap.Exit) == ::user::e_key_state_pressed)
+      if (pcontainer->get_key_state(m_keymap.Exit) == ::user::e_key_state_pressed)
       {
-         pvkcontainer->m_bShouldClose = true;
+         pcontainer->m_bShouldClose = true;
 
       }
 
@@ -159,50 +166,50 @@ namespace graphics3d_vulkan
 
    glm::vec3 MNKController::getCameraPosition() const { return _cameraPosition; }
 
-   void MNKController::handleMouseInput(vkc::VkContainer* pvkcontainer)
+   void MNKController::handleMouseInput(::cube::container* pcontainer)
    {
       
       double x, y;
       double newx, newy;
 
-      if (pvkcontainer->is_absolute_mouse_position())
+      if (pcontainer->is_absolute_mouse_position())
       {
 
-         newx = pvkcontainer->m_dCursorX * 1.25 * MATH_PI;
-         newy = pvkcontainer->m_dCursorY * 1.25 * MATH_PI/2.0;
+         newx = pcontainer->m_dCursorX * 1.25 * MATH_PI;
+         newy = pcontainer->m_dCursorY * 1.25 * MATH_PI/2.0;
 
       }
       else
       {
 
-         newx = pvkcontainer->m_dCursorX;
-         newy = pvkcontainer->m_dCursorY;
+         newx = pcontainer->m_dCursorX;
+         newy = pcontainer->m_dCursorY;
 
       }
       //glfwGetCursorPos(window, &xpos, &ypos);
 
-      //if (pvkcontainer->m_bFirstMouse) {
+      //if (pcontainer->m_bFirstMouse) {
       //   _lastX = newx;
       //   _lastY = newy;
-      //   pvkcontainer->m_bFirstMouse = false;
+      //   pcontainer->m_bFirstMouse = false;
       //   xpos = _lastX;
       //   ypos = _lastY;
       //}
       //else
-      if (!pvkcontainer->is_absolute_mouse_position())
+      if (!pcontainer->is_absolute_mouse_position())
       {
 
-         if (pvkcontainer->m_bFirstMouse)
+         if (pcontainer->m_bFirstMouse)
          {
             m_dMouseLastX = newx;
             m_dMouseLastY = newy;
-            pvkcontainer->m_bFirstMouse = false;
+            pcontainer->m_bFirstMouse = false;
 
          }
 
       }
 
-      if (pvkcontainer->is_absolute_mouse_position())
+      if (pcontainer->is_absolute_mouse_position())
       {
 
          x = m_dMouseLastX + (newx - m_dMouseLastX) * 0.05;

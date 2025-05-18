@@ -1,5 +1,5 @@
 #include "framework.h"
-#include "swap_chain.h"
+#include "swap_chain_render_pass.h"
 
 // std
 #include <array>
@@ -15,21 +15,21 @@
 namespace graphics3d_vulkan
 {
 
-   VkcSwapChain::VkcSwapChain(VkcDevice* pvkcdeviceRef, VkExtent2D extent)
-      : VkcRenderPass(pvkcdeviceRef, extent)
+   swap_chain_render_pass::swap_chain_render_pass(context* pvkcdeviceRef, VkExtent2D extent)
+      : render_pass(pvkcdeviceRef, extent)
    {
       init();
    }
 
-   VkcSwapChain::VkcSwapChain(VkcDevice* pvkcdeviceRef, VkExtent2D extent, ::pointer<VkcRenderPass> previous)
-      : VkcRenderPass( pvkcdeviceRef , extent ,  previous)
+   swap_chain_render_pass::swap_chain_render_pass(context* pvkcdeviceRef, VkExtent2D extent, ::pointer<render_pass> previous)
+      : render_pass( pvkcdeviceRef , extent ,  previous)
    {
       init();
       // Cleans up old swap chain since it's no longer needed after resizing
       //oldSwapChain = nullptr;
    }
 
-   void VkcSwapChain::init() {
+   void swap_chain_render_pass::init() {
       createRenderPassImpl();
       createImageViews();
       createRenderPass();
@@ -38,47 +38,47 @@ namespace graphics3d_vulkan
       createSyncObjects();
    }
 
-   VkcSwapChain::~VkcSwapChain() {
+   swap_chain_render_pass::~swap_chain_render_pass() {
       for (auto imageView : m_imageviews) {
-         vkDestroyImageView(m_pvkcdevice->device(), imageView, nullptr);
+         vkDestroyImageView(m_pcontext->logicalDevice(), imageView, nullptr);
       }
       m_imageviews.clear();
 
       if (m_vkswapchain != nullptr) {
-         vkDestroySwapchainKHR(m_pvkcdevice->device(), m_vkswapchain, nullptr);
+         vkDestroySwapchainKHR(m_pcontext->logicalDevice(), m_vkswapchain, nullptr);
          m_vkswapchain = nullptr;
       }
 
       //for (int i = 0; i < depthImages.size(); i++) {
-      //   vkDestroyImageView(m_pvkcdevice->device(), depthImageViews[i], nullptr);
-      //   vkDestroyImage(m_pvkcdevice->device(), depthImages[i], nullptr);
-      //   vkFreeMemory(m_pvkcdevice->device(), depthImageMemorys[i], nullptr);
+      //   vkDestroyImageView(m_pcontext->logicalDevice(), depthImageViews[i], nullptr);
+      //   vkDestroyImage(m_pcontext->logicalDevice(), depthImages[i], nullptr);
+      //   vkFreeMemory(m_pcontext->logicalDevice(), depthImageMemorys[i], nullptr);
       //}
 
       //for (auto framebuffer : m_vkswapchainFramebuffers) {
-      //   vkDestroyFramebuffer(m_pvkcdevice->device(), framebuffer, nullptr);
+      //   vkDestroyFramebuffer(m_pcontext->logicalDevice(), framebuffer, nullptr);
       //}
 
-      //vkDestroyRenderPass(m_pvkcdevice->device(), m_vkrenderpass, nullptr);
+      //vkDestroyRenderPass(m_pcontext->logicalDevice(), m_vkrenderpass, nullptr);
 
       //// cleanup synchronization objects
       //for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-      //   vkDestroySemaphore(m_pvkcdevice->device(), renderFinishedSemaphores[i], nullptr);
-      //   vkDestroySemaphore(m_pvkcdevice->device(), imageAvailableSemaphores[i], nullptr);
-      //   vkDestroyFence(m_pvkcdevice->device(), inFlightFences[i], nullptr);
+      //   vkDestroySemaphore(m_pcontext->logicalDevice(), renderFinishedSemaphores[i], nullptr);
+      //   vkDestroySemaphore(m_pcontext->logicalDevice(), imageAvailableSemaphores[i], nullptr);
+      //   vkDestroyFence(m_pcontext->logicalDevice(), inFlightFences[i], nullptr);
       //}
    }
 
-   VkResult VkcSwapChain::acquireNextImage(uint32_t* imageIndex) {
+   VkResult swap_chain_render_pass::acquireNextImage(uint32_t* imageIndex) {
       vkWaitForFences(
-         m_pvkcdevice->device(),
+         m_pcontext->logicalDevice(),
          1,
          &inFlightFences[currentFrame],
          VK_TRUE,
          std::numeric_limits<uint64_t>::max());
 
       VkResult result = vkAcquireNextImageKHR(
-         m_pvkcdevice->device(),
+         m_pcontext->logicalDevice(),
          m_vkswapchain,
          std::numeric_limits<uint64_t>::max(),
          imageAvailableSemaphores[currentFrame],  // must be a not signaled semaphore
@@ -88,10 +88,10 @@ namespace graphics3d_vulkan
       return result;
    }
 
-   VkResult VkcSwapChain::submitCommandBuffers(
+   VkResult swap_chain_render_pass::submitCommandBuffers(
       const VkCommandBuffer* buffers, uint32_t* imageIndex) {
       if (imagesInFlight[*imageIndex] != VK_NULL_HANDLE) {
-         vkWaitForFences(m_pvkcdevice->device(), 1, &imagesInFlight[*imageIndex], VK_TRUE, UINT64_MAX);
+         vkWaitForFences(m_pcontext->logicalDevice(), 1, &imagesInFlight[*imageIndex], VK_TRUE, UINT64_MAX);
       }
       imagesInFlight[*imageIndex] = inFlightFences[currentFrame];
 
@@ -111,8 +111,8 @@ namespace graphics3d_vulkan
       submitInfo.signalSemaphoreCount = 1;
       submitInfo.pSignalSemaphores = signalSemaphores;
 
-      vkResetFences(m_pvkcdevice->device(), 1, &inFlightFences[currentFrame]);
-      if (vkQueueSubmit(m_pvkcdevice->graphicsQueue(), 1, &submitInfo, inFlightFences[currentFrame]) !=
+      vkResetFences(m_pcontext->logicalDevice(), 1, &inFlightFences[currentFrame]);
+      if (vkQueueSubmit(m_pcontext->graphicsQueue(), 1, &submitInfo, inFlightFences[currentFrame]) !=
          VK_SUCCESS) {
          throw std::runtime_error("failed to submit draw command buffer!");
       }
@@ -129,15 +129,15 @@ namespace graphics3d_vulkan
 
       presentInfo.pImageIndices = imageIndex;
 
-      auto result = vkQueuePresentKHR(m_pvkcdevice->presentQueue(), &presentInfo);
+      auto result = vkQueuePresentKHR(m_pcontext->presentQueue(), &presentInfo);
 
       currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 
       return result;
    }
 
-   void VkcSwapChain::createRenderPassImpl() {
-      SwapChainSupportDetails m_vkswapchainSupport = m_pvkcdevice->getSwapChainSupport();
+   void swap_chain_render_pass::createRenderPassImpl() {
+      SwapChainSupportDetails m_vkswapchainSupport = m_pcontext->getSwapChainSupport();
 
       VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(m_vkswapchainSupport.formats);
       VkPresentModeKHR presentMode = chooseSwapPresentMode(m_vkswapchainSupport.presentModes);
@@ -151,7 +151,7 @@ namespace graphics3d_vulkan
 
       VkSwapchainCreateInfoKHR createInfo = {};
       createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-      createInfo.surface = m_pvkcdevice->surface();
+      createInfo.surface = m_pcontext->surface();
 
       createInfo.minImageCount = imageCount;
       createInfo.imageFormat = surfaceFormat.format;
@@ -160,7 +160,7 @@ namespace graphics3d_vulkan
       createInfo.imageArrayLayers = 1;
       createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-      QueueFamilyIndices indices = m_pvkcdevice->findPhysicalQueueFamilies();
+      QueueFamilyIndices indices = m_pcontext->findPhysicalQueueFamilies();
       uint32_t queueFamilyIndices[] = { indices.graphicsFamily, indices.presentFamily };
 
       if (indices.graphicsFamily != indices.presentFamily) {
@@ -180,11 +180,11 @@ namespace graphics3d_vulkan
       createInfo.presentMode = presentMode;
       createInfo.clipped = VK_TRUE;
 
-      ::pointer < VkcSwapChain> pswapchainOld = m_pvkcrenderpassOld;
+      ::pointer < swap_chain_render_pass> pswapchainOld = m_pvkcrenderpassOld;
 
       createInfo.oldSwapchain = pswapchainOld == nullptr ? VK_NULL_HANDLE : pswapchainOld->m_vkswapchain;
 
-      if (vkCreateSwapchainKHR(m_pvkcdevice->device(), &createInfo, nullptr, &m_vkswapchain) != VK_SUCCESS) {
+      if (vkCreateSwapchainKHR(m_pcontext->logicalDevice(), &createInfo, nullptr, &m_vkswapchain) != VK_SUCCESS) {
          throw std::runtime_error("failed to create swap chain!");
       }
 
@@ -192,15 +192,15 @@ namespace graphics3d_vulkan
       // allowed to create a swap chain with more. That's why we'll first query the final number of
       // images with vkGetSwapchainImagesKHR, then resize the container and finally call it again to
       // retrieve the handles.
-      vkGetSwapchainImagesKHR(m_pvkcdevice->device(), m_vkswapchain, &imageCount, nullptr);
+      vkGetSwapchainImagesKHR(m_pcontext->logicalDevice(), m_vkswapchain, &imageCount, nullptr);
       m_images.resize(imageCount);
-      vkGetSwapchainImagesKHR(m_pvkcdevice->device(), m_vkswapchain, &imageCount, m_images.data());
+      vkGetSwapchainImagesKHR(m_pcontext->logicalDevice(), m_vkswapchain, &imageCount, m_images.data());
 
       m_formatImage = surfaceFormat.format;
       m_extent = extent;
    }
 
-   void VkcSwapChain::createImageViews() {
+   void swap_chain_render_pass::createImageViews() {
       m_imageviews.resize(m_images.size());
       for (size_t i = 0; i < m_images.size(); i++) {
          VkImageViewCreateInfo viewInfo{};
@@ -214,14 +214,14 @@ namespace graphics3d_vulkan
          viewInfo.subresourceRange.baseArrayLayer = 0;
          viewInfo.subresourceRange.layerCount = 1;
 
-         if (vkCreateImageView(m_pvkcdevice->device(), &viewInfo, nullptr, &m_imageviews[i]) !=
+         if (vkCreateImageView(m_pcontext->logicalDevice(), &viewInfo, nullptr, &m_imageviews[i]) !=
             VK_SUCCESS) {
             throw std::runtime_error("failed to create texture image view!");
          }
       }
    }
 
-   void VkcSwapChain::createRenderPass() {
+   void swap_chain_render_pass::createRenderPass() {
       VkAttachmentDescription depthAttachment{};
       depthAttachment.format = findDepthFormat();
       depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -278,14 +278,14 @@ namespace graphics3d_vulkan
       renderPassInfo.dependencyCount = 1;
       renderPassInfo.pDependencies = &dependency;
 
-      if (vkCreateRenderPass(m_pvkcdevice->device(), &renderPassInfo, nullptr, &m_vkrenderpass) != VK_SUCCESS) {
+      if (vkCreateRenderPass(m_pcontext->logicalDevice(), &renderPassInfo, nullptr, &m_vkrenderpass) != VK_SUCCESS) {
          throw std::runtime_error("failed to create render pass!");
       }
    }
 
-   void VkcSwapChain::createFramebuffers() 
+   void swap_chain_render_pass::createFramebuffers() 
    {
-      VkcRenderPass::createFramebuffers();
+      render_pass::createFramebuffers();
       //swapChainFramebuffers.resize(imageCount());
       //for (size_t i = 0; i < imageCount(); i++) {
       //   std::array<VkImageView, 2> attachments = { m_imageviews[i], depthImageViews[i] };
@@ -301,7 +301,7 @@ namespace graphics3d_vulkan
       //   framebufferInfo.layers = 1;
 
       //   if (vkCreateFramebuffer(
-      //      m_pvkcdevice->device(),
+      //      m_pcontext->logicalDevice(),
       //      &framebufferInfo,
       //      nullptr,
       //      &swapChainFramebuffers[i]) != VK_SUCCESS) {
@@ -310,9 +310,9 @@ namespace graphics3d_vulkan
       //}
    }
 
-   void VkcSwapChain::createDepthResources() 
+   void swap_chain_render_pass::createDepthResources() 
    {
-      VkcRenderPass::createDepthResources();
+      render_pass::createDepthResources();
 
       //VkFormat depthFormat = findDepthFormat();
       //m_formatDepth = depthFormat;
@@ -339,7 +339,7 @@ namespace graphics3d_vulkan
       //   imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
       //   imageInfo.flags = 0;
 
-      //   m_pvkcdevice->createImageWithInfo(
+      //   m_pcontext->createImageWithInfo(
       //      imageInfo,
       //      VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
       //      depthImages[i],
@@ -356,13 +356,13 @@ namespace graphics3d_vulkan
       //   viewInfo.subresourceRange.baseArrayLayer = 0;
       //   viewInfo.subresourceRange.layerCount = 1;
 
-      //   if (vkCreateImageView(m_pvkcdevice->device(), &viewInfo, nullptr, &depthImageViews[i]) != VK_SUCCESS) {
+      //   if (vkCreateImageView(m_pcontext->logicalDevice(), &viewInfo, nullptr, &depthImageViews[i]) != VK_SUCCESS) {
       //      throw std::runtime_error("failed to create texture image view!");
       //   }
       //}
    }
 
-   void VkcSwapChain::createSyncObjects() {
+   void swap_chain_render_pass::createSyncObjects() {
       imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
       renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
       inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
@@ -376,17 +376,17 @@ namespace graphics3d_vulkan
       fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
       for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-         if (vkCreateSemaphore(m_pvkcdevice->device(), &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) !=
+         if (vkCreateSemaphore(m_pcontext->logicalDevice(), &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) !=
             VK_SUCCESS ||
-            vkCreateSemaphore(m_pvkcdevice->device(), &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) !=
+            vkCreateSemaphore(m_pcontext->logicalDevice(), &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) !=
             VK_SUCCESS ||
-            vkCreateFence(m_pvkcdevice->device(), &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS) {
+            vkCreateFence(m_pcontext->logicalDevice(), &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS) {
             throw std::runtime_error("failed to create synchronization objects for a frame!");
          }
       }
    }
 
-   VkSurfaceFormatKHR VkcSwapChain::chooseSwapSurfaceFormat(
+   VkSurfaceFormatKHR swap_chain_render_pass::chooseSwapSurfaceFormat(
       const std::vector<VkSurfaceFormatKHR>& availableFormats) {
       for (const auto& availableFormat : availableFormats) {
          // SRGB can be changed to "UNORM" instead
@@ -399,7 +399,7 @@ namespace graphics3d_vulkan
       return availableFormats[0];
    }
 
-   VkPresentModeKHR VkcSwapChain::chooseSwapPresentMode(
+   VkPresentModeKHR swap_chain_render_pass::chooseSwapPresentMode(
       const std::vector<VkPresentModeKHR>& availablePresentModes) {
       for (const auto& availablePresentMode : availablePresentModes) {
          if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
@@ -419,7 +419,7 @@ namespace graphics3d_vulkan
       return VK_PRESENT_MODE_FIFO_KHR;
    }
 
-   VkExtent2D VkcSwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) {
+   VkExtent2D swap_chain_render_pass::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) {
       if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
          return capabilities.currentExtent;
       }
@@ -436,8 +436,8 @@ namespace graphics3d_vulkan
       }
    }
 
-   VkFormat VkcSwapChain::findDepthFormat() {
-      return m_pvkcdevice->findSupportedFormat(
+   VkFormat swap_chain_render_pass::findDepthFormat() {
+      return m_pcontext->findSupportedFormat(
          { VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
          VK_IMAGE_TILING_OPTIMAL,
          VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
