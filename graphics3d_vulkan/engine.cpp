@@ -131,13 +131,13 @@ namespace graphics3d_vulkan
       auto viewerObject = __øcreate <::graphics3d::scene_object>();
       papp->m_pimpact->m_bLastMouse = true;
       viewerObject->m_transform.translation.z = -2.5f;
-      MNKController cameraController;
+      ::graphics3d::input input;
 
-      cameraController.m_pimpact = papp->m_pimpact;
-      cameraController.m_pkeymap = papp->m_pimpact->m_pkeymap;
+      input.m_pimpact = papp->m_pimpact;
+      input.m_pkeymap = papp->m_pimpact->m_pkeymap;
       /*    glfwSetInputMode(_window.getGLFWwindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
           glfwSetWindowUserPointer(_window.getGLFWwindow(), &cameraController);*/
-      cameraController.m_bMouseAbsolute;
+      input.m_bMouseAbsolute;
 
       ::pointer <::database::client> pdatabaseclient = m_papplication;
 
@@ -146,7 +146,7 @@ namespace graphics3d_vulkan
 
          pdatabaseclient->datastream()->get_block("camera", as_memory_block(camera));
          pdatabaseclient->datastream()->get_block("transform", as_memory_block(viewerObject->m_transform));
-         pdatabaseclient->datastream()->get_block("camera_controller", cameraController.as_block());
+         pdatabaseclient->datastream()->get_block("input", input.as_block());
 
       }
 
@@ -166,11 +166,11 @@ namespace graphics3d_vulkan
 
          currentTime = newTime;
 
-         cameraController.handleMouseInput();
+         input.handleMouseInput();
 
-         cameraController.updateLook(cameraController.getX(), cameraController.getY(), viewerObject);
+         input.updateLook(input.getX(), input.getY(), viewerObject);
 
-         cameraController.updateMovement(frameTime, viewerObject);
+         input.updateMovement(frameTime, viewerObject);
 
          //cameraController.moveInPlaneXZ(m_pimpact, frameTime, viewerObject);
 
@@ -218,7 +218,7 @@ namespace graphics3d_vulkan
       if (pdatabaseclient)
       {
 
-         pdatabaseclient->datastream()->set("camera_controller", cameraController.as_block());
+         pdatabaseclient->datastream()->set("input", input.as_block());
          pdatabaseclient->datastream()->set("transform", as_memory_block(viewerObject->m_transform));
          pdatabaseclient->datastream()->set("camera", as_memory_block(camera));
 
