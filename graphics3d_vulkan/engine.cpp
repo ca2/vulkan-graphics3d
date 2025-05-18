@@ -146,7 +146,7 @@ namespace graphics3d_vulkan
 
          pdatabaseclient->datastream()->get_block("camera", as_memory_block(camera));
          pdatabaseclient->datastream()->get_block("transform", as_memory_block(viewerObject->m_transform));
-         pdatabaseclient->datastream()->get_block("camera_controller", (::block &)cameraController);
+         pdatabaseclient->datastream()->get_block("camera_controller", cameraController.as_block());
 
       }
 
@@ -218,7 +218,7 @@ namespace graphics3d_vulkan
       if (pdatabaseclient)
       {
 
-         pdatabaseclient->datastream()->set("camera_controller", (::block &) cameraController);
+         pdatabaseclient->datastream()->set("camera_controller", cameraController.as_block());
          pdatabaseclient->datastream()->set("transform", as_memory_block(viewerObject->m_transform));
          pdatabaseclient->datastream()->set("camera", as_memory_block(camera));
 

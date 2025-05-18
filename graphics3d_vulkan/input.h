@@ -35,6 +35,13 @@ namespace graphics3d_vulkan
       glm::vec3 _cameraDirection; // Camera direction vector
       glm::vec3 _cameraPosition;
 
+      ::block as_block()
+      {
+
+         return as_memory_block(*this);
+
+      }
+
    };
 
    class CLASS_DECL_GRAPHICS3D_VULKAN MNKController :
@@ -76,12 +83,7 @@ namespace graphics3d_vulkan
 
    public:
 
-      operator ::block ()
-      {
-
-         return as_memory_block((mnk_controller_t&)*this);
-
-      }
+ 
 
       // Existing functions...
       //void handleMouseInput(GLFWwindow* window);
