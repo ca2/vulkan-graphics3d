@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "base/user/simple/frame_window.h"
+#include "app-cube/cube/frame.h"
 
 
 namespace vulkan_graphics3d_landen
@@ -9,7 +9,7 @@ namespace vulkan_graphics3d_landen
 
 
    class CLASS_DECL_VULKAN_GRAPHICS3D_LANDEN frame :
-      virtual public simple_frame_window
+      virtual public ::cube::frame
    {
    public:
 
@@ -37,7 +37,7 @@ namespace vulkan_graphics3d_landen
       using simple_frame_window::frame_experience;
       ::pointer < ::experience::frame > frame_experience() override;
 
-      DECLARE_MESSAGE_HANDLER(on_message_close);
+      //DECLARE_MESSAGE_HANDLER(on_message_close);
    };
 
 

@@ -1,19 +1,23 @@
 // From application_object by camilo on 2025-05-17 01:10 <3ThomasBorregaardSorensen!!
 #include "framework.h"
-#include "application_handler.h"
+#include "descriptors.h"
 #include "buffer.h"
 #include "engine.h"
 #include "frame_info.h"
 #include "input.h"
 #include "offscreen_render_pass.h"
+#include "renderer.h"
 #include "swap_chain_render_pass.h"
+#include "app-cube/cube/application.h"
 #include "app-cube/cube/camera.h"
+#include "app-cube/cube/impact.h"
+#include "app-cube/cube/scene.h"
 #include "system/basic_render_system.h"
 #include "system/point_light_system.h"
 #include "acme/platform/application.h"
 #include "apex/database/client.h"
 #include "apex/database/stream.h"
-#include "app-cube/cube/container.h"
+//#include "app-cube/cube/container.h"
 #include <chrono>
 
 
@@ -36,24 +40,22 @@ namespace graphics3d_vulkan
    }
 
 
-   void engine::run_application()
+   void engine::run()
    {
 
-      //::pointer < vulkan_land_continuum::application> papp = m_p3dapplication;
+      auto papp = get_app();
 
-      __øconstruct(m_p3dapplication->m_pcontext);
+      __øconstruct(m_pcontext);
 
-      ::cast < ::graphics3d_vulkan::context > pcontext = m_p3dapplication->m_pcontext;
-
-      pcontext->initialize_context(m_p3dapplication->m_pcontainer);
+      m_pcontext->initialize_context(papp->m_pimpact);
 
       __construct_new(m_prenderer);
 
-      m_prenderer->initialize_renderer(m_p3dapplication->m_pcontainer, pcontext);
+      m_prenderer->initialize_renderer(papp->m_pimpact, m_pcontext);
 
       auto pglobalpoolbuilder = __allocate descriptor_pool::Builder();
 
-      pglobalpoolbuilder->initialize_builder(pcontext);
+      pglobalpoolbuilder->initialize_builder(m_pcontext);
       pglobalpoolbuilder->setMaxSets(render_pass::MAX_FRAMES_IN_FLIGHT);
       pglobalpoolbuilder->addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, render_pass::MAX_FRAMES_IN_FLIGHT);
 
@@ -66,13 +68,15 @@ namespace graphics3d_vulkan
       //   .setMaxSets(swap_chain_render_pass::MAX_FRAMES_IN_FLIGHT)
       //   .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, swap_chain_render_pass::MAX_FRAMES_IN_FLIGHT)
       //   .build();
-      m_p3dapplication->load_game_objects();
+      m_pscene->on_load_scene();
 
       //pcontext = __allocate context(m_pvulkandevice);
 
       ::pointer_array<buffer> uboBuffers;
 
       uboBuffers.set_size(render_pass::MAX_FRAMES_IN_FLIGHT);
+
+      ::cast < context > pcontext = m_pcontext;
 
       for (int i = 0; i < uboBuffers.size(); i++)
       {
@@ -120,14 +124,17 @@ namespace graphics3d_vulkan
 
       //camera camera{ glm::vec3(0.0f, 2.0f, -15.0f), -90.0f, 0.0f };
       //{ glm::vec3(0.0f, 2.0f, -15.0f), -90.0f, 0.0f };
-      auto camera = m_p3dapplication->get_default_camera();
+      auto camera = papp->get_default_camera();
 
       //VkcCamera camera(glm::vec3(0.0f, 2.0f, -10.0f), .0f, 0.0f);
 
-      auto viewerObject = __øcreate <::cube::application_object>();
-      m_p3dapplication->m_pcontainer->m_bLastMouse = true;
+      auto viewerObject = __øcreate <::cube::scene_object>();
+      papp->m_pimpact->m_bLastMouse = true;
       viewerObject->m_transform.translation.z = -2.5f;
-      MNKController cameraController{};
+      MNKController cameraController;
+
+      cameraController.m_pimpact = papp->m_pimpact;
+      cameraController.m_pkeymap = papp->m_pimpact->m_pkeymap;
       /*    glfwSetInputMode(_window.getGLFWwindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
           glfwSetWindowUserPointer(_window.getGLFWwindow(), &cameraController);*/
       cameraController.m_bMouseAbsolute;
@@ -139,15 +146,15 @@ namespace graphics3d_vulkan
 
          pdatabaseclient->datastream()->get_block("camera", as_memory_block(camera));
          pdatabaseclient->datastream()->get_block("transform", as_memory_block(viewerObject->m_transform));
-         pdatabaseclient->datastream()->get_block("camera_controller", as_memory_block(cameraController));
+         pdatabaseclient->datastream()->get_block("camera_controller", (::block &)cameraController);
 
       }
 
-      auto pcontainer = m_p3dapplication->m_pcontainer;
+      auto pimpact = papp->m_pimpact;
 
       auto currentTime = std::chrono::high_resolution_clock::now();
       //while (!_window.shouldClose())
-      while (!pcontainer->m_bShouldClose && task_get_run())
+      while (!pimpact->m_bShouldClose && task_get_run())
       {
 
          task_iteration();
@@ -159,13 +166,13 @@ namespace graphics3d_vulkan
 
          currentTime = newTime;
 
-         cameraController.handleMouseInput(pcontainer);
+         cameraController.handleMouseInput();
 
-         cameraController.updateLook(pcontainer, cameraController.getX(), cameraController.getY(), viewerObject);
+         cameraController.updateLook(cameraController.getX(), cameraController.getY(), viewerObject);
 
-         cameraController.updateMovement(pcontainer, frameTime, viewerObject);
+         cameraController.updateMovement(frameTime, viewerObject);
 
-         //cameraController.moveInPlaneXZ(m_pcontainer, frameTime, viewerObject);
+         //cameraController.moveInPlaneXZ(m_pimpact, frameTime, viewerObject);
 
          camera.setViewYXZ(viewerObject->m_transform.translation, viewerObject->m_transform.rotation);
 
@@ -182,7 +189,7 @@ namespace graphics3d_vulkan
 
                int frameIndex = m_prenderer->getFrameIndex();
 
-               FrameInfo frameInfo{ frameIndex, frameTime, commandBuffer, camera, globalDescriptorSets[frameIndex], m_mapObjects };
+               FrameInfo frameInfo{ frameIndex, frameTime, commandBuffer, camera, globalDescriptorSets[frameIndex], m_pscene->m_mapObjects };
 
                // update
                GlobalUbo ubo{};
@@ -211,7 +218,7 @@ namespace graphics3d_vulkan
       if (pdatabaseclient)
       {
 
-         pdatabaseclient->datastream()->set("camera_controller", as_memory_block(cameraController));
+         pdatabaseclient->datastream()->set("camera_controller", (::block &) cameraController);
          pdatabaseclient->datastream()->set("transform", as_memory_block(viewerObject->m_transform));
          pdatabaseclient->datastream()->set("camera", as_memory_block(camera));
 

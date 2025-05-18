@@ -2,6 +2,7 @@
 #include "impact.h"
 #include "document.h"
 #include "application.h"
+#include "scene/main.h"
 #include "acme/constant/message.h"
 #include "acme/filesystem/filesystem/file_system.h"
 #include "acme/filesystem/filesystem/file_context.h"
@@ -70,7 +71,7 @@ namespace vulkan_graphics3d_continuum
    void impact::install_message_routing(::channel * psender)
    {
 
-      ::vulkan_graphics3d_landen::impact::install_message_routing(psender);
+      ::cube::impact::install_message_routing(psender);
 
       MESSAGE_LINK(e_message_create,psender,this,&impact::on_message_create);
       MESSAGE_LINK(e_message_destroy, psender, this, &impact::on_message_destroy);
@@ -79,12 +80,12 @@ namespace vulkan_graphics3d_continuum
 
 
 
-   ::pointer < ::graphics3d::application > impact::start_graphics3d_application()
-   {
+   //::pointer < ::graphics3d::application > impact::start_graphics3d_application()
+   //{
 
-      return ::vulkan_graphics3d_landen::impact::start_graphics3d_application();
+   //   return ::vulkan_graphics3d_landen::impact::start_graphics3d_application();
 
-   }
+   //}
 
 
 
@@ -303,7 +304,9 @@ namespace vulkan_graphics3d_continuum
       pgraphics->text_out(point.x(), point.y() + y + size.cy(), strText);
 
       pgraphics->set_smooth_mode(::draw2d::e_smooth_mode_none);
-      ::vulkan_graphics3d_landen::impact::_001OnDraw(pgraphics);
+      
+      ::cube::impact::_001OnDraw(pgraphics);
+
    }
 
 
@@ -319,7 +322,7 @@ namespace vulkan_graphics3d_continuum
 
       }
 
-      ::vulkan_graphics3d_landen::impact::on_layout(pgraphics);
+      ::cube::impact::on_layout(pgraphics);
       
       setup_default_client_area_user_item();
 
@@ -337,12 +340,15 @@ namespace vulkan_graphics3d_continuum
 
             print_line("on_click : e_element_client");
             
-            ::array < ::file::file_dialog_filter > filtera;
+            ::file::file_dialog_filter filterdialogfilter;
             
-            filtera.add({"application.txt", "application.txt"});
+            filterdialogfilter.add_item({"application.txt", "application.txt"});
             
-            pick_single_file_to_open(filtera, [ this ] (const ::file::path & path)
+            pick_single_file_to_open(filterdialogfilter, 
+               [ this ] (::file::file_dialog * pdialog)
                              {
+
+                  auto path = pdialog->get_file_path();
                
                try {
                   auto memory = file()->as_memory(path);
@@ -378,6 +384,40 @@ namespace vulkan_graphics3d_continuum
       return get_app()->is_absolute_mouse_position();
 
    }
+
+
+   void impact::on_load_engine()
+   {
+
+      auto psceneMain = add_scene < main_scene >("main");
+
+      m_pengine->set_current_scene(psceneMain);
+
+   }
+
+
+   ::pointer < ::cube::key_map > impact::get_default_key_map()
+   {
+
+      auto pmap = __create_new < ::cube::key_map>();
+      using namespace ::cube;
+
+      pmap->map(e_key_moveLeft, ::user::e_key_a);
+      pmap->map(e_key_moveRight, ::user::e_key_d);
+      pmap->map(e_key_moveForward, ::user::e_key_w);
+      pmap->map(e_key_moveBackward, ::user::e_key_s);
+      pmap->map(e_key_moveUp, ::user::e_key_e);
+      pmap->map(e_key_moveDown, ::user::e_key_q);
+      pmap->map(e_key_lookLeft, ::user::e_key_left);
+      pmap->map(e_key_lookRight, ::user::e_key_right);
+      pmap->map(e_key_lookUp, ::user::e_key_up);
+      pmap->map(e_key_lookDown, ::user::e_key_down);
+      pmap->map(e_key_Exit, ::user::e_key_escape);
+
+      return pmap;
+
+   }
+
 
 
 } // namespace vulkan_graphics3d_continuum

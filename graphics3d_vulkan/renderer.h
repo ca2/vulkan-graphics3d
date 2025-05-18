@@ -1,7 +1,7 @@
 #pragma once
  
 //#include "AppCore/vk_window.h"
-#include "app-cube/cube/container.h"
+//#include "app-cube/cube/container.h"
 #include "context.h"
 //#include "offscreen.h"
 //#include "swapchain.h"
@@ -30,10 +30,8 @@ namespace graphics3d_vulkan
 		~renderer();
 
 
-		void initialize_renderer(::cube::container * pvkccontainer,  context* pvkcdevice);
+		virtual void initialize_renderer(::cube::impact * pimpact,  ::cube::context* pcontext);
 
-		renderer(const renderer&) = delete;
-		renderer& operator=(const renderer&) = delete;
 
 
 		VkRenderPass getRenderPass() const 
@@ -111,7 +109,7 @@ namespace graphics3d_vulkan
 			~OffScreenSampler();
 
 
-			void initialize_offscreen_sampler(context* pvkcdevice);
+			void initialize_offscreen_sampler(::cube::context* pcontext);
 
 			void clear();
 			void update(VkExtent2D vkextent2d);
@@ -123,7 +121,7 @@ namespace graphics3d_vulkan
 
 		};
 
-		::pointer < ::cube::container >	m_pcontainer;
+		::pointer < ::cube::impact >	m_pimpact;
 		::pointer < context >				m_pcontext;
 		::pointer < OffScreenSampler >	m_poffscreensampler;
 		//::pointer<swap_chain_render_pass>			m_pvkcswapchain;

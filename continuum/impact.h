@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "vulkan-graphics3d/landen/impact.h"
+#include "app-cube/cube/impact.h"
 
 
 namespace vulkan_graphics3d_continuum
@@ -9,7 +9,7 @@ namespace vulkan_graphics3d_continuum
 
 
    class CLASS_DECL_VULKAN_GRAPHICS3D_CONTINUUM impact :
-      virtual public ::app_consumer < application, ::vulkan_graphics3d_landen::impact >
+      virtual public ::app_consumer < application, ::cube::impact >
    {
    public:
 
@@ -30,7 +30,7 @@ namespace vulkan_graphics3d_continuum
       virtual long long decrement_reference_count() override;
 #endif
 
-      ::pointer < ::graphics3d::application > start_graphics3d_application() override;
+      //::pointer < ::graphics3d::application > start_graphics3d_application() override;
 
 
       virtual void install_message_routing(::channel * psender) override;
@@ -52,6 +52,10 @@ namespace vulkan_graphics3d_continuum
       bool on_click(::item * pitem, ::user::mouse * pmouse) override;
       
       bool is_absolute_mouse_position() override;
+
+      void on_load_engine() override;
+
+      ::pointer < ::cube::key_map > get_default_key_map() override;
 
    };
 

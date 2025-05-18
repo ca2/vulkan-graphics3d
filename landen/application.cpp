@@ -36,9 +36,9 @@ namespace vulkan_graphics3d_landen
       //m_ptemplateFuelMain = nullptr;
       //m_ptemplateFuelImpact = nullptr;
 
-      m_strAppId              = "vulkan-graphics3d/landen";
-      m_strAppName            = "vulkan-graphics3d/landen";
-      m_strBaseSupportId      = "vulkan-graphics3d/landen";
+      m_strAppId              = "vulkan-cube/landen";
+      m_strAppName            = "vulkan-cube/landen";
+      m_strBaseSupportId      = "vulkan-cube/landen";
       m_bLicense              = false;
 
    }
@@ -102,116 +102,113 @@ namespace vulkan_graphics3d_landen
 
       //return true;
 
-      auto pfactoryGraphics3dVulkan = system()->factory("graphics3d", "vulkan");
-
-      pfactoryGraphics3dVulkan->merge_to_global_factory();
 
    }
 
 
-   void application::update_3d_application(int cx, int cy)
-   {
+   //void application::update_3d_application(int cx, int cy)
+   //{
 
-      if (!m_p3dapplication)
-      {
+   //   if (!m_p3dapplication)
+   //   {
 
-         if (!m_pimpact->m_callbackOffscreen)
-         {
+   //      if (!m_pimpact->m_callbackOffscreen)
+   //      {
 
-            m_pimpact->m_callbackOffscreen = [this](void* p, int w, int h, int stride)
-               {
+   //         m_pimpact->m_callbackOffscreen = [this](void* p, int w, int h, int stride)
+   //            {
 
-                  {
+   //               {
 
-                     _synchronous_lock synchronouslock(m_pimpact->m_pparticleImageSynchronization);
+   //                  _synchronous_lock synchronouslock(m_pimpact->m_pparticleImageSynchronization);
 
-                     m_pimpact->m_pimage->image32()->copy(m_pimpact->m_pimage->size().minimum(::int_size(w, h)), m_pimpact->m_pimage->m_iScan, (image32_t*)p, stride);
+   //                  m_pimpact->m_pimage->image32()->copy(m_pimpact->m_pimage->size().minimum(::int_size(w, h)), m_pimpact->m_pimage->m_iScan, (image32_t*)p, stride);
 
-                     for (int y = 0; y < h; y++)
-                     {
+   //                  for (int y = 0; y < h; y++)
+   //                  {
 
-                        auto p = (unsigned char*)(m_pimpact->m_pimage->image32() + (y * m_pimpact->m_pimage->m_iScan) / 4);
+   //                     auto p = (unsigned char*)(m_pimpact->m_pimage->image32() + (y * m_pimpact->m_pimage->m_iScan) / 4);
 
-                        for (int x = 0; x < w; x++)
-                        {
+   //                     for (int x = 0; x < w; x++)
+   //                     {
 
-                           //p[0] = p[0] * p[3] / 255;
-                           //p[1] = p[1] * p[3] / 255;
-                           //p[2] = p[2] * p[3] / 255;
+   //                        //p[0] = p[0] * p[3] / 255;
+   //                        //p[1] = p[1] * p[3] / 255;
+   //                        //p[2] = p[2] * p[3] / 255;
 
-                           auto r = p[0];
-                           auto g = p[1];
-                           auto b = p[2];
-                           auto a = p[3];
-                           p[0] = b;
-                           p[2] = r;
-                           //p[3] = 255;
+   //                        auto r = p[0];
+   //                        auto g = p[1];
+   //                        auto b = p[2];
+   //                        auto a = p[3];
+   //                        p[0] = b;
+   //                        p[2] = r;
+   //                        //p[3] = 255;
 
-                           /*         if (r > a)
-                                    {
+   //                        /*         if (r > a)
+   //                                 {
 
-                                       information("What a red!!"_ansi);
+   //                                    information("What a red!!"_ansi);
 
-                                    }
+   //                                 }
 
-                                    if (g > a)
-                                    {
+   //                                 if (g > a)
+   //                                 {
 
-                                       information("What a green!!"_ansi);
+   //                                    information("What a green!!"_ansi);
 
-                                    }
+   //                                 }
 
-                                    if (b > a)
-                                    {
+   //                                 if (b > a)
+   //                                 {
 
-                                       information("What a blue!!"_ansi);
+   //                                    information("What a blue!!"_ansi);
 
-                                    }*/
+   //                                 }*/
 
-                           p += 4;
+   //                        p += 4;
 
-                        }
+   //                     }
 
-                     }
+   //                  }
 
-                  }
-
-
-                  m_pimpact->set_need_redraw();
-                  m_pimpact->post_redraw();
-               };
-
-         }
-
-         m_ptask3dApp = fork([this]()
-            {
-
-               //            run_vulkan_example();
-
-               m_p3dapplication = m_pimpact->start_graphics3d_application();
-
-               m_p3dapplication->m_callbackOffscreen = m_pimpact->m_callbackOffscreen;
-
-               m_p3dapplication->run_application();
-
-               m_ptask3dApp.release();
-
-            });
+   //               }
 
 
+   //               m_pimpact->set_need_redraw();
+   //               m_pimpact->post_redraw();
+   //            };
 
+   //      }
 
-      }
-      else
-      {
+   //      m_ptask3dApp = fork([this]()
+   //         {
 
-         m_p3dapplication->resize(cx, cy);
+   //            //            run_vulkan_example();
 
-      }
+   //            m_p3dapplication = m_pimpact->start_graphics3d_application();
+
+   //            m_p3dapplication->m_callbackOffscreen = m_pimpact->m_callbackOffscreen;
+
+   //            m_p3dapplication->run_application();
+
+   //            m_ptask3dApp.release();
+
+   //         });
 
 
 
-   }
+
+   //   }
+   //   else
+   //   {
+
+   //      m_p3dapplication->resize(cx, cy);
+
+   //   }
+
+
+
+   //}
 
 
    void application::term_instance()
@@ -300,7 +297,11 @@ namespace vulkan_graphics3d_landen
 
    //__namespace_application_factory("app-core/vulken"_ansi);
 
+   ::string application::graphics3d_get_implementation_name()
+   {
 
+      return "vulkan";
+   }
 } // namespace vulkan_graphics3d_landen
 
 

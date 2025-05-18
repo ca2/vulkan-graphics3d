@@ -3,7 +3,7 @@
 #include "app-cube/cube/camera.h"
 #include "context.h"
 #include "frame_info.h"
-#include "application_object.h"
+#include "scene_object.h"
 #include "pipeline.h"
 
 // std

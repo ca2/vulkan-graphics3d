@@ -3,9 +3,9 @@
 // camilo on 2025-05-17 03:00 <3ThomasBorregaardSorensen!!
 #include "framework.h"
 #include "context.h"
-#include "app-cube/cube/container.h"
 #include "initializers.h"
 #include "tools.h"
+#include "app-cube/cube/impact.h"
 // std headers
 #include <cstring>
 #include <iostream>
@@ -91,10 +91,10 @@ namespace graphics3d_vulkan
    }
 
 
-   void context::initialize_context(::cube::container* pcontainer)
+   void context::initialize_context(::cube::impact* pimpact)
    {
 
-      m_pcontainer = pcontainer;
+      m_pimpact = pimpact;
 
    }
 

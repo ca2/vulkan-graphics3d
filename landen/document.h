@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "base/user/user/document.h"
+#include "app-cube/cube/document.h"
 
 
 namespace vulkan_graphics3d_landen
@@ -9,7 +9,7 @@ namespace vulkan_graphics3d_landen
 
 
    class CLASS_DECL_VULKAN_GRAPHICS3D_LANDEN document :
-      virtual public ::user::document
+      virtual public ::cube::document
    {
    public:
 

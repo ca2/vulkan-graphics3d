@@ -30,9 +30,9 @@ namespace vulkan_graphics3d_landen
 
       //      ::backimpact::user::impact::install_message_routing(pchannel);
 
-      ::simple_frame_window::install_message_routing(pchannel);
+      ::cube::frame::install_message_routing(pchannel);
 
-      MESSAGE_LINK(e_message_close, pchannel, this, &frame::on_message_close);
+      //MESSAGE_LINK(e_message_close, pchannel, this, &frame::on_message_close);
 
    }
    //void frame::assert_ok() const
@@ -50,26 +50,26 @@ namespace vulkan_graphics3d_landen
 
    //}
 
-   void frame::on_message_close(::message::message* pmessage)
-   {
+   //void frame::on_message_close(::message::message* pmessage)
+   //{
 
-      ::pointer <::vulkan_graphics3d_landen::application> papp = m_papplication;
+   //   ::pointer <::vulkan_graphics3d_landen::application> papp = m_papplication;
 
-      if (papp)
-      {
+   //   if (papp)
+   //   {
 
-         auto ptask = papp->m_ptask3dApp;
+   //      auto ptask = papp->m_ptaskEngine;
 
-         if (ptask)
-         {
+   //      if (ptask)
+   //      {
 
-            ptask->set_finish();
+   //         ptask->set_finish();
 
-         }
+   //      }
 
-      }
+   //   }
 
-   }
+   //}
 
 
    ::pointer < ::experience::frame > frame::frame_experience()

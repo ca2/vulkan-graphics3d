@@ -5,7 +5,7 @@
 #include "app-cube/cube/engine.h"
 
 
-#include "application_object.h"
+#include "scene_object.h"
 
 
 // libs
@@ -41,7 +41,7 @@ namespace graphics3d_vulkan
 		~engine() override;
 
 
-		void run_application() override;
+		void run() override;
 
 		
 	};

@@ -4,6 +4,7 @@
 #include "swap_chain_render_pass.h"
 #include "initializers.h"
 #include "tools.h"
+#include "app-cube/cube/impact.h"
 
 #include <array>
 #include <cassert>
@@ -20,19 +21,24 @@ namespace graphics3d_vulkan
 
    }
 
-   void renderer::initialize_renderer(::cube::container* pcontainer, context* pvkcdevice)
+
+   void renderer::initialize_renderer(::cube::impact* pimpact, ::cube::context* pcontext)
    {
 
-      m_pcontainer = pcontainer;
-      m_pcontext = pvkcdevice;
+      m_pimpact = pimpact;
+
+      m_pcontext = pcontext;
 
       __construct_new(m_poffscreensampler);
 
-      m_poffscreensampler->initialize_offscreen_sampler(pvkcdevice);
+      m_poffscreensampler->initialize_offscreen_sampler(pcontext);
 
       defer_layout();
+
       createCommandBuffers();
+
    }
+
 
    renderer::~renderer() {
       freeCommandBuffers();
@@ -42,7 +48,7 @@ namespace graphics3d_vulkan
    void renderer::defer_layout()
    {
 
-      auto size = m_pcontainer->size();
+      auto size = m_pimpact->size();
 
       if (m_extentRenderer.width == size.width()
          && m_extentRenderer.height == size.height())
@@ -187,10 +193,10 @@ namespace graphics3d_vulkan
    }
 
 
-   void renderer::OffScreenSampler::initialize_offscreen_sampler(context* pvkcdevice)
+   void renderer::OffScreenSampler::initialize_offscreen_sampler(::cube::context* pcontext)
    {
 
-      m_pcontext = pvkcdevice;
+      m_pcontext = pcontext;
 
    }
 
@@ -355,9 +361,9 @@ namespace graphics3d_vulkan
 
       }
 
-      auto pcontainer = m_pcontext->m_pcontainer;
+      auto pimpact = m_pcontext->m_pimpact;
 
-      auto callback = pcontainer->m_callbackOffscreen;
+      auto callback = pimpact->m_callbackOffscreen;
 
       // Get layout of the image (including row pitch)
       VkImageSubresource subResource{};
@@ -395,7 +401,7 @@ namespace graphics3d_vulkan
    void renderer::sample()
    {
 
-      auto callback = m_pcontainer->m_callbackOffscreen;
+      auto callback = m_pimpact->m_callbackOffscreen;
 
       if (callback)
       {

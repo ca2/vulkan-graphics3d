@@ -724,8 +724,7 @@
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="application_handler.cpp" />
-    <ClCompile Include="application_object.cpp" />
+    <ClCompile Include="scene_object.cpp" />
     <ClCompile Include="buffer.cpp" />
     <ClCompile Include="descriptors.cpp" />
     <ClCompile Include="context.cpp" />
@@ -758,8 +757,7 @@
   <ItemGroup>
     <ClInclude Include="aaa_vkc_types.h" />
     <ClInclude Include="aaa_window.h" />
-    <ClInclude Include="application_handler.h" />
-    <ClInclude Include="application_object.h" />
+    <ClInclude Include="scene_object.h" />
     <ClInclude Include="buffer.h" />
     <ClInclude Include="descriptors.h" />
     <ClInclude Include="context.h" />

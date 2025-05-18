@@ -1,6 +1,5 @@
 #include "framework.h"
 #include "application.h"
-#include "application3d.h"
 #include "main_frame.h"
 #include "document.h"
 #include "impact.h"
@@ -68,9 +67,8 @@ namespace vulkan_graphics3d_continuum
       factory()->add_factory_item <::vulkan_graphics3d_continuum::main_frame >();
       factory()->add_factory_item <::vulkan_graphics3d_continuum::impact >();
       factory()->add_factory_item <::vulkan_graphics3d_continuum::pane_impact >();
-      factory()->add_factory_item <::vulkan_graphics3d_continuum::application3d, ::graphics3d::application >();
 
-      ::vulkan_graphics3d_landen::application::init_instance();
+      ::cube::application::init_instance();
 
       add_impact_system(
          "main", __initialize_new ::user::single_document_template(
@@ -298,7 +296,11 @@ namespace vulkan_graphics3d_continuum
       return m_bAbsoluteMousePosition;
 
    }
+   ::string application::graphics3d_get_implementation_name()
+   {
 
+      return "vulkan";
+   }
 
 } // namespace vulkan_graphics3d_continuum
 

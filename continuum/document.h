@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "base/user/user/document.h"
+#include "app-cube/cube/document.h"
 
 
 namespace vulkan_graphics3d_continuum
@@ -9,7 +9,7 @@ namespace vulkan_graphics3d_continuum
 
 
    class CLASS_DECL_VULKAN_GRAPHICS3D_CONTINUUM document :
-      public ::user::document
+      public ::cube::document
    {
    public:
       

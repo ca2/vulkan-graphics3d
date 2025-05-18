@@ -22,9 +22,6 @@
     <ClCompile Include="_.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="application_handler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="buffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -67,7 +64,7 @@
     <ClCompile Include="tools.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="application_object.cpp">
+    <ClCompile Include="scene_object.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="system\basic_render_system.cpp">
@@ -94,9 +91,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="aaa_window.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="application_handler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="buffer.h">
@@ -147,7 +141,7 @@
     <ClInclude Include="tools.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="application_object.h">
+    <ClInclude Include="scene_object.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="system\basic_render_system.h">

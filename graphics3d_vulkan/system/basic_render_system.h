@@ -2,7 +2,7 @@
 
 #include "context.h"
 #include "pipeline.h"
-#include "application_object.h"
+#include "scene_object.h"
 #include "frame_info.h"
 #include "app-cube/cube/camera.h"
 

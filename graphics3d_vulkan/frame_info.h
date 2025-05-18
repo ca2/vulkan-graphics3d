@@ -1,12 +1,13 @@
 #pragma once
 
 #include "app-cube/cube/camera.h"
-#include "application_object.h"
+#include "scene_object.h"
 
 // lib
 //#include "_vulkan/vulkan.h>
 
-namespace graphics3d_vulkan {
+namespace graphics3d_vulkan 
+{
 
 
 #define MAX_LIGHTS 10
@@ -32,6 +33,11 @@ namespace graphics3d_vulkan {
 		VkCommandBuffer commandBuffer;
 		::cube::camera &camera;
 		VkDescriptorSet globalDescriptorSet;
-		::cube::application_object::map& gameObjects;
+		::cube::scene_object::map& gameObjects;
 	};
-}
+
+
+} // namespace graphics3d_vulkan 
+
+
+

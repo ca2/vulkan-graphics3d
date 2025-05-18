@@ -54,13 +54,8 @@ namespace graphics3d_vulkan
       context();
       ~context();
 
-      virtual void initialize_context(::cube::container* pcontainer);
+      virtual void initialize_context(::cube::impact* pimpact);
 
-      // Not copyable or movable
-      context(const context&) = delete;
-      void operator=(const context&) = delete;
-      //context(::graphics3d_vulkan::VulkanDevice&&) = delete;
-      context& operator=(context&&) = delete;
 
       VkCommandPool getCommandPool() { return m_vkcommandpool; }
       VkDevice logicalDevice() { return m_vkdevice; }
@@ -120,7 +115,8 @@ namespace graphics3d_vulkan
       VkInstance m_vkinstance;
       VkDebugUtilsMessengerEXT debugMessenger;
       VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-      ::pointer < ::cube::container > m_pcontainer;
+      ::pointer < ::cube::impact > m_pimpact;
+
       VkCommandPool m_vkcommandpool;
 
       VkDevice m_vkdevice;

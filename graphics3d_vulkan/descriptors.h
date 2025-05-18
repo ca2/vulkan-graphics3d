@@ -59,9 +59,9 @@ namespace graphics3d_vulkan
         public:
             //Builder(context& m_pcontext) : m_pcontext{ m_pcontext } {}
             Builder() {}
-            void initialize_builder(context* pvkcDevice)
+            void initialize_builder(::cube::context * pcontext)
             {
-               m_pcontext = pvkcDevice;
+               m_pcontext = pcontext;
 
             }
             Builder& addPoolSize(VkDescriptorType descriptorType, uint32_t count);

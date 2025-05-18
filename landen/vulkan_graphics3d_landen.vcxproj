@@ -725,7 +725,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="application.cpp" />
-    <ClCompile Include="application3d.cpp" />
     <ClCompile Include="document.cpp" />
     <ClCompile Include="frame.cpp" />
     <ClCompile Include="framework.cpp">
@@ -739,14 +738,15 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='StaticRelease|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="impact.cpp" />
+    <ClCompile Include="scene\main.cpp" />
     <ClCompile Include="_.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
-    <ClInclude Include="application3d.h" />
     <ClInclude Include="document.h" />
     <ClInclude Include="frame.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="scene\main.h" />
     <ClInclude Include="_.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="impact.h" />

@@ -22,8 +22,8 @@
     <ClCompile Include="pane_impact.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="application3d.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="scene\main.cpp">
+      <Filter>Source Files\scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -60,8 +60,8 @@
     <ClInclude Include="system_basic_render.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="application3d.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="scene\main.h">
+      <Filter>Header Files\scene</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -70,6 +70,12 @@
     </Filter>
     <Filter Include="Header Files">
       <UniqueIdentifier>{553e2ad6-0eec-4e39-9937-6581b3f77c18}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\scene">
+      <UniqueIdentifier>{4f7d92d7-443f-4dca-8930-cb18c9455114}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\scene">
+      <UniqueIdentifier>{63516a3d-20c1-4643-b614-328225d0eb76}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

@@ -1,5 +1,5 @@
 #include "framework.h"
-#include "application_object.h"
+#include "scene_object.h"
 
 //
 //namespace graphics3d_vulkan

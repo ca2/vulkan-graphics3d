@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "vulkan-graphics3d/landen/frame.h"
+#include "app-cube/cube/frame.h"
 
 
 namespace vulkan_graphics3d_continuum
@@ -9,7 +9,7 @@ namespace vulkan_graphics3d_continuum
 
 
    class CLASS_DECL_VULKAN_GRAPHICS3D_CONTINUUM main_frame :
-      virtual public vulkan_graphics3d_landen::frame
+      virtual public ::cube::frame
    {
    public:
 

@@ -40,9 +40,9 @@ namespace vulkan_graphics3d_landen
       //string draw2d_get_default_implementation_name() override;
 
       
-      virtual void on_layout_cube(int cx, int cy);
+      //virtual void on_layout_cube(int cx, int cy);
 
-
+      ::string graphics3d_get_implementation_name() override;
    };
 
 
