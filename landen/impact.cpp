@@ -20,7 +20,7 @@ int run_vulkan_example();
 
 int run_vulkan_example2(const ::function < void(void*, int, int, int)>& callback);
 
-int run_vulkan_example5(::cube::mouse_state* pmousestate, const ::function < void(void*, int, int, int)>& callback);
+int run_vulkan_example5(::graphics3d::mouse_state* pmousestate, const ::function < void(void*, int, int, int)>& callback);
 
 
 //namespace vulkan

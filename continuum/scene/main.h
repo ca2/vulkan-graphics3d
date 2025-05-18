@@ -21,7 +21,7 @@ namespace vulkan_graphics3d_continuum
       ~main_scene() override;
 
 
-      ::graphics3d::camera get_default_camera() override;
+      ::pointer < ::graphics3d::camera > get_default_camera() override;
 
 
       void on_load_scene() override;
