@@ -51,15 +51,21 @@ namespace graphics3d_vulkan
         friend class descriptor_writer;
     };
 
+
     class CLASS_DECL_GRAPHICS3D_VULKAN descriptor_pool :
-    virtual public ::particle {
+    virtual public ::particle 
+    {
     public:
-        class Builder :
-        virtual public ::particle{
+        
+       
+       class Builder :
+        virtual public ::particle
+        {
         public:
+
             //Builder(context& m_pcontext) : m_pcontext{ m_pcontext } {}
             Builder() {}
-            void initialize_builder(::cube::context * pcontext)
+            void initialize_builder(::graphics3d::context * pcontext)
             {
                m_pcontext = pcontext;
 

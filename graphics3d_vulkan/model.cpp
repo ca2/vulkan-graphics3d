@@ -50,7 +50,7 @@ namespace graphics3d_vulkan
     }
 
 
-    void model::initialize_model(::cube::context * pcontext, const ::cube::model::Builder& builder)
+    void model::initialize_model(::graphics3d::context * pcontext, const ::graphics3d::model::Builder& builder)
     {
 
        m_pcontext = pcontext;

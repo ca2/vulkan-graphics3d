@@ -1,6 +1,6 @@
 #pragma once
 
-#include "app-cube/cube/camera.h"
+#include "app-cube/cube/graphics3d/camera.h"
 #include "scene_object.h"
 
 // lib
@@ -31,9 +31,9 @@ namespace graphics3d_vulkan
 		int frameIndex;
 		float frameTime;
 		VkCommandBuffer commandBuffer;
-		::cube::camera &camera;
+		::graphics3d::camera &camera;
 		VkDescriptorSet globalDescriptorSet;
-		::cube::scene_object::map& gameObjects;
+		::graphics3d::scene_object::map& gameObjects;
 	};
 
 

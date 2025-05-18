@@ -4,7 +4,7 @@
 #pragma once
 
 
-#include "app-cube/cube/model.h"
+#include "app-cube/cube/graphics3d/model.h"
 
 
 #include "context.h"
@@ -25,7 +25,7 @@ namespace graphics3d_vulkan
 
 
    class CLASS_DECL_GRAPHICS3D_VULKAN model :
-      virtual public ::cube::model
+      virtual public ::graphics3d::model
    {
    public:
 
@@ -40,7 +40,7 @@ namespace graphics3d_vulkan
       model();
       ~model();
 
-      void initialize_model(::cube::context* pcontext, const ::cube::model::Builder& builder) override;
+      void initialize_model(::graphics3d::context* pcontext, const ::graphics3d::model::Builder& builder) override;
 
       void draw(void * pframeinfo) override;
       void bind(void* pframeinfo) override;

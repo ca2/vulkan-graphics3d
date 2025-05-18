@@ -9,9 +9,9 @@
 #include "renderer.h"
 #include "swap_chain_render_pass.h"
 #include "app-cube/cube/application.h"
-#include "app-cube/cube/camera.h"
 #include "app-cube/cube/impact.h"
-#include "app-cube/cube/scene.h"
+#include "app-cube/cube/graphics3d/camera.h"
+#include "app-cube/cube/graphics3d/scene.h"
 #include "system/basic_render_system.h"
 #include "system/point_light_system.h"
 #include "acme/platform/application.h"
@@ -124,11 +124,11 @@ namespace graphics3d_vulkan
 
       //camera camera{ glm::vec3(0.0f, 2.0f, -15.0f), -90.0f, 0.0f };
       //{ glm::vec3(0.0f, 2.0f, -15.0f), -90.0f, 0.0f };
-      auto camera = papp->get_default_camera();
+      auto camera = m_pscene->get_default_camera();
 
       //VkcCamera camera(glm::vec3(0.0f, 2.0f, -10.0f), .0f, 0.0f);
 
-      auto viewerObject = __øcreate <::cube::scene_object>();
+      auto viewerObject = __øcreate <::graphics3d::scene_object>();
       papp->m_pimpact->m_bLastMouse = true;
       viewerObject->m_transform.translation.z = -2.5f;
       MNKController cameraController;

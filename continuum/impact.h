@@ -55,7 +55,8 @@ namespace vulkan_graphics3d_continuum
 
       void on_load_engine() override;
 
-      ::pointer < ::cube::key_map > get_default_key_map() override;
+      ::pointer < ::graphics3d::key_map > get_default_key_map() override;
+
 
    };
 

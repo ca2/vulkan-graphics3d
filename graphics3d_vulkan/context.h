@@ -3,7 +3,7 @@
 // camilo on 2025-05-17 03:00 <3ThomasBorregaardSorensen!!
 #pragma once
 
-#include "app-cube/cube/context.h"
+#include "app-cube/cube/graphics3d/context.h"
 //#include "window.h"
 //#include "vulkan-cube/graphics3d_vulkan/context.h"
 #include "_vulkan.h"
@@ -38,7 +38,7 @@ namespace graphics3d_vulkan
 
 
    class CLASS_DECL_GRAPHICS3D_VULKAN context :
-      virtual public ::cube::context
+      virtual public ::graphics3d::context
    {
    public:
 

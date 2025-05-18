@@ -2,7 +2,7 @@
 #pragma once
 
 
-#include "app-cube/cube/engine.h"
+#include "app-cube/cube/graphics3d/engine.h"
 
 
 #include "scene_object.h"
@@ -22,7 +22,7 @@ namespace graphics3d_vulkan
 
 
 	class CLASS_DECL_GRAPHICS3D_VULKAN engine :
-		virtual public ::cube::engine
+		virtual public ::graphics3d::engine
 	{
 	public:
 

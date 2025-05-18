@@ -3,7 +3,7 @@
 #include "engine.h"
 #include "model.h"
 #include "app-cube/cube/application.h"
-#include "app-cube/cube/scene_object.h"
+#include "app-cube/cube/graphics3d/scene_object.h"
 //#include "networking.h"
 //#include "apex/networking/http/message.h"
 //#include "sockets/basic/socket_handler.h"
@@ -14,13 +14,13 @@
 IMPLEMENT_FACTORY(graphics3d_vulkan)
 {
 
-   pfactory->add_factory_item < ::graphics3d_vulkan::model, ::cube::model >();
+   pfactory->add_factory_item < ::graphics3d_vulkan::model, ::graphics3d::model >();
 
-   pfactory->add_factory_item < ::graphics3d_vulkan::engine, ::cube::engine >();
+   pfactory->add_factory_item < ::graphics3d_vulkan::engine, ::graphics3d::engine >();
 
-   pfactory->add_factory_item < ::graphics3d_vulkan::context, ::cube::context >();
+   pfactory->add_factory_item < ::graphics3d_vulkan::context, ::graphics3d::context >();
 
-   pfactory->add_factory_item < ::cube::scene_object >();
+   pfactory->add_factory_item < ::graphics3d::scene_object >();
 
 }
 

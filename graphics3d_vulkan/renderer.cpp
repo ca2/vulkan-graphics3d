@@ -22,7 +22,7 @@ namespace graphics3d_vulkan
    }
 
 
-   void renderer::initialize_renderer(::cube::impact* pimpact, ::cube::context* pcontext)
+   void renderer::initialize_renderer(::cube::impact* pimpact, ::graphics3d::context* pcontext)
    {
 
       m_pimpact = pimpact;
@@ -40,8 +40,11 @@ namespace graphics3d_vulkan
    }
 
 
-   renderer::~renderer() {
+   renderer::~renderer() 
+   {
+
       freeCommandBuffers();
+
    }
 
 
@@ -193,7 +196,7 @@ namespace graphics3d_vulkan
    }
 
 
-   void renderer::OffScreenSampler::initialize_offscreen_sampler(::cube::context* pcontext)
+   void renderer::OffScreenSampler::initialize_offscreen_sampler(::graphics3d::context* pcontext)
    {
 
       m_pcontext = pcontext;

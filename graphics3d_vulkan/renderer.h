@@ -30,7 +30,7 @@ namespace graphics3d_vulkan
 		~renderer();
 
 
-		virtual void initialize_renderer(::cube::impact * pimpact,  ::cube::context* pcontext);
+		virtual void initialize_renderer(::cube::impact * pimpact,  ::graphics3d::context* pcontext);
 
 
 
@@ -109,7 +109,7 @@ namespace graphics3d_vulkan
 			~OffScreenSampler();
 
 
-			void initialize_offscreen_sampler(::cube::context* pcontext);
+			void initialize_offscreen_sampler(::graphics3d::context* pcontext);
 
 			void clear();
 			void update(VkExtent2D vkextent2d);

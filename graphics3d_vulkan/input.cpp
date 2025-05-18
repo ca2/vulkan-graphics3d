@@ -2,7 +2,7 @@
 #include "input.h"
 #include "scene_object.h"
 #include "app-cube/cube/impact.h"
-#include "app-cube/cube/types.h"
+#include "app-cube/cube/graphics3d/types.h"
 #include <limits>
 
 
@@ -101,7 +101,7 @@ namespace graphics3d_vulkan
    //}
 
 
-   void MNKController::updateLook(float xOffset, float yOffset, ::cube::scene_object * pobject)
+   void MNKController::updateLook(float xOffset, float yOffset, ::graphics3d::scene_object * pobject)
    {
 
       xOffset *= _sensitivity;
@@ -139,7 +139,7 @@ namespace graphics3d_vulkan
    }
 
 
-   void MNKController::updateMovement(float dt, ::cube::scene_object* pobject)
+   void MNKController::updateMovement(float dt, ::graphics3d::scene_object* pobject)
    {
 
       float yaw = pobject->m_transform.rotation.y;
@@ -149,7 +149,7 @@ namespace graphics3d_vulkan
 
       glm::vec3 moveDir{ 0.f };
       {
-         using namespace cube;
+         using namespace ::graphics3d;
          if (key(e_key_moveForward) == ::user::e_key_state_pressed) moveDir += forwardDir;
          if (key(e_key_moveBackward) == ::user::e_key_state_pressed) moveDir -= forwardDir;
          if (key(e_key_moveRight) == ::user::e_key_state_pressed) moveDir += rightDir;

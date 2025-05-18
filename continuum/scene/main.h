@@ -3,7 +3,7 @@
 #pragma once
 
 
-#include "app-cube/cube/scene.h"
+#include "app-cube/cube/graphics3d/scene.h"
 
 
 namespace vulkan_graphics3d_continuum
@@ -11,7 +11,7 @@ namespace vulkan_graphics3d_continuum
 
 
    class main_scene :
-      virtual public ::cube::scene
+      virtual public ::graphics3d::scene
    {
    public:
 
@@ -21,7 +21,7 @@ namespace vulkan_graphics3d_continuum
       ~main_scene() override;
 
 
-      ::cube::camera get_default_camera() override;
+      ::graphics3d::camera get_default_camera() override;
 
 
       void on_load_scene() override;

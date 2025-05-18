@@ -2,8 +2,9 @@
 // by camilo on 2025-05-07 02:18 <3ThomasBorregaardSorensen!!
 #include "framework.h"
 #include "main.h"
-#include "app-cube/cube/camera.h"
-#include "app-cube/cube/scene_object.h"
+#include "app-cube/cube/application.h"
+#include "app-cube/cube/graphics3d/camera.h"
+#include "app-cube/cube/graphics3d/scene_object.h"
 
 
 namespace vulkan_graphics3d_continuum
@@ -22,7 +23,7 @@ namespace vulkan_graphics3d_continuum
    }
 
 
-   ::cube::camera main_scene::get_default_camera()
+   ::graphics3d::camera main_scene::get_default_camera()
    {
 
       glm::vec3 cameraPos = glm::vec3(0.0f, .0f, -5.0f);
@@ -91,7 +92,7 @@ namespace vulkan_graphics3d_continuum
 
       for (int i = 0; i < lightColors.size(); i++) 
       {
-         auto pointLight = __allocate ::cube::point_light (0.2f);
+         auto pointLight = __allocate ::graphics3d::point_light (0.2f);
          pointLight->m_color = lightColors[i];
          auto rotateLight = glm::rotate(
             glm::mat4(1.f),

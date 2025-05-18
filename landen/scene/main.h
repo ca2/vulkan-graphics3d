@@ -2,7 +2,7 @@
 #pragma once
 
 
-#include "app-cube/cube/scene.h"
+#include "app-cube/cube/graphics3d/scene.h"
 
 
 namespace vulkan_graphics3d_landen
@@ -10,7 +10,7 @@ namespace vulkan_graphics3d_landen
 
 
    class main_scene :
-      virtual public ::cube::scene
+      virtual public ::graphics3d::scene
    {
    public:
 

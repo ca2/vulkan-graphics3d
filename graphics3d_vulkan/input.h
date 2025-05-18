@@ -3,15 +3,12 @@
 #include "scene_object.h"
 //#include "window.h"
 #include "acme/constant/user_key.h"
-#include "app-cube/cube/key_map.h"
+#include "app-cube/cube/graphics3d/key_map.h"
 #include <glm/glm.hpp>
+
 
 namespace graphics3d_vulkan 
 {
-
-
-
-
 
 
    struct mnk_controller_t
@@ -55,8 +52,8 @@ namespace graphics3d_vulkan
 
       //void moveInPlaneXZ(::cube::impact * pimpact, float dt, application_object& gameObject);
 
-      void updateMovement(float dt, ::cube::scene_object* pobject);
-      void updateLook(float xOffset, float yOffset, ::cube::scene_object * pobject);
+      void updateMovement(float dt, ::graphics3d::scene_object* pobject);
+      void updateLook(float xOffset, float yOffset, ::graphics3d::scene_object * pobject);
 
       void processMouseMovement(float xOffset, float yOffset);
       void processKeyboardInput(float deltaTime);
@@ -67,7 +64,7 @@ namespace graphics3d_vulkan
 
 
       ::pointer<::cube::impact > m_pimpact;
-      ::pointer<::cube::key_map > m_pkeymap;
+      ::pointer<::graphics3d::key_map > m_pkeymap;
 
       auto key(auto ekey)
       {
