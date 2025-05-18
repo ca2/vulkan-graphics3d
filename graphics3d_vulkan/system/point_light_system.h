@@ -12,7 +12,7 @@
 
 namespace graphics3d_vulkan 
 {
-    class point_light_system
+    class point_light_system :virtual public ::particle
     {
     public:
 

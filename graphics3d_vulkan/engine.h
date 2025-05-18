@@ -19,7 +19,9 @@
 namespace graphics3d_vulkan 
 {
 
-
+	class SimpleRenderSystem;
+	class point_light_system;
+	class buffer;
 
 	class CLASS_DECL_GRAPHICS3D_VULKAN engine :
 		virtual public ::graphics3d::engine
@@ -34,7 +36,10 @@ namespace graphics3d_vulkan
 		::pointer <descriptor_pool>		m_pglobalpool;
 
 		//::cube::application_object::map				m_mapObjects;
-
+		std::vector<VkDescriptorSet> m_globalDescriptorSets;
+		::pointer < SimpleRenderSystem > m_psimpleRenderSystem;
+		::pointer < point_light_system > m_ppointLightSystem;
+		::pointer_array<buffer> m_uboBuffers;
 
 
 		engine();
@@ -42,6 +47,12 @@ namespace graphics3d_vulkan
 
 
 		void run() override;
+
+
+		void on_start_engine() override;
+
+
+		void on_render_frame(float frameTime) override;
 
 		
 	};

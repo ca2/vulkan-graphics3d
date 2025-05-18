@@ -73,25 +73,23 @@ namespace graphics3d_vulkan
 
       //pcontext = __allocate context(m_pvulkandevice);
 
-      ::pointer_array<buffer> uboBuffers;
-
-      uboBuffers.set_size(render_pass::MAX_FRAMES_IN_FLIGHT);
+      m_uboBuffers.set_size(render_pass::MAX_FRAMES_IN_FLIGHT);
 
       ::cast < context > pcontext = m_pcontext;
 
-      for (int i = 0; i < uboBuffers.size(); i++)
+      for (int i = 0; i < m_uboBuffers.size(); i++)
       {
 
-         uboBuffers[i] = __allocate buffer();
+         m_uboBuffers[i] = __allocate buffer();
 
-         uboBuffers[i]->initialize_buffer(
+         m_uboBuffers[i]->initialize_buffer(
             pcontext,
             sizeof(GlobalUbo),
             1,
             VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
 
-         uboBuffers[i]->map();
+         m_uboBuffers[i]->map();
 
       }
       auto globalSetLayout = set_descriptor_layout::Builder(pcontext)
@@ -99,25 +97,25 @@ namespace graphics3d_vulkan
          .build();
 
 
-      std::vector<VkDescriptorSet> globalDescriptorSets(render_pass::MAX_FRAMES_IN_FLIGHT);
+      m_globalDescriptorSets.resize(render_pass::MAX_FRAMES_IN_FLIGHT);
 
-      for (int i = 0; i < globalDescriptorSets.size(); i++)
+      for (int i = 0; i < m_globalDescriptorSets.size(); i++)
       {
 
-         auto bufferInfo = uboBuffers[i]->descriptorInfo();
+         auto bufferInfo = m_uboBuffers[i]->descriptorInfo();
 
          descriptor_writer(*globalSetLayout, *m_pglobalpool)
             .writeBuffer(0, &bufferInfo)
-            .build(globalDescriptorSets[i]);
+            .build(m_globalDescriptorSets[i]);
 
       }
 
-      SimpleRenderSystem simpleRenderSystem{
+      m_psimpleRenderSystem=__allocate SimpleRenderSystem{
           pcontext,
           m_prenderer->getRenderPass(),
           globalSetLayout->getDescriptorSetLayout() };
 
-      point_light_system pointLightSystem{
+      m_ppointLightSystem = __allocate point_light_system{
           pcontext,
           m_prenderer->getRenderPass(),
           globalSetLayout->getDescriptorSetLayout()
@@ -126,30 +124,40 @@ namespace graphics3d_vulkan
    }
 
 
-   void engine::on_render_frame()
+   void engine::on_render_frame(float frameTime)
    {
+      ::cast < renderer > prenderer = m_prenderer;
+
+      if (prenderer->m_pvkcrenderpass->width() <= 0
+   || prenderer->m_pvkcrenderpass->height() <= 0)
+{
+
+         return;
+
+}
+
 
       if (auto commandBuffer = m_prenderer->beginFrame())
       {
 
          int frameIndex = m_prenderer->getFrameIndex();
 
-         FrameInfo frameInfo{ frameIndex, frameTime, commandBuffer, camera, globalDescriptorSets[frameIndex], m_pscene->m_mapObjects };
+         FrameInfo frameInfo{ frameIndex, frameTime, commandBuffer, *m_pcamera, m_globalDescriptorSets[frameIndex], m_pscene->m_mapObjects };
 
          // update
          GlobalUbo ubo{};
-         ubo.projection = camera.getProjection();
-         ubo.view = camera.getView();
-         ubo.inverseView = camera.getInverseView();
-         pointLightSystem.update(frameInfo, ubo);
-         uboBuffers[frameIndex]->writeToBuffer(&ubo);
-         uboBuffers[frameIndex]->flush();
+         ubo.projection = m_pcamera->getProjection();
+         ubo.view = m_pcamera->getView();
+         ubo.inverseView = m_pcamera->getInverseView();
+         m_ppointLightSystem->update(frameInfo, ubo);
+         m_uboBuffers[frameIndex]->writeToBuffer(&ubo);
+         m_uboBuffers[frameIndex]->flush();
 
          // render
          m_prenderer->beginRenderPass(commandBuffer);
 
-         simpleRenderSystem.renderGameObjects(frameInfo);
-         pointLightSystem.render(frameInfo);
+         m_psimpleRenderSystem->renderGameObjects(frameInfo);
+         m_ppointLightSystem->render(frameInfo);
 
          m_prenderer->endRenderPass(commandBuffer);
          m_prenderer->endFrame();

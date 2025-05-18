@@ -16,7 +16,9 @@
 namespace graphics3d_vulkan 
 {
 
-	class SimpleRenderSystem {
+	class SimpleRenderSystem:
+	virtual public ::particle 
+	{
 	public:
 		SimpleRenderSystem(context *pvkcdevice, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
 		~SimpleRenderSystem();
