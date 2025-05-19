@@ -378,12 +378,12 @@ namespace vulkan_graphics3d_continuum
    }
 
 
-   bool impact::is_absolute_mouse_position()
-   {
+   //bool impact::is_absolute_mouse_position()
+   //{
 
-      return get_app()->is_absolute_mouse_position();
+   //   return get_app()->is_absolute_mouse_position();
 
-   }
+   //}
 
 
    void impact::on_load_engine()

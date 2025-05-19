@@ -51,7 +51,7 @@ namespace vulkan_graphics3d_continuum
       
       bool on_click(::item * pitem, ::user::mouse * pmouse) override;
       
-      bool is_absolute_mouse_position() override;
+      //bool is_absolute_mouse_position() override;
 
       void on_load_engine() override;
 

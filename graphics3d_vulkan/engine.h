@@ -52,7 +52,7 @@ namespace graphics3d_vulkan
 		void on_start_engine() override;
 
 
-		void on_render_frame(float frameTime) override;
+		void on_render_frame() override;
 
 		
 	};

@@ -124,8 +124,9 @@ namespace graphics3d_vulkan
    }
 
 
-   void engine::on_render_frame(float frameTime)
+   void engine::on_render_frame()
    {
+
       ::cast < renderer > prenderer = m_prenderer;
 
       if (prenderer->m_pvkcrenderpass->width() <= 0
@@ -142,7 +143,9 @@ namespace graphics3d_vulkan
 
          int frameIndex = m_prenderer->getFrameIndex();
 
-         FrameInfo frameInfo{ frameIndex, frameTime, commandBuffer, *m_pcamera, m_globalDescriptorSets[frameIndex], m_pscene->m_mapObjects };
+         FrameInfo frameInfo{ frameIndex, dt(), commandBuffer,
+            *m_pcamera, m_globalDescriptorSets[frameIndex],
+            m_pscene->m_mapObjects};
 
          // update
          GlobalUbo ubo{};
