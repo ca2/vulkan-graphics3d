@@ -37,12 +37,12 @@ namespace vulkan_graphics3d_continuum
    }
 
 
-   void main_scene::on_load_scene()
+   void main_scene::on_load_scene(::graphics3d::context * pcontext)
    {
 
       {
 
-         auto & flatVase = create_object("matter://models/flat_vase.obj");
+         auto & flatVase = tinyobjloader_object("matter://models/flat_vase.obj");
          flatVase.translate({ -.5f, .5f, 0.f });
          flatVase.scale({3.f, 1.5f, 3.f});
 
@@ -50,7 +50,7 @@ namespace vulkan_graphics3d_continuum
 
       {
 
-         auto & floor = create_object("matter://models/quad.obj");
+         auto & floor = tinyobjloader_object("matter://models/quad.obj");
          floor.translate({0.f, .5f, 0.f});
          floor.scale({8.f, 1.f, 8.f});
 
@@ -58,7 +58,7 @@ namespace vulkan_graphics3d_continuum
 
       {
 
-         auto & smoothVase = create_object("matter://models/smooth_vase.obj");
+         auto & smoothVase = tinyobjloader_object("matter://models/smooth_vase.obj");
          smoothVase.translate({.5f, .5f, 0.f});
          smoothVase.scale({3.f, 1.5f, 3.f});
 
@@ -66,7 +66,7 @@ namespace vulkan_graphics3d_continuum
 
       {
 
-         auto & stoneSphere = create_object("matter://models/StoneSphere.obj");
+         auto & stoneSphere = tinyobjloader_object("matter://models/StoneSphere.obj");
          stoneSphere.translate({ .0f, 0.f, 2.f });
          stoneSphere.scale({.5f, .5f, .5f});
 
@@ -74,7 +74,7 @@ namespace vulkan_graphics3d_continuum
 
       {
 
-         auto & woodBarrel = create_object("matter://models/Barrel_OBJ.obj");
+         auto & woodBarrel = tinyobjloader_object("matter://models/Barrel_OBJ.obj");
          woodBarrel.translate({ 1.f, -.4f, -1.5f });
          woodBarrel.scale({1.f, 1.f, 1.f});
 
