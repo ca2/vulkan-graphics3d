@@ -1,0 +1,1 @@
+unsigned int shader_frag_spv[] = { 0x07230203, 0x00010000, /* ... */ };
