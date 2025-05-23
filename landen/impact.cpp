@@ -18,9 +18,9 @@
 
 int run_vulkan_example();
 
-int run_vulkan_example2(const ::function < void(void*, int, int, int)>& callback);
+int run_vulkan_example2(const ::image32_callback& callback);
 
-int run_vulkan_example5(::graphics3d::mouse_state* pmousestate, const ::function < void(void*, int, int, int)>& callback);
+int run_vulkan_example5(::graphics3d::mouse_state* pmousestate, const ::image32_callback& callback);
 
 
 //namespace vulkan

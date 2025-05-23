@@ -112,10 +112,10 @@ namespace vulkan_graphics3d_landen
    //   if (!m_p3dapplication)
    //   {
 
-   //      if (!m_pimpact->m_callbackOffscreen)
+   //      if (!m_pimpact->m_callbackImage32CpuBuffer)
    //      {
 
-   //         m_pimpact->m_callbackOffscreen = [this](void* p, int w, int h, int stride)
+   //         m_pimpact->m_callbackImage32CpuBuffer = [this](void* p, int w, int h, int stride)
    //            {
 
    //               {
@@ -187,7 +187,7 @@ namespace vulkan_graphics3d_landen
 
    //            m_p3dapplication = m_pimpact->start_graphics3d_application();
 
-   //            m_p3dapplication->m_callbackOffscreen = m_pimpact->m_callbackOffscreen;
+   //            m_p3dapplication->m_callbackImage32CpuBuffer = m_pimpact->m_callbackImage32CpuBuffer;
 
    //            m_p3dapplication->run_application();
 
