@@ -38,7 +38,7 @@ namespace vulkan_graphics3d_continuum
    }
 
 
-   void main_scene::on_load_scene(::graphics3d::context * pcontext)
+   void main_scene::on_load_scene(::gpu::context * pcontext)
    {
 
       {
