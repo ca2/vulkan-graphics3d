@@ -25,12 +25,12 @@ namespace vulkan_graphics3d_continuum
 
    ::pointer < ::graphics3d::camera > main_scene::get_default_camera()
    {
-      glm::vec3 cameraPos = glm::vec3(0.0f, .0f, -5.0f);
+      glm::vec3 camera = glm::vec3(0.0f, .0f, -5.0f);
       glm::vec3 target = glm::vec3(0.0f); // Look at origin
-      glm::vec3 direction = glm::normalize(target - cameraPos);
+      //glm::vec3 direction = glm::normalize(target - cameraPos);
       //camera camera{ glm::vec3(0.0f, 2.0f, -15.0f), -90.0f, 0.0f };
       auto pcamera = __øcreate< ::graphics3d::camera>();
-      pcamera->initialize_camera( cameraPos, target, direction );
+      pcamera->initialize_camera(target, camera);
       //pcamera->m_pimpact = m_pimpact;
       return pcamera;
 
