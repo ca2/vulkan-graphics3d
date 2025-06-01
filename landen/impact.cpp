@@ -324,9 +324,9 @@ namespace vulkan_graphics3d_landen
 
       get_app()->m_pimpact = this;
 
-      m_pparticleImageSynchronization = node()->create_mutex();
+      //m_pparticleImageSynchronization = node()->create_mutex();
 
-      m_pimage = image()->create_image(int_size{ 1920, 1080 });
+      //m_pimage = image()->create_image(int_size{ 1920, 1080 });
 
    }
 
