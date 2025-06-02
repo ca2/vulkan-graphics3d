@@ -2,10 +2,10 @@
 
 
 
-#include "app-cube/cube/impact.h"
+#include "cube/impact.h"
 //#include "vulkan-cube/graphics3d_vulkan/types.h"
-//#include "app-cube/cube/application.h"
-//#include "app-cube/cube/impact.h"
+//#include "cube/application.h"
+//#include "cube/impact.h"
 //#include "apex/platform/app_consumer.h"
 //#include "bred/cube/container.h"
 

@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "app-cube/cube/document.h"
+#include "cube/document.h"
 
 
 namespace vulkan_graphics3d_continuum

@@ -830,7 +830,7 @@
     <ProjectReference Include="..\..\..\source\app\base\base.vcxproj">
       <Project>{a216abd4-26c4-4746-96b3-9d30ed28cf92}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\app-cube\cube\cube.vcxproj">
+    <ProjectReference Include="..\..\app\cube\cube.vcxproj">
       <Project>{c5fadcf3-ca08-483d-b5f9-2ce2d2beccbe}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\app\axis\axis.vcxproj">

@@ -1,8 +1,8 @@
 #pragma once
 
 //#include "vulkan/application.h"
-#include "app-cube/cube/platform/application.h"
-#include "app-cube/cube/application.h"
+#include "cube/platform/application.h"
+#include "cube/application.h"
 
 
 namespace vulkan_graphics3d_landen

@@ -2,9 +2,9 @@
 // by camilo on 2025-05-07 02:18 <3ThomasBorregaardSorensen!!
 #include "framework.h"
 #include "main.h"
-#include "app-cube/cube/application.h"
-#include "app-cube/cube/graphics3d/camera.h"
-#include "app-cube/cube/graphics3d/scene_object.h"
+#include "cube/application.h"
+#include "cube/graphics3d/camera.h"
+#include "cube/graphics3d/scene_object.h"
 
 
 namespace vulkan_graphics3d_continuum
