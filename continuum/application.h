@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "cube/application.h"
+#include "core/platform/application.h"
 
 
 namespace vulkan_graphics3d_continuum
@@ -9,7 +9,7 @@ namespace vulkan_graphics3d_continuum
 
 
    class CLASS_DECL_VULKAN_GRAPHICS3D_CONTINUUM application :
-      virtual public ::cube::application
+      virtual public ::core::application
    {
    public:
 

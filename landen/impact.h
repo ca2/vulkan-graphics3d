@@ -1,11 +1,11 @@
 #pragma once
 
 
-
-#include "cube/impact.h"
+#include "aura/user/user/graphics3d.h"
+#include "base/user/user/show.h"
 //#include "vulkan-cube/graphics3d_vulkan/types.h"
 //#include "cube/application.h"
-//#include "cube/impact.h"
+//#include "aura/user/user/graphics3d.h"
 //#include "apex/platform/app_consumer.h"
 //#include "bred/cube/container.h"
 
@@ -15,7 +15,7 @@ namespace vulkan_graphics3d_landen
 
 
    class CLASS_DECL_VULKAN_GRAPHICS3D_LANDEN impact :
-      virtual public ::app_consumer < application, ::cube::impact>
+      virtual public ::app_consumer < application, ::user::show<::user::graphics3d>>
    {
    public:
 

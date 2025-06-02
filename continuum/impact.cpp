@@ -28,7 +28,7 @@ namespace vulkan_graphics3d_continuum
    impact::impact()
    {
 
-      m_emouse = ::cube::e_mouse_updateLook;
+      m_emouse = ::graphics3d::e_mouse_updateLook;
       m_flagNonClient -= e_non_client_background;
       m_iSequence = 0;
       m_bNeedFullRedrawOnResize = true;
@@ -72,7 +72,7 @@ namespace vulkan_graphics3d_continuum
    void impact::install_message_routing(::channel * psender)
    {
 
-      ::cube::impact::install_message_routing(psender);
+      ::user::graphics3d::install_message_routing(psender);
 
       MESSAGE_LINK(e_message_create,psender,this,&impact::on_message_create);
       MESSAGE_LINK(e_message_destroy, psender, this, &impact::on_message_destroy);
@@ -306,7 +306,7 @@ namespace vulkan_graphics3d_continuum
 
       pgraphics->set_smooth_mode(::draw2d::e_smooth_mode_none);
       
-      ::cube::impact::_001OnDraw(pgraphics);
+      ::user::graphics3d::_001OnDraw(pgraphics);
 
    }
 
@@ -323,7 +323,7 @@ namespace vulkan_graphics3d_continuum
 
       }
 
-      ::cube::impact::on_layout(pgraphics);
+      ::user::graphics3d::on_layout(pgraphics);
       
       setup_default_client_area_user_item();
 

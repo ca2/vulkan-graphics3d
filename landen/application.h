@@ -1,8 +1,8 @@
 #pragma once
 
 //#include "vulkan/application.h"
-#include "cube/platform/application.h"
-#include "cube/application.h"
+//#include "aura/platform/application.h"
+#include "core/platform/application.h"
 
 
 namespace vulkan_graphics3d_landen
@@ -10,7 +10,7 @@ namespace vulkan_graphics3d_landen
 
 
    class CLASS_DECL_VULKAN_GRAPHICS3D_LANDEN application :
-      virtual public ::cube::application
+      virtual public ::core::application
    {
    public:
 

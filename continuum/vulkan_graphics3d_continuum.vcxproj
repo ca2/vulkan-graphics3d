@@ -830,8 +830,8 @@
     <ProjectReference Include="..\..\..\source\app\base\base.vcxproj">
       <Project>{a216abd4-26c4-4746-96b3-9d30ed28cf92}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\app\cube\cube.vcxproj">
-      <Project>{c5fadcf3-ca08-483d-b5f9-2ce2d2beccbe}</Project>
+    <ProjectReference Include="..\..\app-graphics3d\graphics3d_vulkan\graphics3d_vulkan.vcxproj">
+      <Project>{14be1858-637e-4577-a1f3-daed81d5d9df}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\app\axis\axis.vcxproj">
       <Project>{a2cbd4ed-ed0f-482b-9b16-f48f21c32835}</Project>
@@ -841,9 +841,6 @@
     </ProjectReference>
     <ProjectReference Include="..\..\app\core\core.vcxproj">
       <Project>{29c1eb5b-060e-4021-ae12-d1bcfb1b1359}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\graphics3d_vulkan\graphics3d_vulkan.vcxproj">
-      <Project>{928e4e5f-e062-43d3-8073-f3826381a2e1}</Project>
     </ProjectReference>
     <ProjectReference Include="..\landen\vulkan_graphics3d_landen.vcxproj">
       <Project>{5aafbd19-daed-40a5-bbd6-2fb07425c874}</Project>

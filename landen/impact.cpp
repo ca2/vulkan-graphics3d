@@ -120,7 +120,7 @@ namespace vulkan_graphics3d_landen
    void impact::install_message_routing(::channel* pchannel)
    {
 
-      ::cube::impact::install_message_routing(pchannel);
+      ::user::graphics3d::install_message_routing(pchannel);
 
       MESSAGE_LINK(e_message_create, pchannel, this, &impact::on_message_create);
       MESSAGE_LINK(e_message_destroy, pchannel, this, &impact::on_message_destroy);
@@ -322,7 +322,7 @@ namespace vulkan_graphics3d_landen
 
       }
 
-      get_app()->m_pimpact = this;
+      //get_app()->m_pimpact = this;
 
       //m_pparticleImageSynchronization = node()->create_mutex();
 
@@ -481,7 +481,7 @@ namespace vulkan_graphics3d_landen
 
       }
 
-      ::cube::impact::on_layout(pgraphics);
+      ::user::graphics3d::on_layout(pgraphics);
 
       //m_iWidth = rectangleX.width();
 

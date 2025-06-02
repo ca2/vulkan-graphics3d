@@ -1,7 +1,8 @@
 #pragma once
 
 
-#include "cube/impact.h"
+#include "aura/user/user/graphics3d.h"
+#include "base/user/user/show.h"
 
 
 namespace vulkan_graphics3d_continuum
@@ -9,7 +10,7 @@ namespace vulkan_graphics3d_continuum
 
 
    class CLASS_DECL_VULKAN_GRAPHICS3D_CONTINUUM impact :
-      virtual public ::app_consumer < application, ::cube::impact >
+      virtual public ::app_consumer < application, ::user::show<::user::graphics3d > >
    {
    public:
 

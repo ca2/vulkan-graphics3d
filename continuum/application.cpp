@@ -68,7 +68,7 @@ namespace vulkan_graphics3d_continuum
       factory()->add_factory_item <::vulkan_graphics3d_continuum::impact >();
       factory()->add_factory_item <::vulkan_graphics3d_continuum::pane_impact >();
 
-      ::cube::application::init_instance();
+      ::core::application::init_instance();
 
       add_impact_system(
          "main", __initialize_new ::user::single_document_template(

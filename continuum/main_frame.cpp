@@ -26,7 +26,7 @@ namespace vulkan_graphics3d_continuum
    ::pointer < ::experience::frame > main_frame::frame_experience()
    {
 
-      auto pframe = ::cube::frame::frame_experience(nullptr, "022", "LightBlue");
+      auto pframe = ::simple_frame_window::frame_experience(nullptr, "022", "LightBlue");
 
       return pframe;
 
@@ -44,7 +44,7 @@ namespace vulkan_graphics3d_continuum
    void main_frame::install_message_routing(::channel * pchannel)
    {
 
-      ::cube::frame::install_message_routing(pchannel);
+      ::simple_frame_window::install_message_routing(pchannel);
 
       MESSAGE_LINK(e_message_create, pchannel, this, &main_frame::on_message_create);
 

@@ -30,7 +30,7 @@ namespace vulkan_graphics3d_landen
 
       //      ::backimpact::user::impact::install_message_routing(pchannel);
 
-      ::cube::frame::install_message_routing(pchannel);
+      ::simple_frame_window::install_message_routing(pchannel);
 
       //MESSAGE_LINK(e_message_close, pchannel, this, &frame::on_message_close);
 

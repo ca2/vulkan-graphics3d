@@ -3,7 +3,7 @@
 #pragma once
 
 
-#include "cube/graphics3d/scene.h"
+#include "aura/graphics/graphics3d/scene.h"
 
 
 namespace vulkan_graphics3d_continuum
