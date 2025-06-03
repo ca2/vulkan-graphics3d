@@ -390,7 +390,7 @@ namespace vulkan_graphics3d_continuum
    void impact::on_load_engine()
    {
 
-      auto psceneMain = add_scene < main_scene >("main");
+      auto psceneMain = create_scene < main_scene >("main");
 
       m_pengine->set_current_scene(psceneMain);
 
