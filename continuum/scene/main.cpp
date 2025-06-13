@@ -3,8 +3,8 @@
 #include "framework.h"
 #include "main.h"
 #include "aura/platform/application.h"
-#include "aura/graphics/graphics3d/camera.h"
-#include "aura/graphics/graphics3d/scene_object.h"
+#include "bred/graphics3d/camera.h"
+#include "bred/graphics3d/scene_object.h"
 
 
 namespace vulkan_graphics3d_continuum
