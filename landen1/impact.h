@@ -36,11 +36,11 @@
 // In the previous demo, we used a TGA image with an embedded alpha mask as the
 // source of our layered window.
 //
-// In this demo we use OpenGL to draw a rotating cube to a pbuffer. Once the
+// In this demo we use OpenGL to draw a rotating graphics3d to a pbuffer. Once the
 // scene is drawn to the pbuffer we then make a local system memory copy of
 // the pbuffer's pixel data and use that as the source of our layered window.
 //
-// You can transfer the cube around the screen by holding down the left mouse
+// You can transfer the graphics3d around the screen by holding down the left mouse
 // button and dragging. To exit the demo press the ESC key.
 //
 // This demo requires Windows 2000, XP, or higher to run. The minimum supported

@@ -18,7 +18,7 @@ namespace vulkan_graphics3d_landen
       //::user::document *                     m_pdocMenu;
       //::user::single_document_template *     m_ptemplateFuelMain;
       //::user::single_document_template *     m_ptemplateFuelImpact;
-      //::pointer < ::cube::application > m_p3dapplication;
+      //::pointer < ::graphics3d::application > m_p3dapplication;
 
       application();
       ~application() override;

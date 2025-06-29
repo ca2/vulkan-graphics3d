@@ -3,11 +3,11 @@
 
 #include "bred/user/user/graphics3d.h"
 #include "base/user/user/show.h"
-//#include "vulkan-cube/graphics3d_vulkan/types.h"
-//#include "cube/application.h"
+//#include "vulkan-graphics3d/graphics3d_vulkan/types.h"
+//#include "graphics3d/application.h"
 //#include "bred/user/user/graphics3d.h"
 //#include "apex/platform/app_consumer.h"
-//#include "bred/cube/container.h"
+//#include "bred/graphics3d/container.h"
 
 
 namespace vulkan_graphics3d_landen
@@ -22,7 +22,7 @@ namespace vulkan_graphics3d_landen
       //memory m_memory;
       //int m_i;
 
-      //::cube::mouse_state     m_mousestate;
+      //::graphics3d::mouse_state     m_mousestate;
 
 
 
@@ -52,7 +52,7 @@ namespace vulkan_graphics3d_landen
       ::user::document * get_document();
 
 
-      //virtual ::pointer < ::cube::application > start_graphics3d_application();
+      //virtual ::pointer < ::graphics3d::application > start_graphics3d_application();
 
 
       void on_layout(::draw2d::graphics_pointer & pgraphics) override;

@@ -351,7 +351,7 @@ namespace vulkan1
       auto pathPlaneGltf = pathFolder / "models/plane.gltf"_ansi;
       auto pathDragonGltf = pathFolder / "models/chinesedragon.gltf"_ansi;
       //auto pathDragonGltf = pathFolder / "models/plants.gltf"_ansi;
-      //auto pathDragonGltf = pathFolder / "models/cube.gltf"_ansi;
+      //auto pathDragonGltf = pathFolder / "models/graphics3d.gltf"_ansi;
       models.plane.loadFromFile(pathPlaneGltf, pdevice, m_vkqueue, glTFLoadingFlags);
       models.example.loadFromFile(pathDragonGltf, pdevice, m_vkqueue, glTFLoadingFlags);
    }

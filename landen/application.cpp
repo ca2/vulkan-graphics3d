@@ -36,9 +36,9 @@ namespace vulkan_graphics3d_landen
       //m_ptemplateFuelMain = nullptr;
       //m_ptemplateFuelImpact = nullptr;
 
-      m_strAppId              = "vulkan-cube/landen";
-      m_strAppName            = "vulkan-cube/landen";
-      m_strBaseSupportId      = "vulkan-cube/landen";
+      m_strAppId              = "vulkan-graphics3d/landen";
+      m_strAppName            = "vulkan-graphics3d/landen";
+      m_strBaseSupportId      = "vulkan-graphics3d/landen";
       m_bLicense              = false;
 
    }

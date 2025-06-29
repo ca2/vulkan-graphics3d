@@ -790,7 +790,7 @@ namespace vulkan1
       }
       // Cube faces count as array layers in Vulkan
       imageCreateInfo.arrayLayers = 6;
-      // This flag is required for cube map images
+      // This flag is required for graphics3d map images
       imageCreateInfo.flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
 
 
@@ -822,7 +822,7 @@ namespace vulkan1
          VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
          subresourceRange);
 
-      // Copy the cube map faces from the staging buffer to the optimal tiled image
+      // Copy the graphics3d map faces from the staging buffer to the optimal tiled image
       vkCmdCopyBufferToImage(
          copyCmd,
          stagingBuffer,

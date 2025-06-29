@@ -285,7 +285,7 @@ namespace vulkan_graphics3d_landen
    //}
 
 
-   //::pointer < ::cube::application > impact::start_graphics3d_application()
+   //::pointer < ::graphics3d::application > impact::start_graphics3d_application()
    //{
 
    //   auto p3dapplication = get_app()->start_graphics3d_aplication();
