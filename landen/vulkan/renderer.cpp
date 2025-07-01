@@ -31,11 +31,11 @@ namespace vulkan
       m_poffscreensampler->initialize_offscreen_sampler(pvkcdevice);
 
       defer_layout();
-      createCommandBuffers();
+      create_command_buffers();
    }
 
    Renderer::~Renderer() {
-      freeCommandBuffers();
+      free_command_buffers();
    }
 
 
@@ -83,7 +83,7 @@ namespace vulkan
       //}
    }
 
-   void Renderer::createCommandBuffers() {
+   void Renderer::create_command_buffers() {
       commandBuffers.resize(VkcRenderPass::MAX_FRAMES_IN_FLIGHT);
 
       VkCommandBufferAllocateInfo allocInfo{};
@@ -99,7 +99,7 @@ namespace vulkan
 
    }
 
-   void Renderer::freeCommandBuffers() {
+   void Renderer::free_command_buffers() {
       vkFreeCommandBuffers(
          m_pvkcdevice->device(),
          m_pvkcdevice->getCommandPool(),

@@ -220,7 +220,7 @@ namespace vulkan1
 //      return windowTitle;
 //   }
 //
-//   void base_application_with_swap_chain::createCommandBuffers()
+//   void base_application_with_swap_chain::create_command_buffers()
 //   {
 //      // Create one command buffer for each swap chain image
 //      m_vkcommandbuffersDraw.resize(m_swapchain.imageCount);
@@ -250,7 +250,7 @@ namespace vulkan1
 //      initSwapchain();
 //      createCommandPool();
 //      setupSwapChain();
-//      createCommandBuffers();
+//      create_command_buffers();
 //      createSynchronizationPrimitives();
 //      setupDepthStencil();
 //      setupRenderPass();
@@ -3241,7 +3241,7 @@ namespace vulkan1
       // Command buffers need to be recreated as they may store
       // references to the recreated frame buffer
       destroyCommandBuffers();
-      createCommandBuffers();
+      create_command_buffers();
       buildCommandBuffers();
 
       // SRS - Recreate fences in case number of swapchain images has changed on resize

@@ -246,7 +246,7 @@ namespace vulkan1
       virtual void createSynchronizationPrimitives();
       virtual void initSwapchain();
       virtual void setupSwapChain();
-      virtual void createCommandBuffers();
+      virtual void create_command_buffers() override;
       virtual void destroyCommandBuffers();
       /** @brief (Virtual) Creates the application wide Vulkan instance */
       //virtual VkResult createInstance();

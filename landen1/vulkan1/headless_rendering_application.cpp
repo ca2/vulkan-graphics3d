@@ -1968,7 +1968,7 @@ headless_application::~headless_application()
    }
 
 
-   void headless_rendering_application::createCommandBuffers()
+   void headless_rendering_application::create_command_buffers()
    {
       // Create one command buffer for each swap chain image
 //      m_vkcommandbuffersDraw.resize(m_swapchain.imageCount);
@@ -2320,7 +2320,7 @@ headless_application::~headless_application()
       //createCommandPool();
       //setupSwapChain();
       createTransferCommandPool();
-      createCommandBuffers();
+      create_command_buffers();
       createSynchronizationPrimitives();
       setupDepthStencil();
       setupRenderPass();

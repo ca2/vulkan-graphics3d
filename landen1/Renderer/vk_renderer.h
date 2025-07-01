@@ -81,9 +81,9 @@ namespace vkc {
 		void beginRenderPass(VkCommandBuffer commandBuffer);
 		void endRenderPass(VkCommandBuffer commandBuffer);
 	public:
-		void createCommandBuffers();
+		void create_command_buffers() override;
 
-		void freeCommandBuffers();
+		void free_command_buffers() override;
 		//void recreateSwapchain();
 		void defer_layout();
 

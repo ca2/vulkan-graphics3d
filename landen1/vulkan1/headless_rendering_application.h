@@ -326,7 +326,7 @@ namespace vulkan1
       void setupDescriptors();
 
 
-      void createCommandBuffers();
+      void create_command_buffers() override;
 
       void createSynchronizationPrimitives();
 

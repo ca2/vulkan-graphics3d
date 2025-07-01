@@ -88,7 +88,7 @@ private:
 	void createSynchronizationPrimitives();
 	void initSwapchain();
 	void setupSwapChain();
-	void createCommandBuffers();
+	void create_command_buffers() override;
 	void destroyCommandBuffers();
 	std::string shaderDir = "glsl"_ansi;
 protected:
