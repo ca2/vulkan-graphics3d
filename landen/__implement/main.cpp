@@ -1,7 +1,7 @@
 #include "framework.h"
 //#include "application.h"
 #define APPLICATION_NAMESPACE vulkan_graphics3d_landen
-#include "acme/inline/application/main.inl"
+#include "acme/inline/application/main_executable.inl"
 
 
 //app_core_vulken::application g_app_core_vulken;

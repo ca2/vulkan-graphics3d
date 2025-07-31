@@ -1,6 +1,6 @@
 #include "framework.h"
 #define APPLICATION_NAMESPACE vulkan_graphics3d_continuum
-#include "acme/inline/application/main.inl"
+#include "acme/inline/application/main_executable.inl"
 
 
 // //app_simple_application::application g_app_simple_application;
