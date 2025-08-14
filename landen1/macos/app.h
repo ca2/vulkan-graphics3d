@@ -11,7 +11,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import <Foundation/Foundation.h>
-#include "base/base/node/macos/RoundWindowApp.h"
+#include "berg/base/node/macos/RoundWindowApp.h"
 
 @interface app : RoundWindowApp
 
