@@ -102,7 +102,7 @@ namespace vulkan_graphics3d_continuum
    void application::term_application()
    {
 
-      ::base::application::term_application();
+      ::berg::application::term_application();
 
    }
 
