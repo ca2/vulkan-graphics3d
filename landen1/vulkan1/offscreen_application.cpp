@@ -1204,7 +1204,7 @@ namespace vulkan1
    ::pointer<::vulkan::application > start_offscreen_application(::vkc::VkContainer* pvkcontainer, m_mousestate* pmousestate)
    {
 
-      auto pvulkanoffscreenapplication = pvkcontainer->__create_new < offscreen_application >();
+      auto pvulkanoffscreenapplication = pvkcontainer->øcreate_new < offscreen_application >();
 
       pvulkanoffscreenapplication->m_pmousestate = pmousestate;
 

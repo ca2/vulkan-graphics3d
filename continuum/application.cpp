@@ -177,7 +177,7 @@ namespace vulkan_graphics3d_continuum
 
       auto pstillTitle = create_label<::user::still>(pparent, "vulkan-land continuum Options");
 
-      __defer_construct(pstillTitle->m_pfont);
+      ødefer_construct(pstillTitle->m_pfont);
 
       pstillTitle->m_pfont->create_font(e_font_sans_ui, 24_pt);
 
@@ -245,13 +245,13 @@ namespace vulkan_graphics3d_continuum
 
       //auto pstill = __allocate ::user::still();
 
-      //__construct_new(m_pedit);
+      //øconstruct_new(m_pedit);
 
-      //__construct_new(m_pbuttonClear);
+      //øconstruct_new(m_pbuttonClear);
 
-      //__construct_new(m_pbuttonSend);
+      //øconstruct_new(m_pbuttonSend);
 
-      //__construct_new(m_pstillReceiver);
+      //øconstruct_new(m_pstillReceiver);
 
       //m_pstill->create_control(this, "still");
 

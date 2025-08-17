@@ -42,7 +42,7 @@ namespace vkc {
 
    ::pointer<::vulkan::application > start_vulkan_application(::vkc::VkContainer* pvkcontainer, mouse_state* pmousestate)
    {
-      auto pvulkanexample = pvkcontainer->__create_new < Application >();
+      auto pvulkanexample = pvkcontainer->øcreate_new < Application >();
 
       pvulkanexample->initialize_application(pvkcontainer);
 
@@ -85,11 +85,11 @@ namespace vkc {
       ::pointer < vulkan_land_continuum::application> papp = m_papplication;
 
 
-      __construct_new(m_pvkcdevice);
+      øconstruct_new(m_pvkcdevice);
 
       m_pvkcdevice->initialize_device(m_pvkcontainer);
 
-      __construct_new(m_prenderer);
+      øconstruct_new(m_prenderer);
 
       m_prenderer->initialize_renderer(m_pvkcontainer, m_pvkcdevice);
 

@@ -228,7 +228,7 @@ namespace vulkan_land_landen
       //   if (strMode == "window"_ansi)
       //   {
 
-      //      auto pwindow = __create_new < window >();
+      //      auto pwindow = øcreate_new < window >();
 
       //      //::user::system cs(
       //      //   WS_EX_LAYERED,

@@ -26,7 +26,7 @@ namespace vulkan
       m_pvkcontainer = pvkcontainer;
       m_pvkcdevice = pvkcdevice;
 
-      __construct_new(m_poffscreensampler);
+      øconstruct_new(m_poffscreensampler);
 
       m_poffscreensampler->initialize_offscreen_sampler(pvkcdevice);
 

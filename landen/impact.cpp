@@ -397,7 +397,7 @@ namespace vulkan_graphics3d_landen
 
    //   //pgraphics->fill_solid_rectangle(::int_rectangle_dimension(110, 100, 100, 100), argb(255, 200, 220, 255));
 
-   //   //auto ppen = __øcreate < ::draw2d::pen > ();
+   //   //auto ppen = øcreate < ::draw2d::pen > ();
 
    //   //ppen->create_solid(10, argb(200, 20, 155, 50));
 
@@ -409,7 +409,7 @@ namespace vulkan_graphics3d_landen
 
    //   //pgraphics->fill_solid_rectangle(::int_rectangle_dimension(110, 150, 100, 100), argb(255, 100, 255, 120));
 
-   //   //auto ppen2 = __øcreate < ::draw2d::pen > ();
+   //   //auto ppen2 = øcreate < ::draw2d::pen > ();
 
    //   //ppen2->create_solid(5, argb(200, 20, 155, 50));
 
@@ -517,7 +517,7 @@ namespace vulkan_graphics3d_landen
    ::pointer < ::graphics3d::key_map > impact::get_default_key_map()
    {
 
-      auto pmap = __create_new < ::graphics3d::key_map>();
+      auto pmap = øcreate_new < ::graphics3d::key_map>();
       using namespace ::graphics3d;
 
       pmap->map(e_key_moveLeft, ::user::e_key_a);
