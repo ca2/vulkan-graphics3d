@@ -4,6 +4,7 @@
 #include "main.h"
 #include "aura/platform/application.h"
 #include "bred/graphics3d/camera.h"
+#include "bred/graphics3d/point_light.h"
 #include "bred/graphics3d/scene_object.h"
 
 
@@ -23,7 +24,7 @@ namespace vulkan_graphics3d_continuum
    }
 
 
-   ::pointer < ::graphics3d::camera > main_scene::get_default_camera()
+   ::graphics3d::camera * main_scene::get_default_camera()
    {
       glm::vec3 camera = glm::vec3(0.0f, .0f, -5.0f);
       glm::vec3 target = glm::vec3(0.0f); // Look at origin
@@ -43,7 +44,7 @@ namespace vulkan_graphics3d_continuum
 
       {
 
-         auto & flatVase = tinyobjloader_object("matter://models/flat_vase.obj");
+         auto & flatVase = scene_object("matter://models/flat_vase.obj");
          flatVase.translate({ -.5f, .5f, 0.f });
          flatVase.scale({3.f, 1.5f, 3.f});
 
@@ -51,7 +52,7 @@ namespace vulkan_graphics3d_continuum
 
       {
 
-         auto & floor = tinyobjloader_object("matter://models/quad.obj");
+         auto & floor = scene_object("matter://models/quad.obj");
          floor.translate({0.f, .5f, 0.f});
          floor.scale({8.f, 1.f, 8.f});
 
@@ -59,7 +60,7 @@ namespace vulkan_graphics3d_continuum
 
       {
 
-         auto & smoothVase = tinyobjloader_object("matter://models/smooth_vase.obj");
+         auto & smoothVase = scene_object("matter://models/smooth_vase.obj");
          smoothVase.translate({.5f, .5f, 0.f});
          smoothVase.scale({3.f, 1.5f, 3.f});
 
@@ -67,7 +68,7 @@ namespace vulkan_graphics3d_continuum
 
       {
 
-         auto & stoneSphere = tinyobjloader_object("matter://models/StoneSphere.obj");
+         auto & stoneSphere = scene_object("matter://models/StoneSphere.obj");
          stoneSphere.translate({ .0f, 0.f, 2.f });
          stoneSphere.scale({.5f, .5f, .5f});
 
@@ -75,7 +76,7 @@ namespace vulkan_graphics3d_continuum
 
       {
 
-         auto & woodBarrel = tinyobjloader_object("matter://models/Barrel_OBJ.obj");
+         auto & woodBarrel = scene_object("matter://models/Barrel_OBJ.obj");
          woodBarrel.translate({ 1.f, -.4f, -1.5f });
          woodBarrel.scale({1.f, 1.f, 1.f});
 
@@ -83,26 +84,27 @@ namespace vulkan_graphics3d_continuum
 
       float fLo = 0.5f;
 
-      std::vector<glm::vec3> lightColors{
-            {1.f, fLo, fLo},
-            {fLo, fLo, 1.f},
-            {fLo, 1.f, fLo},
-            {1.f, 1.f, fLo},
-            {fLo, 1.f, 1.f},
-            {1.f, 1.f, 1.f}
+      ::array_base < ::color::color > lightColors{
+            argb(1.f, 1.f, fLo, fLo),
+            argb(1.f, fLo, fLo, 1.f),
+            argb(1.f, fLo, 1.f, fLo),
+            argb(1.f, 1.f, 1.f, fLo),
+            argb(1.f, fLo, 1.f, 1.f),
+            argb(1.f, 1.f, 1.f, 1.f)
       };
 
       for (int i = 0; i < lightColors.size(); i++) 
       {
-         auto pointLight = __allocate ::graphics3d::point_light (0.2f);
-         pointLight->m_color = lightColors[i];
+         auto ppointlight = create_point_light (0.2f);
+         ppointlight->m_color = lightColors[i];
          auto rotateLight = glm::rotate(
             glm::mat4(1.f),
             (i * glm::two_pi<float>()) / lightColors.size(),
             { 0.f, -1.f, 0.f });
-         pointLight->m_pointlightcomponent.lightIntensity = 1.0f;
-         pointLight->m_transform.translation = glm::vec3(rotateLight * glm::vec4(-1.f, -1.f, -1.f, 1.f));
-         add_object(pointLight);
+         ppointlight->m_fLightIntensity = 1.0f;
+         ppointlight->transform().m_vec3Translation = glm::vec3(rotateLight * glm::vec4(-1.f, -1.f, -1.f, 1.f));
+         //add_object(pointLight);
+         m_pointlighta.add(ppointlight);
 
       }
 

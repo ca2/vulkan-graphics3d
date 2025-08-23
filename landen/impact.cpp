@@ -494,14 +494,14 @@ namespace vulkan_graphics3d_landen
    }
 
 
-   ::pointer < ::graphics3d::scene > impact::create_main_scene()
-   {
+   //::pointer < ::graphics3d::scene > impact::create_main_scene()
+   //{
 
-      auto psceneMain = create_scene < main_scene >("main");
+   //   auto psceneMain = create_scene < main_scene >("main");
 
-      return psceneMain;
+   //   return psceneMain;
 
-   }
+   //}
 
 
    //void impact::on_load_engine()
