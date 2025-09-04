@@ -31,7 +31,7 @@ namespace vulkan_graphics3d_continuum
       //glm::vec3 direction = glm::normalize(target - cameraPos);
       //camera camera{ glm::vec3(0.0f, 2.0f, -15.0f), -90.0f, 0.0f };
       auto pcamera = øcreate< ::graphics3d::camera>();
-      pcamera->initialize_camera(target, camera);
+      //pcamera->initialize_camera(target, camera);
       //pcamera->m_pimpact = m_pimpact;
       return pcamera;
 
@@ -102,7 +102,7 @@ namespace vulkan_graphics3d_continuum
             (i * glm::two_pi<float>()) / lightColors.size(),
             { 0.f, -1.f, 0.f });
          ppointlight->m_fLightIntensity = 1.0f;
-         ppointlight->transform().m_vec3Translation = glm::vec3(rotateLight * glm::vec4(-1.f, -1.f, -1.f, 1.f));
+         ppointlight->transform().m_vec3Position = glm::vec3(rotateLight * glm::vec4(-1.f, -1.f, -1.f, 1.f));
          //add_object(pointLight);
          m_pointlighta.add(ppointlight);
 

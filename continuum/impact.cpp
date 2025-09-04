@@ -28,7 +28,7 @@ namespace vulkan_graphics3d_continuum
    impact::impact()
    {
 
-      m_emouse = ::graphics3d::e_mouse_updateLook;
+      /// m_emouse = ::graphics3d::e_mouse_updateLook;
       m_flagNonClient -= e_non_client_background;
       m_iSequence = 0;
       m_bNeedFullRedrawOnResize = true;
@@ -74,8 +74,8 @@ namespace vulkan_graphics3d_continuum
 
       ::user::graphics3d::install_message_routing(psender);
 
-      MESSAGE_LINK(e_message_create,psender,this,&impact::on_message_create);
-      MESSAGE_LINK(e_message_destroy, psender, this, &impact::on_message_destroy);
+      USER_MESSAGE_LINK(::user::e_message_create,psender,this,&impact::on_message_create);
+      USER_MESSAGE_LINK(::user::e_message_destroy, psender, this, &impact::on_message_destroy);
 
    }
 
